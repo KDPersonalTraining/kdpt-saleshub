@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#000000"/>
+  <!-- K letterform -->
+  <path d="M6 6h4v8l8-8h5L14 16l9 10h-5L6 14z" fill="#ffffff"/>
+  <!-- D open ring -->
+  <path d="M18 7 C26 7 26 25 18 25" stroke="#7ED597" stroke-width="3.2"
+        stroke-linecap="round" fill="none"/>
+</svg>
