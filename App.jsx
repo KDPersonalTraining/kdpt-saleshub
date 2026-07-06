@@ -1924,7 +1924,7 @@ function ProgrammesPage({ openQuiz, go }) {
                   One payment. Built and delivered within 3 to 5 days.
                 </p>
               </div>
-              <BtnPrimary href="https://buy.stripe.com/28EaEW6eFaPy3l76Sd3oA00">
+              <BtnPrimary href="https://buy.stripe.com/3cI3cu9qRg9S7BngsN3oA01">
                 Get My Programme
               </BtnPrimary>
             </div>
@@ -1950,7 +1950,7 @@ function ProgrammesPage({ openQuiz, go }) {
                   One payment. Built and delivered within 3 to 5 days.
                 </p>
               </div>
-              <BtnPrimary href="https://buy.stripe.com/28EaEW6eFaPy3l76Sd3oA00">
+              <BtnPrimary href="https://buy.stripe.com/3cI3cu9qRg9S7BngsN3oA01">
                 Get My Programme
               </BtnPrimary>
             </div>
@@ -1972,7 +1972,7 @@ function ProgrammesPage({ openQuiz, go }) {
             </Body>
             <PriceCard label="Personalised Programme" price="£49" period="one-off"
               features={["Fully custom training plan", "Delivered via Everfit", "Video guidance for every exercise", "Built around your equipment", "Yours to keep — no subscription"]}
-              ctaLabel="Get My Programme" href="https://buy.stripe.com/28EaEW6eFaPy3l76Sd3oA00" />
+              ctaLabel="Get My Programme" href="https://buy.stripe.com/3cI3cu9qRg9S7BngsN3oA01" />
             <button onClick={() => { go("home"); setTimeout(() => document.getElementById("paths")?.scrollIntoView({ behavior: "smooth" }), 120); }}
                     style={{ background: "none", border: "none", cursor: "pointer",
                              fontFamily: "'Poppins', sans-serif", fontSize: 13,
