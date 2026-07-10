@@ -35,10 +35,10 @@ export default async function handler(req, res) {
         attributes: {
           FIRSTNAME: name || "",
         },
-        // This tag is what triggers the "Strong Start Guide" automation
-        // inside Brevo. You'll set that automation up in the Brevo dashboard
-        // to watch for this tag being added and fire the email sequence.
-        listIds: [], // fill this in with your Brevo list ID once created
+        // New signups are added to the "KDPT Leads" list (ID 3).
+        // The automation in Brevo watches this list and fires the
+        // email sequence when someone new is added to it.
+        listIds: [3],
         updateEnabled: true, // if they already exist, update instead of erroring
       }),
     });
