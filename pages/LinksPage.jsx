@@ -188,7 +188,7 @@ const css = `
   margin-bottom: 36px;
 }
 .lk-logo {
-  height: 44px;
+  height: 72px;
   width: auto;
   margin-bottom: 18px;
 }
