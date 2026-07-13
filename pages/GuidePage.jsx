@@ -112,11 +112,15 @@ export default function GuidePage() {
             Everything you need to walk into the gym with a plan, not a guess.
           </p>
           <div className="sg-progress-row">
-            {STEPS.map((s, i) => (
-              <div key={s.n} className="sg-progress-chip">
+            {STEPS.map((s) => (
+              <button
+                key={s.n}
+                className="sg-progress-chip"
+                onClick={() => document.getElementById(`step-${s.n}`)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              >
                 <span className="sg-progress-num">{s.n}</span>
                 <span className="sg-progress-label">{s.title}</span>
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -170,7 +174,7 @@ export default function GuidePage() {
 
         {/* Steps */}
         {STEPS.map((step) => (
-          <section key={step.n} className="sg-step">
+          <section key={step.n} id={`step-${step.n}`} className="sg-step">
             <span className="sg-step-watermark">{step.n}</span>
 
             <div className="sg-step-header">
@@ -250,7 +254,7 @@ export default function GuidePage() {
             </div>
           </div>
 
-          <a className="sg-cta-btn" href="https://start.kdpersonaltraining.com/online-coaching">
+          <a className="sg-cta-btn" href="https://start.kdpersonaltraining.com/online#oc-pricing">
             Start Online Coaching <ArrowRight size={14} />
           </a>
 
@@ -352,6 +356,13 @@ const css = `
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 999px;
   padding: 8px 16px 8px 10px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+}
+.sg-progress-chip:hover {
+  border-color: rgba(126,213,151,0.4);
+  background: #141414;
 }
 .sg-progress-num {
   font-family: 'Montserrat', sans-serif;
