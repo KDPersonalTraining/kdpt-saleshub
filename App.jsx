@@ -2705,6 +2705,13 @@ const getInitialPage = () => {
   return "home";
 };
 const [page, setPage] = useState(getInitialPage);
+  useEffect(() => {
+    if (window.location.hash) {
+      setTimeout(() => {
+        document.getElementById(window.location.hash.slice(1))?.scrollIntoView({ behavior: "smooth" });
+      }, 150);
+    }
+  }, []);
   const [quiz, setQuiz] = useState(false);
   const topRef = useRef(null);
 
