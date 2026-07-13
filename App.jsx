@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ArrowRight, ArrowLeft, X, Check, MapPin, Smartphone, FileText, Dumbbell, ChevronDown, Menu, Star, Quote } from "lucide-react";
+import MealsPage from "./pages/MealsPage";
+import GuidePage from "./pages/GuidePage";
 
 // ─── Global styles injected once ────────────────────────────────────────────
 const GLOBAL_CSS = `
@@ -2690,7 +2692,12 @@ function CookiesPage() {
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function App() {
   useGlobalStyles();
-  const [page, setPage] = useState("home");
+const getInitialPage = () => {
+  const path = window.location.pathname.replace(/^\/|\/$/g, "");
+  if (path === "meals" || path === "guide") return path;
+  return "home";
+};
+const [page, setPage] = useState(getInitialPage);
   const [quiz, setQuiz] = useState(false);
   const topRef = useRef(null);
 
@@ -2722,6 +2729,8 @@ export default function App() {
         {page === "terms"      && <TermsPage go={go} />}
         {page === "privacy"    && <PrivacyPage go={go} />}
         {page === "cookies"    && <CookiesPage go={go} />}
+        {page === "meals"      && <MealsPage />}
+{page === "guide"      && <GuidePage />}
       </div>
       <Footer go={go} />
       {quiz && <QuizModal onClose={() => setQuiz(false)} go={go} />}
