@@ -53,6 +53,13 @@ const GLOBAL_CSS = `
 
 function useGlobalStyles() {
   useEffect(() => {
+  if (window.location.hash) {
+    setTimeout(() => {
+      document.getElementById(window.location.hash.slice(1))?.scrollIntoView({ behavior: "smooth" });
+    }, 150);
+  }
+}, []);
+  useEffect(() => {
     if (!document.getElementById("kdpt-global")) {
       const el = document.createElement("style");
       el.id = "kdpt-global";
@@ -2694,7 +2701,7 @@ export default function App() {
   useGlobalStyles();
 const getInitialPage = () => {
   const path = window.location.pathname.replace(/^\/|\/$/g, "");
-  if (path === "meals" || path === "guide") return path;
+  if (["meals", "guide", "online", "programmes", "pt"].includes(path)) return path;
   return "home";
 };
 const [page, setPage] = useState(getInitialPage);
