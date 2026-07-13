@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ArrowRight, ArrowLeft, X, Check, MapPin, Smartphone, FileText, Dumbbell, ChevronDown, Menu, Star, Quote } from "lucide-react";
 import MealsPage from "./pages/MealsPage";
 import GuidePage from "./pages/GuidePage";
+import LinksPage from "./pages/LinksPage";
 
 // ─── Global styles injected once ────────────────────────────────────────────
 const GLOBAL_CSS = `
@@ -2701,7 +2702,7 @@ export default function App() {
   useGlobalStyles();
 const getInitialPage = () => {
   const path = window.location.pathname.replace(/^\/|\/$/g, "");
-  if (["meals", "guide", "online", "programmes", "pt"].includes(path)) return path;
+if (["meals", "guide", "online", "programmes", "pt", "links"].includes(path)) return path;
   return "home";
 };
 const [page, setPage] = useState(getInitialPage);
@@ -2745,6 +2746,7 @@ const [page, setPage] = useState(getInitialPage);
         {page === "cookies"    && <CookiesPage go={go} />}
         {page === "meals"      && <MealsPage />}
 {page === "guide"      && <GuidePage />}
+        {page === "links"      && <LinksPage />}
       </div>
       <Footer go={go} />
       {quiz && <QuizModal onClose={() => setQuiz(false)} go={go} />}
