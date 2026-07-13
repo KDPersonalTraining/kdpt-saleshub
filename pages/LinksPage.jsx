@@ -188,9 +188,9 @@ const css = `
   margin-bottom: 36px;
 }
 .lk-logo {
-  height: 72px;
+  height: 130px;
   width: auto;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 .lk-title {
   font-family: 'Montserrat', sans-serif;
