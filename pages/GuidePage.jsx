@@ -254,8 +254,8 @@ export default function GuidePage() {
             </div>
           </div>
 
-          <a className="sg-cta-btn" href="https://start.kdpersonaltraining.com/online#oc-pricing">
-            Start Online Coaching <ArrowRight size={14} />
+          <a className="sg-cta-btn" href="https://start.kdpersonaltraining.com/#paths">
+            Explore Coaching Options <ArrowRight size={14} />
           </a>
 
           <p className="sg-body-small">
