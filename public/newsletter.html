@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Coaching Corner — September | KDPT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0D0D0D;
+    --card: #161613;
+    --mint: #7ED597;
+    --white: #F5F5F3;
+    --dim: #9E9E98;
+    --hairline: rgba(255,255,255,0.08);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--white);
+    font-family:'Poppins',sans-serif; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2{font-family:'Montserrat',sans-serif; letter-spacing:-0.01em;}
+  .wrap{max-width:600px; margin:0 auto;}
+
+  /* HEADER — clear title, tagline, then straight into Kyle's note */
+  .header{padding:44px 26px 34px; border-bottom:1px solid var(--hairline);}
+  .header .eyebrow{font-size:12px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--mint); margin-bottom:14px;}
+  h1.title{font-size:36px; font-weight:900; line-height:1.05; letter-spacing:-0.015em; margin-bottom:14px;}
+  .tagline{color:var(--dim); font-size:15.5px; max-width:40ch; margin-bottom:16px;}
+  .month-tag{
+    display:inline-block; font-size:12px; font-weight:700; color:var(--mint);
+    border:1px solid var(--hairline); border-radius:100px; padding:6px 14px;
+  }
+
+  /* WELCOME NOTE */
+  .note{padding:0 26px 32px;}
+  .note p{color:var(--dim); font-size:15px; margin-bottom:12px;}
+  .note strong{color:var(--white); font-weight:600;}
+  .note .sign{font-size:14px; color:var(--white); font-weight:600; margin-top:6px;}
+
+  /* PRIMARY CTA */
+  .cta-main{padding:0 26px 44px;}
+  .btn{
+    display:block; width:100%; text-align:center; text-decoration:none; font-weight:700; font-size:15px;
+    padding:16px 18px; border-radius:10px;
+  }
+  .btn.primary{background:var(--mint); color:#0D0D0D;}
+  .btn.secondary{background:transparent; border:1px solid var(--hairline); color:var(--white); margin-top:10px;}
+  .btn.secondary:active{border-color:var(--mint);}
+
+  /* SECTIONS — plain, consistent, easy to copy/paste for next month */
+  section{padding:36px 26px; border-top:1px solid var(--hairline);}
+  .label{
+    display:flex; align-items:baseline; gap:10px; margin-bottom:14px;
+  }
+  .label .idx{font-family:'Montserrat',sans-serif; font-size:12.5px; font-weight:700; color:var(--mint);}
+  .label .txt{font-size:12px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim);}
+  h2.h2{font-size:22px; font-weight:800; margin-bottom:14px; line-height:1.25;}
+  p{color:var(--dim); font-size:15.5px; margin-bottom:14px;}
+  strong{color:var(--white); font-weight:600;}
+
+  .photo-placeholder{
+    width:100%; aspect-ratio:16/10; border-radius:10px; margin:6px 0 18px;
+    background:#141410; border:1px dashed var(--hairline);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--dim); font-size:12.5px; text-align:center; padding:14px;
+  }
+
+  .checklist{list-style:none; margin:16px 0;}
+  .checklist li{
+    display:flex; gap:10px; padding:11px 0; font-size:15px; color:var(--white);
+    border-top:1px solid var(--hairline);
+  }
+  .checklist li:first-child{border-top:none;}
+  .checklist .mark{color:var(--mint); font-weight:700; flex-shrink:0;}
+
+  .callout{
+    margin:18px 0; padding:18px 20px; border-radius:10px; border:1px solid var(--hairline); border-left:2px solid var(--mint);
+  }
+  .callout .callout-label{font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--mint); margin-bottom:8px;}
+  .callout p{color:var(--white); font-size:14.5px; margin-bottom:0;}
+
+  .stat-strip{display:flex; gap:1px; margin:18px 0; background:var(--hairline); border-radius:10px; overflow:hidden;}
+  .stat{flex:1; background:var(--card); padding:14px 8px; text-align:center;}
+  .stat .num{font-family:'Montserrat',sans-serif; font-size:20px; font-weight:900; color:var(--mint);}
+  .stat .lbl{font-size:10px; color:var(--dim); margin-top:4px; text-transform:uppercase; letter-spacing:0.03em;}
+
+  /* CLOSING CTA */
+  .cta-final{padding:40px 26px; border-top:1px solid var(--hairline); text-align:left;}
+  .cta-final h3{font-size:20px; font-weight:800; margin-bottom:10px;}
+  .cta-final p{font-size:14.5px; margin-bottom:18px;}
+
+  /* FOOTER */
+  footer{padding:36px 26px 44px; border-top:1px solid var(--hairline);}
+  .contact-row{display:flex; flex-direction:column; gap:8px; margin:16px 0 22px;}
+  .contact-item{
+    display:flex; align-items:center; gap:12px; font-size:14.5px; font-weight:500;
+    text-decoration:none; color:var(--white); padding:12px 14px; border-radius:8px; background:var(--card);
+  }
+  .partner-row{display:flex; align-items:center; gap:12px; margin:20px 0 4px;}
+  .partner-logo{
+    font-family:'Montserrat',sans-serif; font-weight:700; font-size:10px; letter-spacing:0.05em;
+    text-transform:uppercase; color:#5c5c58; padding:5px 9px; border:1px solid #2a2a26; border-radius:5px;
+  }
+  .fine{font-size:11.5px; color:#5c5c58; margin-top:18px; line-height:1.6;}
+
+  @media(max-width:400px){ h1.headline{font-size:31px;} }
+</style>
+</head>
+<body>
+
+<!--
+  HOW TO EDIT THIS EACH MONTH
+  ---------------------------
+  Every editable bit of text sits between an "EDIT START" and "EDIT END" comment.
+  To build next month's edition: copy this whole file in GitHub, rename it, and
+  just change the text inside those comment blocks. Don't touch anything outside
+  them unless you're changing the actual design.
+-->
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="eyebrow">KDPT · Exclusive to Trilogy</div>
+    <!-- EDIT START: title stays the same every month, tagline stays the same every month -->
+    <h1 class="title">The Coaching Corner</h1>
+    <p class="tagline">Stay ahead of your fitness journey with pro tips & personal training insights.</p>
+    <!-- EDIT END -->
+    <!-- EDIT START: month -->
+    <span class="month-tag">September Edition</span>
+    <!-- EDIT END -->
+  </div>
+
+  <div class="note" style="padding-top:32px;">
+    <!-- EDIT START: personal welcome note -->
+    <p>Hey, I hope your summer treated you well. Whatever the last few weeks looked like for you, whether it was full of routine or a bit more relaxed, <strong>you're exactly where you need to be to start again</strong>.</p>
+    <p>This month we're easing back in gently and getting honest about what the rest of the year could look like.</p>
+    <div class="sign">— Kyle</div>
+    <!-- EDIT END -->
+  </div>
+
+  <div class="cta-main">
+    <!-- EDIT START: CTA text and links -->
+    <a class="btn primary" href="https://start.kdpersonaltraining.com" data-track="cta_get_started">Get Started with KDPT</a>
+    <a class="btn secondary" href="https://start.kdpersonaltraining.com/#meal-plan-signup" data-track="cta_meal_plan">Get Your Free 3 Meals a Day, 10-Day Plan</a>
+    <!-- EDIT END -->
+  </div>
+
+  <!-- ============ SECTION 1 — copy this whole <section> block for a new topic ============ -->
+  <section>
+    <div class="label"><span class="idx">01</span><span class="txt"><!-- EDIT: section name -->Easing Back In</span></div>
+    <!-- EDIT START: section 1 content -->
+    <h2 class="h2">Getting Back Into Routine, Gently</h2>
+    <p>If summer pulled you away from your usual routine, that's completely normal, and it doesn't mean you've lost anything. <strong>You don't need a dramatic reset</strong>, you just need one small step in the right direction.</p>
+    <ul class="checklist">
+      <li><span class="mark">✓</span> Pick one thing to bring back first, don't try to fix everything at once</li>
+      <li><span class="mark">✓</span> Book your first session in like an appointment you can't miss</li>
+      <li><span class="mark">✓</span> Be kind to yourself if the first week feels harder than it used to</li>
+      <li><span class="mark">✓</span> Showing up is the whole win right now</li>
+    </ul>
+    <!-- EDIT END -->
+  </section>
+
+  <!-- ============ SECTION 2 ============ -->
+  <section>
+    <div class="label"><span class="idx">02</span><span class="txt">Looking Ahead</span></div>
+    <!-- EDIT START: section 2 content -->
+    <h2 class="h2">Setting Honest Goals for Autumn</h2>
+    <p>With a few months left in the year, now's a good time to get clear on what you actually want, not what you think you should want. A goal that feels honest to you is one you'll actually stick with.</p>
+    <div class="photo-placeholder">Photo spot: you writing in a training journal or planning a session</div>
+    <div class="callout">
+      <div class="callout-label">This Month's Challenge</div>
+      <p>Write down one thing you'd be proud of by December. Not a number on a scale, something you'd actually feel. Message me yours, I read every one.</p>
+    </div>
+    <!-- EDIT END -->
+  </section>
+
+  <!-- ============ SECTION 3 ============ -->
+  <section>
+    <div class="label"><span class="idx">03</span><span class="txt">Myth, Busted</span></div>
+    <!-- EDIT START: section 3 content -->
+    <h2 class="h2">"If you're not sore the next day, the workout didn't work."</h2>
+    <p>This is one of the things I hear most, and it's holding people back for no reason. Soreness just means your muscles did something unfamiliar, not that the session was effective. The more consistent you get with a movement, the less sore you'll feel doing it, even as you get stronger and fitter at it. Some of the best sessions I've coached leave people barely sore at all.</p>
+    <div class="callout">
+      <div class="callout-label">Why It Matters</div>
+      <p>Chasing soreness leads people to either overtrain trying to "earn" it, or feel like they've failed when a solid session doesn't leave them aching. Neither helps you progress. Consistency and steady improvement matter far more than how wrecked you feel the next day.</p>
+    </div>
+    <p><strong>The takeaway:</strong> track your progress through what you can lift, how you feel, and whether you're showing up consistently, not how sore you are. If anything, less soreness over time is usually a sign you're adapting well.</p>
+    <!-- EDIT END -->
+  </section>
+  <!-- ============ END OF COPY-ABLE SECTIONS ============ -->
+
+  <div class="cta-final">
+    <!-- EDIT START: closing CTA -->
+    <h3>Ready for a bit more support?</h3>
+    <p>If any of this struck a chord, I'm always just a message away. Let's chat about what your next step could look like.</p>
+    <a class="btn primary" href="https://start.kdpersonaltraining.com" data-track="cta_get_started_bottom">Get Started with KDPT</a>
+    <!-- EDIT END -->
+  </div>
+
+  <footer>
+    <div class="contact-row">
+      <a class="contact-item" href="tel:07983755528" data-track="contact_call">📞 07983 755528</a>
+      <a class="contact-item" href="https://start.kdpersonaltraining.com" data-track="contact_site">🌐 start.kdpersonaltraining.com</a>
+      <a class="contact-item" href="https://www.tiktok.com/@kyle.coaching" data-track="contact_tiktok">🎵 @kyle.coaching on TikTok</a>
+    </div>
+    <div class="partner-row">
+      <div class="partner-logo">Trilogy</div>
+      <div class="partner-logo">YPT</div>
+    </div>
+    <p class="fine">You're receiving this as part of Trilogy. Thanks for reading.</p>
+  </footer>
+
+</div>
+
+<script>
+  document.querySelectorAll('[data-track]').forEach(function(el){
+    el.addEventListener('click', function(){
+      var label = el.getAttribute('data-track');
+      if (window.va) { window.va('event', { name: label }); }
+      else { console.log('[track]', label); }
+    });
+  });
+  if (window.va) { window.va('event', { name: 'newsletter_view_september' }); }
+</script>
+
+</body>
+</html>
