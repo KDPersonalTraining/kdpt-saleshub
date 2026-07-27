@@ -25,9 +25,10 @@
   .wrap{max-width:600px; margin:0 auto;}
 
   /* HEADER — clear title, tagline, then straight into Kyle's note */
-  .header{padding:44px 26px 34px; border-bottom:1px solid var(--hairline);}
-  .header .eyebrow{font-size:12px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--mint); margin-bottom:14px;}
-  h1.title{font-size:36px; font-weight:900; line-height:1.05; letter-spacing:-0.015em; margin-bottom:14px;}
+  .header{padding:44px 26px 34px; border-bottom:1px solid var(--hairline); position:relative;}
+  .header .logo{position:absolute; top:44px; right:26px; height:32px; width:auto;}
+  .header .eyebrow{font-size:12px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--mint); margin-bottom:14px; padding-right:70px;}
+  h1.title{font-size:36px; font-weight:900; line-height:1.05; letter-spacing:-0.015em; margin-bottom:14px; padding-right:70px;}
   .tagline{color:var(--dim); font-size:15.5px; max-width:40ch; margin-bottom:16px;}
   .month-tag{
     display:inline-block; font-size:12px; font-weight:700; color:var(--mint);
@@ -99,11 +100,8 @@
     display:flex; align-items:center; gap:12px; font-size:14.5px; font-weight:500;
     text-decoration:none; color:var(--white); padding:12px 14px; border-radius:8px; background:var(--card);
   }
-  .partner-row{display:flex; align-items:center; gap:12px; margin:20px 0 4px;}
-  .partner-logo{
-    font-family:'Montserrat',sans-serif; font-weight:700; font-size:10px; letter-spacing:0.05em;
-    text-transform:uppercase; color:#5c5c58; padding:5px 9px; border:1px solid #2a2a26; border-radius:5px;
-  }
+  .partner-row{display:flex; align-items:center; gap:20px; margin:20px 0 4px;}
+  .partner-logo-img{height:18px; width:auto; opacity:0.55; filter:grayscale(1);}
   .fine{font-size:11.5px; color:#5c5c58; margin-top:18px; line-height:1.6;}
 
   @media(max-width:400px){ h1.headline{font-size:31px;} }
@@ -123,7 +121,8 @@
 <div class="wrap">
 
   <div class="header">
-    <div class="eyebrow">KDPT · Exclusive to Trilogy</div>
+    <!-- EDIT ONCE: your logo file, only needs setting up the first time -->
+    <img class="logo" src="/images/logos/kdpt-logo.png" alt="KDPT">
     <!-- EDIT START: title stays the same every month, tagline stays the same every month -->
     <h1 class="title">The Coaching Corner</h1>
     <p class="tagline">Stay ahead of your fitness journey with pro tips & personal training insights.</p>
@@ -143,8 +142,9 @@
 
   <div class="cta-main">
     <!-- EDIT START: CTA text and links -->
-    <a class="btn primary" href="https://start.kdpersonaltraining.com" data-track="cta_get_started">Get Started with KDPT</a>
-    <a class="btn secondary" href="https://start.kdpersonaltraining.com/#meal-plan-signup" data-track="cta_meal_plan">Get Your Free 3 Meals a Day, 10-Day Plan</a>
+    <p style="color:var(--dim); font-size:14px; margin-bottom:14px;">Not sure where to start, or just want a simple plan to follow? The Strong Start Guide walks you through your first steps with training and nutrition, plus 30 high-protein meal ideas along the way.</p>
+    <a class="btn primary" href="https://start.kdpersonaltraining.com/guide" data-track="cta_guide">Get My Free Strong Start Guide</a>
+    <a class="btn secondary" href="https://start.kdpersonaltraining.com" data-track="cta_get_started">Or Explore KDPT Coaching</a>
     <!-- EDIT END -->
   </div>
 
@@ -207,8 +207,9 @@
       <a class="contact-item" href="https://www.tiktok.com/@kyle.coaching" data-track="contact_tiktok">🎵 @kyle.coaching on TikTok</a>
     </div>
     <div class="partner-row">
-      <div class="partner-logo">Trilogy</div>
-      <div class="partner-logo">YPT</div>
+      <!-- EDIT ONCE: their logo files, only needs setting up the first time -->
+      <img class="partner-logo-img" src="/images/logos/logo-trilogy.png" alt="Trilogy">
+      <img class="partner-logo-img" src="/images/logos/logo-ypt.jpeg" alt="YPT">
     </div>
     <p class="fine">You're receiving this as part of Trilogy. Thanks for reading.</p>
   </footer>
