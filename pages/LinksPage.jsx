@@ -32,7 +32,7 @@ const LINKS = [
     Icon: Percent,
     label: "20% Off Applied Nutrition",
     tag: "Code: KDPT",
-    href: "https://www.appliednutrition.com",
+    href: "https://appliednutrition.uk/?ref=kpcwjaga",
     external: true,
   },
 ];
