@@ -25,20 +25,20 @@
   .wrap{max-width:600px; margin:0 auto;}
 
   /* HEADER — clear title, tagline, then straight into Kyle's note */
-  .header{padding:44px 26px 34px; border-bottom:1px solid var(--hairline);}
+  .header{padding:44px 26px 34px; border-bottom:2px solid var(--mint);}
   .header .logo{display:block; height:180px; width:auto; margin-bottom:22px;}
   h1.title{font-size:36px; font-weight:900; line-height:1.05; letter-spacing:-0.015em; margin-bottom:14px;}
   .tagline{color:var(--dim); font-size:15.5px; max-width:40ch; margin-bottom:16px;}
   .month-tag{
-    display:inline-block; font-size:12px; font-weight:700; color:var(--mint);
-    border:1px solid var(--hairline); border-radius:100px; padding:6px 14px;
+    display:inline-block; font-size:12px; font-weight:800; color:#0D0D0D;
+    background:var(--mint); border-radius:100px; padding:6px 14px;
   }
 
   /* WELCOME NOTE */
-  .note{padding:0 26px 32px;}
+  .note{padding:0 26px 32px; border-left:3px solid var(--mint); margin:0 26px 32px; padding-left:20px;}
   .note p{color:var(--dim); font-size:15px; margin-bottom:12px;}
   .note strong{color:var(--white); font-weight:600;}
-  .note .sign{font-size:14px; color:var(--white); font-weight:600; margin-top:6px;}
+  .note .sign{font-size:14px; color:var(--mint); font-weight:700; margin-top:6px;}
 
   /* PRIMARY CTA */
   .cta-main{padding:0 26px 44px;}
@@ -47,17 +47,17 @@
     padding:16px 18px; border-radius:10px;
   }
   .btn.primary{background:var(--mint); color:#0D0D0D;}
-  .btn.secondary{background:transparent; border:1px solid var(--hairline); color:var(--white); margin-top:10px;}
-  .btn.secondary:active{border-color:var(--mint);}
+  .btn.secondary{background:transparent; border:1px solid var(--mint); color:var(--mint); margin-top:10px;}
+  .btn.secondary:active{background:var(--mint); color:#0D0D0D;}
 
   /* SECTIONS — plain, consistent, easy to copy/paste for next month */
-  section{padding:36px 26px; border-top:1px solid var(--hairline);}
+  section{padding:36px 26px 36px 24px; border-top:1px solid var(--hairline); border-left:3px solid var(--mint); margin-left:26px;}
   .label{
     display:flex; align-items:baseline; gap:10px; margin-bottom:14px;
   }
   .label .idx{font-family:'Montserrat',sans-serif; font-size:12.5px; font-weight:700; color:var(--mint);}
   .label .txt{font-size:12px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim);}
-  h2.h2{font-size:22px; font-weight:800; margin-bottom:14px; line-height:1.25;}
+  h2.h2{font-size:22px; font-weight:800; margin-bottom:14px; line-height:1.25; color:var(--mint);}
   p{color:var(--dim); font-size:15.5px; margin-bottom:14px;}
   strong{color:var(--white); font-weight:600;}
 
@@ -93,11 +93,11 @@
 
   /* CLOSING CTA */
   .cta-final{padding:40px 26px; border-top:1px solid var(--hairline); text-align:left;}
-  .cta-final h3{font-size:20px; font-weight:800; margin-bottom:10px;}
+  .cta-final h3{font-size:20px; font-weight:800; margin-bottom:10px; color:var(--mint);}
   .cta-final p{font-size:14.5px; margin-bottom:18px;}
 
   /* FOOTER */
-  footer{padding:36px 26px 44px; border-top:1px solid var(--hairline);}
+  footer{padding:36px 26px 44px; border-top:2px solid var(--mint);}
   .contact-row{display:flex; flex-direction:column; gap:8px; margin:16px 0 22px;}
   .contact-item{
     display:flex; align-items:center; gap:12px; font-size:14.5px; font-weight:500;
@@ -107,7 +107,11 @@
   .partner-logo-img{height:46px; width:auto;}
   .fine{font-size:11.5px; color:#5c5c58; margin-top:18px; line-height:1.6;}
 
-  @media(max-width:400px){ h1.headline{font-size:31px;} }
+  @media(max-width:400px){
+    h1.headline{font-size:31px;}
+    section{margin-left:16px; padding-left:16px;}
+    .note{margin-left:16px; margin-right:16px; padding-left:14px;}
+  }
 </style>
 </head>
 <body>
@@ -137,8 +141,7 @@
 
   <div class="note" style="padding-top:32px;">
     <!-- EDIT START: personal welcome note -->
-    <p>Hey, I hope your summer treated you well. Whatever the last few weeks looked like for you, whether it was full of routine or a bit more relaxed, <strong>you're exactly where you need to be to start again</strong>.</p>
-    <p>This month we're easing back in gently and getting honest about what the rest of the year could look like.</p>
+    <p>Hope your summer's been good, whatever that's looked like for you. This month I want to help you ease back into training, set a few honest goals for the rest of the year, and clear up a myth that's putting people off for no reason.</p>
     <div class="sign">— Kyle</div>
     <!-- EDIT END -->
   </div>
@@ -156,12 +159,12 @@
     <div class="label"><span class="idx">01</span><span class="txt"><!-- EDIT: section name -->Easing Back In</span></div>
     <!-- EDIT START: section 1 content -->
     <h2 class="h2">Getting Back Into Routine, Gently</h2>
-    <p>If summer pulled you away from your usual routine, that's completely normal, and it doesn't mean you've lost anything. <strong>You don't need a dramatic reset</strong>, you just need one small step in the right direction.</p>
+    <p>If summer pulled you away from your usual routine, that's normal. It doesn't mean you've lost anything, you just need one small step in the right direction, not a big reset.</p>
     <ul class="checklist">
-      <li><span class="mark">✓</span> Pick one thing to bring back first, don't try to fix everything at once</li>
+      <li><span class="mark">✓</span> Pick one thing to bring back first, not everything at once</li>
       <li><span class="mark">✓</span> Book your first session in like an appointment you can't miss</li>
-      <li><span class="mark">✓</span> Be kind to yourself if the first week feels harder than it used to</li>
-      <li><span class="mark">✓</span> Showing up is the whole win right now</li>
+      <li><span class="mark">✓</span> Expect the first week to feel harder than it used to, that's normal</li>
+      <li><span class="mark">✓</span> Showing up is the win right now</li>
     </ul>
     <!-- EDIT END -->
   </section>
@@ -170,12 +173,12 @@
   <section>
     <div class="label"><span class="idx">02</span><span class="txt">Looking Ahead</span></div>
     <!-- EDIT START: section 2 content -->
-    <h2 class="h2">Setting Honest Goals for Autumn</h2>
-    <p>With a few months left in the year, now's a good time to get clear on what you actually want, not what you think you should want. A goal that feels honest to you is one you'll actually stick with.</p>
+    <h2 class="h2">A Few Honest Goals for Autumn</h2>
+    <p>There's still a good few months left in the year, so it's worth getting clear on what you actually want, not what you think you should want.</p>
     <img src="/images/newsletter/goal-setting-photo.jpg" alt="Setting goals for the month" style="width:100%; border-radius:10px; margin:6px 0 18px;">
     <div class="callout">
       <div class="callout-label">This Month's Challenge</div>
-      <p>Write down one thing you'd be proud of by December. Not a number on a scale, something you'd actually feel. Message me yours, I read every one.</p>
+      <p>Write down one thing you'd be proud of by December. Doesn't need to be a number on the scale. Message me yours, I read every one.</p>
     </div>
     <!-- EDIT END -->
   </section>
@@ -185,12 +188,8 @@
     <div class="label"><span class="idx">03</span><span class="txt">Myth, Busted</span></div>
     <!-- EDIT START: section 3 content -->
     <h2 class="h2">"If you're not sore the next day, the workout didn't work."</h2>
-    <p>This is one of the things I hear most, and it's holding people back for no reason. Soreness just means your muscles did something unfamiliar, not that the session was effective. The more consistent you get with a movement, the less sore you'll feel doing it, even as you get stronger and fitter at it. Some of the best sessions I've coached leave people barely sore at all.</p>
-    <div class="callout">
-      <div class="callout-label">Why It Matters</div>
-      <p>Chasing soreness leads people to either overtrain trying to "earn" it, or feel like they've failed when a solid session doesn't leave them aching. Neither helps you progress. Consistency and steady improvement matter far more than how wrecked you feel the next day.</p>
-    </div>
-    <p><strong>The takeaway:</strong> track your progress through what you can lift, how you feel, and whether you're showing up consistently, not how sore you are. If anything, less soreness over time is usually a sign you're adapting well.</p>
+    <p>This is one of the things I hear most. Soreness just means your muscles did something unfamiliar, not that the session worked. The more used to a movement you get, the less sore you'll feel doing it, even as you keep getting stronger.</p>
+    <p>Chasing soreness leads people to either overtrain trying to "earn" it, or feel like they've failed after a good session that didn't leave them aching. Neither helps. Track progress by what you can lift and whether you're showing up, not how wrecked you feel the next day.</p>
     <!-- EDIT END -->
   </section>
   <!-- ============ END OF COPY-ABLE SECTIONS ============ -->
@@ -198,8 +197,8 @@
   <!-- EDIT START: partner discount, update code/link/copy as needed -->
   <section style="padding-top:0;">
     <div style="background:linear-gradient(135deg, var(--mint) 0%, #9FE8B5 100%); border-radius:16px; padding:24px; color:#0D0D0D;">
-      <div style="font-size:11.5px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:6px;">🎁 A Little Something Extra</div>
-      <p style="color:#1a1a18; font-size:15.5px; margin-bottom:16px; font-weight:500;">If you're topping up protein this month, I've partnered with <strong style="color:#0D0D0D;">Applied Nutrition</strong>, use the code below for 20% off.</p>
+      <div style="font-size:11.5px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;">Discount Code</div>
+      <p style="color:#1a1a18; font-size:15.5px; margin-bottom:16px; font-weight:500;">If you're topping up protein this month, I've partnered with <strong style="color:#0D0D0D;">Applied Nutrition</strong>. Use the code below for 20% off.</p>
       <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
         <span style="display:inline-block; font-family:'Montserrat',sans-serif; font-weight:900; font-size:17px; letter-spacing:0.06em; background:#0D0D0D; color:var(--mint); padding:8px 16px; border-radius:8px;">KDPT</span>
         <a href="https://appliednutrition.uk/?ref=kpcwjaga" data-track="cta_applied_nutrition" style="color:#0D0D0D; font-weight:800; font-size:14.5px; text-decoration:none; border-bottom:2px solid #0D0D0D;">Shop Applied Nutrition →</a>
@@ -210,8 +209,8 @@
 
   <div class="cta-final">
     <!-- EDIT START: closing CTA -->
-    <h3>Ready for a bit more support?</h3>
-    <p>If any of this struck a chord, I'm always just a message away. Let's chat about what your next step could look like.</p>
+    <h3>Ready to figure out what's next?</h3>
+    <p>Message me, I'm always happy to help you work out your next step.</p>
     <a class="btn primary" href="https://start.kdpersonaltraining.com" data-track="cta_get_started_bottom">Get Started with KDPT</a>
     <!-- EDIT END -->
   </div>
