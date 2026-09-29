@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Coaching Corner — September | KDPT</title>
+<title>The Coaching Corner | KDPT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -33,6 +33,8 @@
     display:inline-block; font-size:12px; font-weight:800; color:#0D0D0D;
     background:var(--mint); border-radius:100px; padding:6px 14px;
   }
+  .edition{display:none;}
+  .edition.active{display:block;}
 
   /* WELCOME NOTE */
   .note{padding:0 26px 32px; border-left:3px solid var(--mint); margin:0 26px 32px; padding-left:20px;}
@@ -119,10 +121,16 @@
 <!--
   HOW TO EDIT THIS EACH MONTH
   ---------------------------
-  Every editable bit of text sits between an "EDIT START" and "EDIT END" comment.
-  To build next month's edition: copy this whole file in GitHub, rename it, and
-  just change the text inside those comment blocks. Don't touch anything outside
-  them unless you're changing the actual design.
+  Each month's content lives inside its own <div class="edition" data-release="YYYY-MM-DD">.
+  The script at the bottom automatically shows whichever edition's release date has
+  passed, so you can write and upload next month's content whenever you like,
+  it just won't appear to visitors until that date arrives.
+
+  TO ADD A NEW MONTH: copy an entire "edition" block (from
+  <div class="edition" ...> to its closing </div>), paste it as a new block,
+  change data-release to the 1st of that new month, and edit the text inside
+  as normal using the EDIT START/END comments. Keep old editions in the file,
+  they're just harmless once a newer one has taken over.
 -->
 
 <div class="wrap">
@@ -134,86 +142,182 @@
     <h1 class="title">The Coaching Corner</h1>
     <p class="tagline">Stay ahead of your fitness journey with pro tips & personal training insights.</p>
     <!-- EDIT END -->
-    <!-- EDIT START: month, set this to whichever month you're WRITING for, not today's date -->
-    <span class="month-tag">September Edition</span>
-    <!-- EDIT END -->
+    <!-- This fills in automatically from whichever edition below is currently active -->
+    <span class="month-tag" id="month-tag"></span>
   </div>
 
-  <div class="note" style="padding-top:32px;">
-    <!-- EDIT START: personal welcome note -->
-    <p>Hope your summer's been good, whatever that's looked like for you. This month I want to help you ease back into training, set a few honest goals for the rest of the year, and clear up a myth that's putting people off for no reason.</p>
-    <div class="sign">— Kyle</div>
-    <!-- EDIT END -->
-  </div>
+  <!-- ================================================================ -->
+  <!-- EDITION: September 2026 -->
+  <!-- ================================================================ -->
+  <div class="edition" data-release="2026-09-01">
 
-  <div class="cta-main">
-    <!-- EDIT START: CTA text and links -->
-    <p style="color:var(--dim); font-size:14px; margin-bottom:14px;">Not sure where to start, or just want a simple plan to follow? The Strong Start Guide walks you through your first steps with training and nutrition, plus 30 high-protein meal ideas along the way.</p>
-    <a class="btn primary" href="https://start.kdpersonaltraining.com/links" data-track="cta_guide">Get My Free Strong Start Guide</a>
-    <a class="btn secondary" href="https://start.kdpersonaltraining.com" data-track="cta_get_started">Or Explore KDPT Coaching</a>
-    <!-- EDIT END -->
-  </div>
-
-  <!-- ============ SECTION 1 — copy this whole <section> block for a new topic ============ -->
-  <section>
-    <div class="label"><span class="idx">01</span><span class="txt"><!-- EDIT: section name -->Easing Back In</span></div>
-    <!-- EDIT START: section 1 content -->
-    <h2 class="h2">Getting Back Into Routine, Gently</h2>
-    <p>If summer pulled you away from your usual routine, that's normal. It doesn't mean you've lost anything, you just need one small step in the right direction, not a big reset.</p>
-    <ul class="checklist">
-      <li><span class="mark">✓</span> Pick one thing to bring back first, not everything at once</li>
-      <li><span class="mark">✓</span> Book your first session in like an appointment you can't miss</li>
-      <li><span class="mark">✓</span> Expect the first week to feel harder than it used to, that's normal</li>
-      <li><span class="mark">✓</span> Showing up is the win right now</li>
-    </ul>
-    <!-- EDIT END -->
-  </section>
-
-  <!-- ============ SECTION 2 ============ -->
-  <section>
-    <div class="label"><span class="idx">02</span><span class="txt">Looking Ahead</span></div>
-    <!-- EDIT START: section 2 content -->
-    <h2 class="h2">A Few Honest Goals for Autumn</h2>
-    <p>There's still a good few months left in the year, so it's worth getting clear on what you actually want, not what you think you should want.</p>
-    <img src="/images/newsletter/goal-setting-photo.jpg" alt="Setting goals for the month" style="width:100%; border-radius:10px; margin:6px 0 18px;">
-    <div class="callout">
-      <div class="callout-label">This Month's Challenge</div>
-      <p>Write down one thing you'd be proud of by December. Doesn't need to be a number on the scale. Message me yours, I read every one.</p>
+    <div class="note" style="padding-top:32px;">
+      <!-- EDIT START: personal welcome note -->
+      <p>Hope your summer's been good, whatever that's looked like for you. This month I want to help you ease back into training, set a few honest goals for the rest of the year, and clear up a myth that's putting people off for no reason.</p>
+      <div class="sign">Kyle</div>
+      <!-- EDIT END -->
     </div>
-    <!-- EDIT END -->
-  </section>
 
-  <!-- ============ SECTION 3 ============ -->
-  <section>
-    <div class="label"><span class="idx">03</span><span class="txt">Myth, Busted</span></div>
-    <!-- EDIT START: section 3 content -->
-    <h2 class="h2">"If you're not sore the next day, the workout didn't work."</h2>
-    <p>This is one of the things I hear most. Soreness just means your muscles did something unfamiliar, not that the session worked. The more used to a movement you get, the less sore you'll feel doing it, even as you keep getting stronger.</p>
-    <p>Chasing soreness leads people to either overtrain trying to "earn" it, or feel like they've failed after a good session that didn't leave them aching. Neither helps. Track progress by what you can lift and whether you're showing up, not how wrecked you feel the next day.</p>
-    <!-- EDIT END -->
-  </section>
-  <!-- ============ END OF COPY-ABLE SECTIONS ============ -->
+    <div class="cta-main">
+      <!-- EDIT START: CTA text and links -->
+      <p style="color:var(--dim); font-size:14px; margin-bottom:14px;">Not sure where to start, or just want a simple plan to follow? The Strong Start Guide walks you through your first steps with training and nutrition, plus 30 high-protein meal ideas along the way.</p>
+      <a class="btn primary" href="https://start.kdpersonaltraining.com/links" data-track="cta_guide">Get My Free Strong Start Guide</a>
+      <a class="btn secondary" href="https://start.kdpersonaltraining.com" data-track="cta_get_started">Or Explore KDPT Coaching</a>
+      <!-- EDIT END -->
+    </div>
 
-  <!-- EDIT START: partner discount, update code/link/copy as needed -->
-  <section style="padding-top:0;">
-    <div style="background:linear-gradient(135deg, var(--mint) 0%, #9FE8B5 100%); border-radius:16px; padding:24px; color:#0D0D0D;">
-      <div style="font-size:11.5px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;">Discount Code</div>
-      <p style="color:#1a1a18; font-size:15.5px; margin-bottom:16px; font-weight:500;">If you're topping up protein this month, I've partnered with <strong style="color:#0D0D0D;">Applied Nutrition</strong>. Use the code below for 20% off.</p>
-      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-        <span style="display:inline-block; font-family:'Montserrat',sans-serif; font-weight:900; font-size:17px; letter-spacing:0.06em; background:#0D0D0D; color:var(--mint); padding:8px 16px; border-radius:8px;">KDPT</span>
-        <a href="https://appliednutrition.uk/?ref=kpcwjaga" data-track="cta_applied_nutrition" style="color:#0D0D0D; font-weight:800; font-size:14.5px; text-decoration:none; border-bottom:2px solid #0D0D0D;">Shop Applied Nutrition →</a>
+    <!-- ============ SECTION 1 - copy this whole <section> block for a new topic ============ -->
+    <section>
+      <div class="label"><span class="idx">01</span><span class="txt"><!-- EDIT: section name -->Easing Back In</span></div>
+      <!-- EDIT START: section 1 content -->
+      <h2 class="h2">Getting Back Into Routine, Gently</h2>
+      <p>If summer pulled you away from your usual routine, that's normal. It doesn't mean you've lost anything, you just need one small step in the right direction, not a big reset.</p>
+      <ul class="checklist">
+        <li><span class="mark">✓</span> Pick one thing to bring back first, not everything at once</li>
+        <li><span class="mark">✓</span> Book your first session in like an appointment you can't miss</li>
+        <li><span class="mark">✓</span> Expect the first week to feel harder than it used to, that's normal</li>
+        <li><span class="mark">✓</span> Showing up is the win right now</li>
+      </ul>
+      <!-- EDIT END -->
+    </section>
+
+    <!-- ============ SECTION 2 ============ -->
+    <section>
+      <div class="label"><span class="idx">02</span><span class="txt">Looking Ahead</span></div>
+      <!-- EDIT START: section 2 content -->
+      <h2 class="h2">A Few Honest Goals for Autumn</h2>
+      <p>There's still a good few months left in the year, so it's worth getting clear on what you actually want, not what you think you should want.</p>
+      <img src="/images/newsletter/goal-setting-photo.jpg" alt="Setting goals for the month" style="width:100%; border-radius:10px; margin:6px 0 18px;">
+      <div class="callout">
+        <div class="callout-label">This Month's Challenge</div>
+        <p>Write down one thing you'd be proud of by December. Doesn't need to be a number on the scale. Message me yours, I read every one.</p>
       </div>
-    </div>
-  </section>
-  <!-- EDIT END -->
+      <!-- EDIT END -->
+    </section>
 
-  <div class="cta-final">
-    <!-- EDIT START: closing CTA -->
-    <h3>Ready to figure out what's next?</h3>
-    <p>Message me, I'm always happy to help you work out your next step.</p>
-    <a class="btn primary" href="https://start.kdpersonaltraining.com" data-track="cta_get_started_bottom">Get Started with KDPT</a>
+    <!-- ============ SECTION 3 ============ -->
+    <section>
+      <div class="label"><span class="idx">03</span><span class="txt">Myth, Busted</span></div>
+      <!-- EDIT START: section 3 content -->
+      <h2 class="h2">"If you're not sore the next day, the workout didn't work."</h2>
+      <p>This is one of the things I hear most. Soreness just means your muscles did something unfamiliar, not that the session worked. The more used to a movement you get, the less sore you'll feel doing it, even as you keep getting stronger.</p>
+      <p>Chasing soreness leads people to either overtrain trying to "earn" it, or feel like they've failed after a good session that didn't leave them aching. Neither helps. Track progress by what you can lift and whether you're showing up, not how wrecked you feel the next day.</p>
+      <!-- EDIT END -->
+    </section>
+    <!-- ============ END OF COPY-ABLE SECTIONS ============ -->
+
+    <!-- EDIT START: partner discount, update code/link/copy as needed -->
+    <section style="padding-top:0;">
+      <div style="background:linear-gradient(135deg, var(--mint) 0%, #9FE8B5 100%); border-radius:16px; padding:24px; color:#0D0D0D;">
+        <div style="font-size:11.5px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;">Discount Code</div>
+        <p style="color:#1a1a18; font-size:15.5px; margin-bottom:16px; font-weight:500;">If you're topping up protein this month, I've partnered with <strong style="color:#0D0D0D;">Applied Nutrition</strong>. Use the code below for 20% off.</p>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <span style="display:inline-block; font-family:'Montserrat',sans-serif; font-weight:900; font-size:17px; letter-spacing:0.06em; background:#0D0D0D; color:var(--mint); padding:8px 16px; border-radius:8px;">KDPT</span>
+          <a href="https://appliednutrition.uk/?ref=kpcwjaga" data-track="cta_applied_nutrition" style="color:#0D0D0D; font-weight:800; font-size:14.5px; text-decoration:none; border-bottom:2px solid #0D0D0D;">Shop Applied Nutrition →</a>
+        </div>
+      </div>
+    </section>
     <!-- EDIT END -->
+
+    <div class="cta-final">
+      <!-- EDIT START: closing CTA -->
+      <h3>Ready to figure out what's next?</h3>
+      <p>Message me, I'm always happy to help you work out your next step.</p>
+      <a class="btn primary" href="https://start.kdpersonaltraining.com" data-track="cta_get_started_bottom">Get Started with KDPT</a>
+      <!-- EDIT END -->
+    </div>
+
   </div>
+  <!-- ============ END OF SEPTEMBER EDITION ============ -->
+
+  <!-- ================================================================ -->
+  <!-- EDITION: October 2026, not live yet, goes live automatically on the release date above -->
+  <!-- ================================================================ -->
+  <div class="edition" data-release="2026-10-01">
+
+    <div class="note" style="padding-top:32px;">
+      <!-- EDIT START: personal welcome note -->
+      <p>Welcome to October's Coaching Corner. This one's about plateaus, why they happen and how to actually break through one, plus where your nutrition might be quietly working against you as the mornings get darker.</p>
+      <p>If I'm honest, October's always the month my own motivation dips before it needs to. The daylight goes and training suddenly feels like more effort than it did in July. If that's you as well, you're not behind, you're just human. Let's get into it.</p>
+      <div class="sign">Kyle</div>
+      <!-- EDIT END -->
+    </div>
+
+    <!-- ============ SECTION 1: Plateaus + Momentum Tracker ============ -->
+    <section>
+      <div class="label"><span class="idx">01</span><span class="txt">Plateaus & Progress</span></div>
+      <!-- EDIT START: section 1 content -->
+      <h2 class="h2">Hit a Plateau? Here's Why, and How to Actually Fix It</h2>
+      <p>If your results have slowed down the past few weeks, you haven't done anything wrong. Your body adapts to whatever you keep repeating, so the training and eating that worked a few months ago naturally does less over time. That's not failure, it's just how adaptation works.</p>
+      <img src="/images/newsletter/plateau-photo.jpg" alt="Working through a training plateau" style="width:100%; border-radius:10px; margin:6px 0 18px;">
+      <p>The tricky part is knowing what to actually change. That's what the Momentum Tracker is for. It's free to use, and it looks at:</p>
+      <ul class="checklist">
+        <li><span class="mark">✓</span> Your training, are you doing enough of the right thing</li>
+        <li><span class="mark">✓</span> Your nutrition, is it actually supporting your goal</li>
+        <li><span class="mark">✓</span> Your recovery, is it holding you back without you realising</li>
+      </ul>
+      <p>From there, you've got the option to upgrade to a full analysis, or get a programme built completely around your own scores.</p>
+      <a class="btn primary" href="https://momentum.kdpersonaltraining.com" data-track="cta_momentum_tracker">Try the Momentum Tracker, Free</a>
+      <!-- EDIT END -->
+    </section>
+
+    <!-- ============ SECTION 2: Nutrition tip, Applied Nutrition link at the end ============ -->
+    <section>
+      <div class="label"><span class="idx">02</span><span class="txt">Nutrition Tip</span></div>
+      <!-- EDIT START: section 2 content -->
+      <h2 class="h2">The Simplest Fix for Autumn Energy Dips</h2>
+      <p>As the days get shorter, a lot of people notice their energy dropping and reach for quick carbs to fix it. Usually the bigger issue is protein and fibre being too low earlier in the day.</p>
+      <img src="/images/newsletter/nutrition-photo.jpg" alt="A high protein breakfast" style="width:100%; border-radius:10px; margin:6px 0 18px;">
+      <ul class="checklist">
+        <li><span class="mark">✓</span> Get a solid source of protein at breakfast, not just lunch and dinner</li>
+        <li><span class="mark">✓</span> Add a source of fibre earlier in the day, fruit, oats, or veg</li>
+        <li><span class="mark">✓</span> Notice the afternoon slump less when breakfast actually holds you</li>
+      </ul>
+      <div style="background:linear-gradient(135deg, var(--mint) 0%, #9FE8B5 100%); border-radius:16px; padding:24px; color:#0D0D0D; margin-top:6px;">
+        <div style="font-size:11.5px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;">Discount Code</div>
+        <p style="color:#1a1a18; font-size:15.5px; margin-bottom:16px; font-weight:500;">If you're topping up protein this month, I've partnered with <strong style="color:#0D0D0D;">Applied Nutrition</strong>. Use the code below for 20% off.</p>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <span style="display:inline-block; font-family:'Montserrat',sans-serif; font-weight:900; font-size:17px; letter-spacing:0.06em; background:#0D0D0D; color:var(--mint); padding:8px 16px; border-radius:8px;">KDPT</span>
+          <a href="https://appliednutrition.uk/?ref=kpcwjaga" data-track="cta_applied_nutrition" style="color:#0D0D0D; font-weight:800; font-size:14.5px; text-decoration:none; border-bottom:2px solid #0D0D0D;">Shop Applied Nutrition</a>
+        </div>
+      </div>
+      <!-- EDIT END -->
+    </section>
+
+    <!-- ============ SECTION 3: Programmes heading into autumn ============ -->
+    <section>
+      <div class="label"><span class="idx">03</span><span class="txt">Personalised Programmes</span></div>
+      <!-- EDIT START: section 3 content -->
+      <h2 class="h2">Is Your Plan Actually Right for Where You Are Now?</h2>
+      <p>A plan that worked in summer doesn't always fit once your schedule, energy and goals shift into autumn. Worth taking a moment to check yours still matches what you actually need right now, not what you needed a few months ago.</p>
+      <img src="/images/newsletter/programme-photo.jpg" alt="Reviewing a training programme" style="width:100%; border-radius:10px; margin:6px 0 18px;">
+      <p>If it doesn't, a personalised programme built around your current goals, equipment and schedule is a straightforward way to reset that without committing to ongoing coaching.</p>
+      <a class="btn secondary" href="https://start.kdpersonaltraining.com" data-track="cta_programmes_october">See Personalised Programmes</a>
+      <!-- EDIT END -->
+    </section>
+
+    <!-- ============ SECTION 4: Online coaching ============ -->
+    <section>
+      <div class="label"><span class="idx">04</span><span class="txt">Online Coaching</span></div>
+      <!-- EDIT START: section 4 content -->
+      <h2 class="h2">If You Want Ongoing Support, Not Just a Plan</h2>
+      <p>For anyone who wants more than a one-off programme, online coaching gets you weekly check-ins, nutrition guidance that fits how you actually eat, video form reviews, and direct access to me whenever you need it. All built around your life, not a generic template.</p>
+      <img src="/images/newsletter/coaching-photo.jpg" alt="Online coaching check in" style="width:100%; border-radius:10px; margin:6px 0 18px;">
+      <a class="btn secondary" href="https://start.kdpersonaltraining.com" data-track="cta_online_coaching_october">See What's Included</a>
+      <!-- EDIT END -->
+    </section>
+    <!-- ============ END OF COPY-ABLE SECTIONS ============ -->
+
+    <div class="cta-final">
+      <!-- EDIT START: closing note -->
+      <h3>Just Starting Out?</h3>
+      <p>If any of this feels like a lot and you just want a simple first step, the Strong Start Guide walks you through the basics of training and nutrition, plus 30 high protein meal ideas to get going with.</p>
+      <a class="btn primary" href="https://start.kdpersonaltraining.com/links" data-track="cta_guide_october">Get the Strong Start Guide</a>
+      <!-- EDIT END -->
+    </div>
+
+  </div>
+  <!-- ============ END OF OCTOBER EDITION ============ -->
 
   <footer>
     <div class="contact-row">
@@ -233,6 +337,27 @@
 </div>
 
 <script>
+  // Pick whichever edition's release date has passed, latest one wins.
+  // Falls back to the earliest edition if somehow none have "started" yet.
+  var editions = Array.prototype.slice.call(document.querySelectorAll('.edition'));
+  var today = new Date();
+  var previewParam = new URLSearchParams(window.location.search).get('preview');
+  if (previewParam) { today = new Date(previewParam); }
+
+  editions.sort(function(a, b){
+    return new Date(a.dataset.release) - new Date(b.dataset.release);
+  });
+
+  var active = editions[0];
+  editions.forEach(function(ed){
+    var releaseDate = new Date(ed.dataset.release);
+    if (releaseDate <= today) { active = ed; }
+  });
+  active.classList.add('active');
+
+  document.getElementById('month-tag').textContent =
+    new Date(active.dataset.release).toLocaleString('en-GB', { month: 'long', timeZone: 'UTC' }) + ' Edition';
+
   document.querySelectorAll('[data-track]').forEach(function(el){
     el.addEventListener('click', function(){
       var label = el.getAttribute('data-track');
@@ -240,7 +365,7 @@
       else { console.log('[track]', label); }
     });
   });
-  if (window.va) { window.va('event', { name: 'newsletter_view_september' }); }
+  if (window.va) { window.va('event', { name: 'newsletter_view_' + active.dataset.release }); }
 </script>
 
 </body>
