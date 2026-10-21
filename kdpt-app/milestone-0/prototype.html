@@ -360,6 +360,153 @@ svg { display: block; }
 .composer input:focus { outline: none; }
 .composer .round { flex: none; width: 50px; height: 50px; background: var(--mint); color: var(--mint-ink); }
 
+.topbar .right { display: flex; gap: 8px; align-items: center; }
+.topbar .ib { width: 38px; height: 38px; border-radius: 50%; background: var(--s2); display: grid; place-items: center; position: relative; color: var(--fg); }
+.topbar .ib svg { width: 19px; height: 19px; }
+.topbar .ib .badge { position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--coral); color: #2a0703; font: 700 10px var(--display); display: grid; place-items: center; padding: 0 4px; box-shadow: 0 0 0 2px var(--bg); }
+.topbar .ib .dot { position: absolute; top: 1px; right: 1px; width: 9px; height: 9px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 2px var(--bg); }
+
+/* Onboarding */
+.onb { min-height: 100%; display: flex; flex-direction: column; }
+.onb-photo { height: 420px; position: relative; overflow: hidden; }
+.onb-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 40% 30%; }
+.onb-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.1) 30%, #000 96%); }
+.onb-body { padding: 0 var(--gut-r) 40px var(--gut); display: grid; gap: 16px; margin-top: -70px; position: relative; }
+.onb-mark { height: 30px; width: auto; }
+.onb h1 { font-size: 34px; font-weight: 800; line-height: 1.05; }
+.onb .lead { color: var(--fg2); font-size: 16px; margin: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .onb-mark { animation: markin .9s cubic-bezier(.2,.9,.3,1) both; }
+  .onb-body h1 { animation: markin .9s .15s cubic-bezier(.2,.9,.3,1) both; }
+  .onb-body .lead, .onb-body .pill-btn { animation: markin .9s .3s cubic-bezier(.2,.9,.3,1) both; }
+  @keyframes markin { from { opacity: 0; transform: translateY(14px); } }
+}
+.onb-top { display: flex; align-items: center; gap: 14px; padding: 14px var(--gut-r) 0 var(--gut); }
+.onb-prog { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.onb-prog i { height: 4px; border-radius: 2px; background: var(--s3); transition: background .3s; }
+.onb-prog i.on { background: var(--mint); }
+.onb-step { padding: 26px var(--gut-r) 140px var(--gut); display: grid; gap: 22px; align-content: start; }
+.onb-step h1 { font-size: 28px; }
+.goal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.goal { min-height: 132px; border-radius: 24px; background: var(--s2); display: grid; align-content: space-between; padding: 16px; text-align: left; border: 2px solid transparent; font: 700 16px var(--display); }
+.goal .gi { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; }
+.goal[aria-pressed="true"] { border-color: var(--mint); background: rgba(126,213,151,.07); }
+.days-pick { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.days-pick button { aspect-ratio: 1; max-width: 100%; border-radius: 50%; background: var(--s2); font: 800 24px var(--display); }
+.days-pick button[aria-pressed="true"] { background: var(--fg); color: #000; }
+.freq { display: grid; gap: 10px; }
+.fopt { display: flex; gap: 14px; align-items: center; padding: 16px; border-radius: 22px; background: var(--s2); border: 2px solid transparent; text-align: left; width: 100%; }
+.fopt[aria-pressed="true"] { border-color: var(--violet); background: rgba(169,155,255,.08); }
+.fopt .t { flex: 1; min-width: 0; }
+.fopt b { font: 700 17px var(--display); display: block; }
+.fopt small { color: var(--fg3); font-size: 13px; }
+.acc { display: flex; gap: 3px; align-items: flex-end; }
+.acc i { width: 6px; border-radius: 3px; background: var(--s4, #2a2d2b); }
+.acc i:nth-child(1) { height: 8px; } .acc i:nth-child(2) { height: 13px; } .acc i:nth-child(3) { height: 18px; }
+.acc i.on { background: var(--violet); }
+.preview { display: flex; gap: 14px; align-items: center; padding: 14px 16px; border-radius: 20px; background: var(--s1); border: 1px solid var(--hair); }
+.preview b { font: 700 15px var(--display); display: block; }
+.preview small { color: var(--fg3); font-size: 12px; }
+.daychips { display: flex; gap: 6px; flex-wrap: wrap; }
+.daychips button { height: 40px; padding: 0 16px; border-radius: 20px; background: var(--s2); font-weight: 500; font-size: 14px; }
+.daychips button[aria-pressed="true"] { background: var(--violet); color: #120d2b; }
+.toggles { display: grid; gap: 8px; }
+.tg { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 18px; background: var(--s2); }
+.tg .li { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; flex: none; }
+.tg .li svg { width: 18px; height: 18px; }
+.tg span.t { flex: 1; min-width: 0; }
+.tg b { font-weight: 600; font-size: 15px; display: block; }
+.tg small { color: var(--fg3); font-size: 12px; }
+.sw { width: 50px; height: 30px; border-radius: 15px; background: var(--s3); position: relative; flex: none; transition: background .2s; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; transition: transform .2s; }
+.sw[aria-checked="true"] { background: var(--mint); }
+.sw[aria-checked="true"]::after { transform: translateX(20px); }
+.onb-done { min-height: 100%; display: grid; place-items: center; align-content: center; gap: 22px; text-align: center; padding: 60px var(--gut-r) 40px var(--gut); }
+.onb-done h1 { font-size: 34px; font-weight: 800; }
+.summary { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.summary .chip { background: var(--s2); color: var(--fg2); }
+
+/* Notifications */
+.ntop { display: flex; align-items: center; gap: 12px; padding-top: 6px; }
+.ntop h1 { flex: 1; font-size: 28px; font-weight: 800; }
+.ntop .ib { width: 44px; height: 44px; border-radius: 50%; background: var(--s2); display: grid; place-items: center; }
+.ngroup { display: grid; gap: 8px; }
+.nrow { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; padding: 14px; border-radius: 20px; background: var(--s2); text-align: left; width: 100%; position: relative; }
+.nrow.unread::after { content: ""; position: absolute; top: 18px; right: 16px; width: 8px; height: 8px; border-radius: 50%; background: var(--coral); }
+.nrow .li { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; }
+.nrow .li svg { width: 20px; height: 20px; }
+.nrow b { font-weight: 600; font-size: 15px; display: block; padding-right: 18px; }
+.nrow p { margin: 2px 0 0; color: var(--fg2); font-size: 14px; }
+.nrow time { color: var(--fg3); font-size: 12px; display: block; margin-top: 4px; }
+.cta { margin-top: 10px; display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: 17px; font: 600 13px var(--display); }
+
+/* Community */
+.drop { border-radius: 28px; background: linear-gradient(160deg, #221d38 0%, var(--s2) 62%); border: 1px solid rgba(169,155,255,.2); padding: 20px; display: grid; gap: 12px; }
+.drop .by { display: flex; gap: 10px; align-items: center; }
+.drop .by img { width: 36px; height: 36px; border-radius: 50%; background: #000; object-fit: contain; padding: 8px 5px; }
+.drop .by b { font-size: 14px; font-weight: 600; display: block; }
+.drop .by small { color: var(--fg3); font-size: 12px; }
+.drop h2 { font-size: 24px; font-weight: 800; line-height: 1.1; }
+.drop p { margin: 0; color: var(--fg2); font-size: 15px; }
+.reacts { display: flex; gap: 8px; }
+.react { height: 36px; padding: 0 12px; border-radius: 18px; background: rgba(255,255,255,.07); display: inline-flex; gap: 6px; align-items: center; font: 600 13px var(--display); }
+.react svg { width: 16px; height: 16px; }
+.react.on { background: var(--violet); color: #120d2b; }
+.meal3 { display: grid; gap: 10px; }
+.m3 { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 10px 14px 10px 10px; border-radius: 22px; background: var(--s2); text-align: left; width: 100%; }
+.m3 img { width: 92px; height: 92px; border-radius: 16px; object-fit: cover; }
+.m3 b { font: 700 16px var(--display); display: block; line-height: 1.2; }
+.m3 .macros { display: flex; gap: 10px; margin-top: 6px; font-size: 12px; color: var(--fg3); }
+.m3 .macros span:first-child { color: var(--amber); font-weight: 600; }
+.m3 .add { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,180,94,.14); color: var(--amber); display: grid; place-items: center; }
+.m3 .add.on { background: var(--amber); color: #2a1600; }
+.ann { display: flex; gap: 14px; padding: 16px; border-radius: 20px; background: var(--s2); align-items: center; text-align: left; width: 100%; }
+.ann .li { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; flex: none; }
+.ann .t { flex: 1; min-width: 0; }
+.ann b { font-weight: 600; display: block; }
+.ann small { color: var(--fg3); font-size: 13px; }
+
+/* Push banner */
+.push { position: absolute; left: 10px; right: 10px; top: 10px; z-index: 70; border-radius: 24px; background: rgba(44,46,45,.86); backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%); padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start; text-align: left; box-shadow: 0 16px 40px rgba(0,0,0,.5); transform: translateY(-160%); transition: transform .5s cubic-bezier(.2,.9,.3,1); }
+.push.show { transform: none; }
+@media (min-width: 700px) { .push { top: 50px; } }
+.push img { width: 38px; height: 38px; border-radius: 10px; background: #000; object-fit: contain; padding: 9px 5px; flex: none; }
+.push .t { flex: 1; min-width: 0; }
+.push .row { display: flex; justify-content: space-between; font-size: 12px; color: var(--fg2); }
+.push b { font-weight: 600; font-size: 14px; display: block; }
+.push p { margin: 0; font-size: 14px; color: var(--fg); }
+
+/* Booking, payment, check-in sheets */
+.allow { display: flex; gap: 6px; }
+.allow i { flex: 1; height: 8px; border-radius: 4px; background: var(--s3); transition: background .2s; }
+.allow i.on { background: var(--sky); }
+.dates { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.dt { border-radius: 16px; background: var(--s2); padding: 10px 4px; display: grid; justify-items: center; gap: 1px; border: 1.5px solid transparent; }
+.dt small { color: var(--fg3); font: 600 10px var(--display); letter-spacing: .1em; }
+.dt b { font: 800 20px var(--display); }
+.dt span { color: var(--fg2); font-size: 11px; }
+.dt[aria-pressed="true"] { background: rgba(110,198,255,.12); border-color: var(--sky); }
+.dt[aria-pressed="true"] b { color: var(--sky); }
+.paycard { border-radius: 22px; padding: 18px; background: var(--s2); display: grid; gap: 10px; }
+.line { display: flex; justify-content: space-between; color: var(--fg2); font-size: 14px; }
+.line.total { color: var(--fg); font: 800 24px var(--display); border-top: 1px solid var(--hair); padding-top: 12px; }
+.cardrow { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 18px; background: var(--s2); }
+.cardrow .brand { width: 46px; height: 30px; border-radius: 6px; background: linear-gradient(135deg, #1a1f71, #2b55c2); color: #fff; font: 800 10px var(--display); display: grid; place-items: center; letter-spacing: .06em; }
+.cardrow .t { flex: 1; }
+.cardrow b { font-weight: 600; display: block; font-size: 15px; }
+.cardrow small { color: var(--fg3); font-size: 12px; }
+.cimetric { display: grid; gap: 8px; }
+.cimetric .lab { display: flex; justify-content: space-between; align-items: baseline; }
+.cimetric .lab b { font: 700 16px var(--display); }
+.cimetric .lab small { color: var(--fg3); font-size: 12px; }
+.scale5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.scale5 button { height: 46px; border-radius: 14px; background: var(--s2); font: 700 16px var(--display); }
+.scale5 button[aria-pressed="true"] { background: var(--c); color: #0a0a0a; }
+.wt { display: flex; align-items: center; gap: 10px; background: var(--s2); border-radius: 16px; padding: 0 16px; height: 56px; }
+.wt input { background: none; border: 0; color: var(--fg); font: 800 24px var(--display); width: 100px; }
+.wt input:focus { outline: none; }
+.wt span { color: var(--fg3); }
+
 .toast { position: absolute; left: 50%; top: 60px; transform: translateX(-50%); z-index: 60; background: var(--fg); color: #000; padding: 10px 18px; border-radius: 22px; font-size: 14px; font-weight: 500; white-space: nowrap; max-width: calc(100% - 40px); overflow: hidden; text-overflow: ellipsis; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
 @media (prefers-reduced-motion: no-preference) { .fade { animation: fade .28s ease; } @keyframes fade { from { opacity: 0; transform: translateY(6px); } } }
 </style>
@@ -370,6 +517,7 @@ svg { display: block; }
   <nav class="tabbar" id="tabbar" aria-label="App sections"></nav>
   <div id="layer"></div>
   <div class="toast" id="toast" role="status" hidden></div>
+  <button class="push" id="push" hidden aria-live="polite"></button>
 </div>
 
 <script>
@@ -409,7 +557,13 @@ const P = {
   bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5h4"/>',
   dumbbell: '<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/>',
   machine: '<rect x="4" y="3.5" width="5" height="17" rx="1.5"/><path d="M9 8h7l3 9M9 17h10"/>',
-  body: '<circle cx="12" cy="5" r="2"/><path d="M12 7.5v7M8 10.5h8M9.5 21l2.5-6.5 2.5 6.5"/>'
+  body: '<circle cx="12" cy="5" r="2"/><path d="M12 7.5v7M8 10.5h8M9.5 21l2.5-6.5 2.5 6.5"/>',
+  community: '<circle cx="9" cy="8.5" r="3.2"/><path d="M3 19.5a6 6 0 0 1 12 0M16 5.5a3 3 0 0 1 0 6M18 13.5a5.5 5.5 0 0 1 3 6"/>',
+  card: '<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/>',
+  heart: '<path d="M12 20s-7.5-4.6-7.5-10A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7.5 3c0 5.4-7.5 10-7.5 10z"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  megaphone: '<path d="M4 10v4h3l7 4V6l-7 4zM17.5 9.5a3.5 3.5 0 0 1 0 5"/>'
 };
 const ic = (n, cls = 'ic', sw = 1.8) => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
 
@@ -487,7 +641,11 @@ function fitToTime(minutes) {
 // ---------------------------------------------------------------------------
 // State
 // ---------------------------------------------------------------------------
-const S = { view: 'home', duration: 60, idx: 0, logs: {}, swaps: {}, why: false, sheet: null,
+const S = { onb: { step: 0, goal: 'strength', days: 3, freq: 'weekly', day: 'Sun' },
+  notifs: { workout: true, booking: true, session: true, payment: true, drop: true, checkin: true },
+  book: { sel: null, done: false }, paid: false, autopay: true, ci: { sleep: 4, energy: 4, stress: 2, diet: 4, weight: '67.8', done: false },
+  liked: {}, saved: {}, read: false,
+  view: 'home', duration: 60, idx: 0, logs: {}, swaps: {}, why: false, sheet: null,
   pain: { area: null, sev: 3, act: null, sent: false }, rest: null, progTab: 0, chat: [] };
 const plan = () => fitToTime(S.duration);
 function setsFor(ex, n) {
@@ -506,7 +664,10 @@ const vHome = () => {
   const p = plan();
   const days = [['M', 'done', ic('check')], ['T', 'pt', 'PT'], ['W', 'now', '21'], ['T', '', '22'], ['F', '', '23'], ['S', 'pt', 'PT'], ['S', '', '25']];
   return `<div class="page fade">
-    <div class="topbar"><img src="assets/kd-mark.png" alt="KD Personal Training"><button class="avatar" data-toast="Profile and settings">SM</button></div>
+    <div class="topbar"><img src="assets/kd-mark.png" alt="KD Personal Training"><div class="right">
+      <button class="ib" data-go="notifs" aria-label="Notifications">${ic('bell')}${S.read ? '' : '<span class="badge">3</span>'}</button>
+      <button class="ib" data-go="chat" aria-label="Messages from Kyle">${ic('chat')}<span class="dot"></span></button>
+      <button class="avatar" data-toast="Profile and settings">SM</button></div></div>
     <div class="greet"><div class="eyebrow">Wednesday 21 October</div><h1>Morning, Sarah</h1></div>
 
     <button class="card mom" data-sheet="momentum" aria-label="Momentum: strong. See the breakdown">
@@ -530,8 +691,8 @@ const vHome = () => {
 
     <div class="actions">
       <button class="act" data-go="fuel"><i style="background:rgba(255,180,94,.14);color:var(--amber)">${ic('camera')}</i>Log meal</button>
-      <button class="act" data-toast="Booking opens on the 20th"><i style="background:rgba(110,198,255,.14);color:var(--sky)">${ic('cal')}</i>Book</button>
-      <button class="act" data-toast="Weekly check-in opens Sunday"><i style="background:rgba(169,155,255,.14);color:var(--violet)">${ic('clip')}</i>Check-in</button>
+      <button class="act" data-sheet="book"><i style="background:rgba(110,198,255,.14);color:var(--sky)">${ic('cal')}</i>Book</button>
+      <button class="act" data-sheet="checkin"><i style="background:rgba(169,155,255,.14);color:var(--violet)">${ic('clip')}</i>Check-in</button>
       <button class="act" data-go="chat"><i style="background:var(--s2);color:var(--fg)">${ic('spark')}</i>Ask</button>
     </div>
 
@@ -710,7 +871,7 @@ const vProgress = () => {
 };
 
 const vChat = () => `<div class="page fade" style="padding-bottom:200px">
-  <div class="chat-head"><img src="assets/kd-mark.png" alt=""><span><b>Kyle</b><small>Usually replies within a few hours</small></span></div>
+  <div class="chat-head"><button class="round" style="background:var(--s2);width:40px;height:40px" data-go="home" aria-label="Back">${ic('back')}</button><img src="assets/kd-mark.png" alt=""><span><b>Kyle</b><small>Usually replies within a few hours</small></span></div>
   <div class="msgs">
     <div class="stamp">Yesterday</div>
     <div class="msg them">Great session Monday. Leg press goes up today 💪</div>
@@ -732,9 +893,118 @@ function chatDock() {
 }
 
 // ---------------------------------------------------------------------------
+// Onboarding, notifications, community
+// ---------------------------------------------------------------------------
+const GOALS = [['strength', 'trophy', 'var(--mint)', 'Get stronger'], ['fat', 'flame', 'var(--amber)', 'Lose fat'], ['fit', 'bolt', 'var(--sky)', 'Feel fitter'], ['pain', 'body', 'var(--violet)', 'Move pain-free']];
+const FREQ = [['weekly', 'Weekly', 3, 'High', 'Most accurate Momentum'], ['fortnightly', 'Every 2 weeks', 2, 'Good', 'A good balance'], ['monthly', 'Monthly', 1, 'Basic', 'The lightest touch']];
+const NOTIF_TYPES = [['workout', 'train', 'var(--mint)', 'rgba(126,213,151,.14)', 'Workout reminders', 'On your training days'], ['booking', 'cal', 'var(--sky)', 'rgba(110,198,255,.14)', 'Bookings open', 'On the 20th, for next month'],
+  ['session', 'clock', 'var(--sky)', 'rgba(110,198,255,.14)', 'Session reminders', 'The evening before'], ['payment', 'card', 'var(--amber)', 'rgba(255,180,94,.14)', 'Payment reminders', '3 days before it\'s due'],
+  ['drop', 'community', 'var(--violet)', 'rgba(169,155,255,.14)', 'Weekly drop', 'Mondays: a tip and 3 meals'], ['checkin', 'clip', 'var(--violet)', 'rgba(169,155,255,.14)', 'Check-in due', 'On your check-in day']];
+const freqInfo = () => { const f = FREQ.find(x => x[0] === S.onb.freq); return { label: f[1], n: f[2], acc: f[3] }; };
+const accBars = n => [1, 2, 3].map(i => `<i class="${i <= n ? 'on' : ''}"></i>`).join('');
+const toggleList = () => `<div class="toggles">${NOTIF_TYPES.map(([k, i, c, bg, l, sub]) => `<div class="tg"><span class="li" style="background:${bg};color:${c}">${ic(i)}</span><span class="t"><b>${l}</b><small>${sub}</small></span>
+  <button class="sw" role="switch" aria-checked="${S.notifs[k]}" data-notif="${k}" aria-label="${l}"></button></div>`).join('')}</div>`;
+
+function vOnboard() {
+  const o = S.onb;
+  if (o.step === 0) return `<div class="onb">
+    <div class="onb-photo"><img src="assets/coaching.jpg" alt=""></div>
+    <div class="onb-body"><img class="onb-mark" src="assets/kd-mark.png" alt="KD Personal Training">
+      <h1>Welcome, Sarah</h1><p class="lead">Kyle has set up your coaching. Two minutes and you're in.</p>
+      <button class="pill-btn mint" data-onb="next">Let's go ${ic('right')}</button></div></div>`;
+  if (o.step === 5) return `<div class="onb-done fade">
+    <svg viewBox="0 0 150 150" width="150" height="150">${MOM.map((m, i) => `<g transform="translate(${i * 17} ${i * 17})">${ring(150 - 34 * i, 13, 0.08, m.col, m.tr)}</g>`).join('')}</svg>
+    <div><h1>You're all set</h1><p class="lead" style="margin-top:8px">Your rings fill up as you train, eat well and check in.</p></div>
+    <div class="summary"><span class="chip">${ic(GOALS.find(g => g[0] === o.goal)[1])} ${GOALS.find(g => g[0] === o.goal)[3]}</span><span class="chip">${ic('train')} ${o.days} days a week</span><span class="chip">${ic('clip')} ${freqInfo().label}${o.freq === 'monthly' ? '' : ' · ' + o.day}</span></div>
+    <button class="pill-btn white" style="width:100%" data-onb="finish">Open my app</button></div>`;
+  const titles = ['', 'What matters most to you?', 'How many days a week can you train?', 'How often should we check in?', 'What should we tell you about?'];
+  let body = '';
+  if (o.step === 1) body = `<div class="goal-grid">${GOALS.map(([k, i, c, l]) => `<button class="goal" aria-pressed="${o.goal === k}" data-goal="${k}"><span class="gi" style="background:color-mix(in srgb, ${c} 16%, transparent);color:${c}">${ic(i)}</span>${l}</button>`).join('')}</div>`;
+  if (o.step === 2) body = `<div class="days-pick">${[2, 3, 4, 5, 6].map(n => `<button class="num" aria-pressed="${o.days === n}" data-days="${n}">${n}</button>`).join('')}</div>
+    <p class="lead" style="color:var(--fg3);font-size:14px">Kyle builds your programme around this. You can change it any time.</p>`;
+  if (o.step === 3) body = `<p class="lead" style="margin-top:-10px">Two minutes: sleep, energy, stress and weight. The more often you check in, the more accurate your Momentum.</p>
+    <div class="freq">${FREQ.map(([k, l, n, a, sub]) => `<button class="fopt" aria-pressed="${o.freq === k}" data-freq="${k}"><span class="t"><b>${l}</b><small>${sub}</small></span><span class="acc">${accBars(n)}</span></button>`).join('')}</div>
+    ${o.freq === 'monthly' ? '' : `<div><div class="eyebrow" style="margin-bottom:10px">Which day?</div><div class="daychips">${['Fri', 'Sat', 'Sun', 'Mon'].map(d => `<button aria-pressed="${o.day === d}" data-cday="${d}">${d}</button>`).join('')}</div></div>`}
+    <div class="preview">${rings(56, 6)}<span><b>Momentum accuracy: ${freqInfo().acc}</b><small>${o.freq === 'weekly' ? 'Kyle can adjust your plan week by week' : o.freq === 'fortnightly' ? 'Trends show up within a month' : 'Best if you also log meals and workouts'}</small></span></div>`;
+  if (o.step === 4) body = toggleList();
+  return `<div class="onb fade">
+    <div class="onb-top"><button class="round" style="background:var(--s2)" data-onb="back" aria-label="Back">${ic('back')}</button><div class="onb-prog">${[1, 2, 3, 4].map(i => `<i class="${i <= o.step ? 'on' : ''}"></i>`).join('')}</div></div>
+    <div class="onb-step"><h1>${titles[o.step]}</h1>${body}</div></div>`;
+}
+
+const NOTES = [
+  { id: 'pay', icon: 'card', c: 'var(--amber)', bg: 'rgba(255,180,94,.14)', t: 'November payment due Sunday', b: '£120.00 · Online Coaching', when: '9:00', cta: ['Pay now', 'pay'], unread: true, group: 'Today' },
+  { id: 'book', icon: 'cal', c: 'var(--sky)', bg: 'rgba(110,198,255,.14)', t: 'November sessions are open', b: 'Your regular Tue & Sat slots are held until Friday.', when: '8:00', cta: ['Confirm slots', 'book'], unread: true, group: 'Today' },
+  { id: 'drop', icon: 'community', c: 'var(--violet)', bg: 'rgba(169,155,255,.14)', t: 'This week\'s drop is here', b: 'Protein at breakfast, plus 3 new high-protein meals.', when: 'Mon', cta: ['Open', 'go:community'], unread: true, group: 'Earlier' },
+  { id: 'sess', icon: 'clock', c: 'var(--sky)', bg: 'rgba(110,198,255,.14)', t: 'PT with Kyle on Saturday', b: '9:00 at the Studio. Free to change until Friday 9:00.', when: 'Mon', group: 'Earlier' },
+  { id: 'ci', icon: 'clip', c: 'var(--violet)', bg: 'rgba(169,155,255,.14)', t: 'Check-in done', b: 'Momentum updated. Kyle replied to your note.', when: 'Sun', group: 'Earlier' }
+];
+function vNotifs() {
+  const row = n => `<div class="nrow ${n.unread && !S.read ? 'unread' : ''}"><span class="li" style="background:${n.bg};color:${n.c}">${ic(n.icon)}</span><span><b>${n.t}</b><p>${n.id === 'pay' && S.paid ? 'Paid · thank you' : n.b}</p><time>${n.when}</time>
+    ${n.cta && !(n.id === 'pay' && S.paid) && !(n.id === 'book' && S.book.done) ? `<button class="cta" style="background:${n.bg};color:${n.c}" ${n.cta[1].startsWith('go:') ? `data-go="${n.cta[1].slice(3)}"` : `data-sheet="${n.cta[1]}"`}>${n.cta[0]}</button>` : ''}</span></div>`;
+  return `<div class="page fade">
+    <div class="ntop"><button class="ib" data-go="home" aria-label="Back">${ic('back')}</button><h1>Notifications</h1><button class="ib" data-sheet="notifset" aria-label="Notification settings">${ic('gear')}</button></div>
+    ${['Today', 'Earlier'].map(g => `<div class="ngroup"><div class="eyebrow">${g}</div>${NOTES.filter(n => n.group === g).map(row).join('')}</div>`).join('')}
+  </div>`;
+}
+
+const MEALS3 = [['pasta', 'Creamy Cajun Chicken Pasta', '45g protein', '480 kcal'], ['potato-bowl', 'Big Mac Loaded Potato Bowl', '42g protein', '540 kcal'], ['wrap', 'High-Protein Breakfast Wrap', '41g protein', '400 kcal']];
+function vCommunity() {
+  const r = (k, icon, n) => `<button class="react ${S.liked[k] ? 'on' : ''}" data-like="${k}">${ic(icon)}<span class="num">${n + (S.liked[k] ? 1 : 0)}</span></button>`;
+  return `<div class="page fade">
+    <div class="greet" style="padding-top:6px"><div class="eyebrow">Week 43 · Monday 19 October</div><h1>Community</h1></div>
+    <article class="drop">
+      <div class="by"><img src="assets/kd-mark.png" alt=""><span><b>Kyle</b><small>Tip of the week</small></span></div>
+      <h2>Front-load your protein</h2>
+      <p>Aim for 30g at breakfast. It keeps you full until lunch and makes your daily target far easier to hit.</p>
+      <div class="reacts">${r('t1', 'heart', 14)}${r('t2', 'flame', 9)}</div>
+    </article>
+    <div class="sec-head"><h2>3 high-protein meals</h2><span class="chip" style="background:rgba(255,180,94,.14);color:var(--amber);height:26px">New</span></div>
+    <div class="meal3">${MEALS3.map(([img, n, p, k], i) => `<div class="m3"><img src="assets/${img}.jpg" alt=""><span><b>${n}</b><span class="macros num"><span>${p}</span><span>${k}</span></span></span>
+      <button class="add ${S.saved[i] ? 'on' : ''}" data-save="${i}" aria-label="Save to Fuel">${ic(S.saved[i] ? 'check' : 'plus')}</button></div>`).join('')}</div>
+    <div class="sec-head"><h2>From Kyle</h2></div>
+    <button class="ann" data-toast="You're in. Steps count from Sunday"><span class="li" style="background:rgba(255,180,94,.14);color:var(--amber)">${ic('flame')}</span><span class="t"><b>November challenge: 10k steps a day</b><small>12 clients in · tap to join</small></span><span class="chev">${ic('right')}</span></button>
+    <div class="ann"><span class="li" style="background:rgba(110,198,255,.14);color:var(--sky)">${ic('megaphone')}</span><span class="t"><b>Studio closed Monday 3 November</b><small>Online sessions as normal</small></span></div>
+    <div class="sec-head"><h2>Past drops</h2></div>
+    ${[['Week 42', 'Sleep: the free recovery tool'], ['Week 41', 'How to warm up in 5 minutes']].map(([w, t]) => `<button class="ann" data-toast="${t}"><span class="li" style="background:var(--s3);color:var(--fg2)">${ic('community')}</span><span class="t"><b>${t}</b><small>${w} · tip + 3 meals</small></span><span class="chev">${ic('right')}</span></button>`).join('')}
+  </div>`;
+}
+
+// Sarah's regular slots for November: Tuesdays 7:00 and Saturdays 9:00.
+const NOV = [['TUE', 3, '7:00'], ['SAT', 7, '9:00'], ['TUE', 10, '7:00'], ['SAT', 14, '9:00'], ['TUE', 17, '7:00'], ['SAT', 21, '9:00'], ['TUE', 24, '7:00'], ['SAT', 28, '9:00']];
+
+// ---------------------------------------------------------------------------
 // Sheets
 // ---------------------------------------------------------------------------
 function sheetHTML() {
+  if (S.sheet === 'notifset') return `<div><h3>Notifications</h3><div class="sub">Choose what reaches your phone</div></div>${toggleList()}<button class="pill-btn white" data-close>Done</button>`;
+  if (S.sheet === 'book') {
+    if (!S.book.sel) S.book.sel = NOV.map(() => true);
+    const n = S.book.sel.filter(Boolean).length;
+    if (S.book.done) return `<div class="sent"><span class="ok" style="background:var(--sky);color:#03121f">${ic('check', 'ic', 2.6)}</span><h3>${n} sessions booked</h3><p>Added to your calendar. Free to change up to 24 hours before.</p></div><button class="pill-btn white" data-close>Done</button>`;
+    return `<div><h3>Book November</h3><div class="sub">Your regular slots are held. Tap a date to drop it.</div></div>
+      <div><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span class="eyebrow">Sessions</span><span class="num" style="font:700 14px var(--display)">${n} of 8</span></div><div class="allow">${NOV.map((_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div></div>
+      <div class="dates">${NOV.map(([d, day, t], i) => `<button class="dt" aria-pressed="${S.book.sel[i]}" data-bk="${i}"><small>${d}</small><b class="num">${day}</b><span class="num">${t}</span></button>`).join('')}</div>
+      <button class="pill-btn dark" data-toast="Open slots for November appear here">${ic('plus')} Pick other times</button>
+      <button class="pill-btn mint" data-bookok ${n ? '' : 'disabled style="opacity:.5"'}>Confirm ${n} sessions</button>`;
+  }
+  if (S.sheet === 'pay') {
+    if (S.paid) return `<div class="sent"><span class="ok" style="background:var(--amber);color:#2a1600">${ic('check', 'ic', 2.6)}</span><h3>Paid · thank you</h3><p>Receipt sent to your email. ${S.autopay ? 'December will be taken automatically.' : ''}</p></div><button class="pill-btn white" data-close>Done</button>`;
+    return `<div><h3>November payment</h3><div class="sub">Due Sunday 1 November</div></div>
+      <div class="paycard"><div class="line"><span>Online Coaching</span><span class="num">£120.00</span></div><div class="line"><span>1–30 November</span><span></span></div><div class="line total"><span>Total</span><span class="num">£120.00</span></div></div>
+      <div class="cardrow"><span class="brand">VISA</span><span class="t"><b>•••• 4242</b><small>Expires 08/28</small></span><button data-toast="Change card in Stripe" style="color:var(--fg2);font-size:14px">Change</button></div>
+      <div class="tg"><span class="li" style="background:rgba(255,180,94,.14);color:var(--amber)">${ic('card')}</span><span class="t"><b>Pay automatically each month</b><small>Reminder 3 days before, cancel any time</small></span><button class="sw" role="switch" aria-checked="${S.autopay}" data-autopay aria-label="Pay automatically"></button></div>
+      <button class="pill-btn mint" data-payok>Pay £120.00</button>`;
+  }
+  if (S.sheet === 'checkin') {
+    const c = S.ci;
+    if (c.done) return `<div class="sent"><span class="ok" style="background:var(--violet);color:#120d2b">${ic('check', 'ic', 2.6)}</span><h3>Check-in sent</h3><p>Momentum updated. Kyle will reply before your next session.</p></div><button class="pill-btn white" data-close>Done</button>`;
+    const M = [['sleep', 'Sleep', 'var(--violet)', 'Poor', 'Great'], ['energy', 'Energy', 'var(--mint)', 'Flat', 'Buzzing'], ['stress', 'Stress', 'var(--coral)', 'Calm', 'Maxed out'], ['diet', 'Food', 'var(--amber)', 'Off track', 'Spot on']];
+    return `<div><h3>${freqInfo().label} check-in</h3><div class="sub">About two minutes</div></div>
+      ${M.map(([k, l, col, lo, hi]) => `<div class="cimetric"><div class="lab"><b>${l}</b><small>${lo} → ${hi}</small></div><div class="scale5">${[1, 2, 3, 4, 5].map(v => `<button class="num" style="--c:${col}" aria-pressed="${c[k] === v}" data-ci="${k}" data-v="${v}">${v}</button>`).join('')}</div></div>`).join('')}
+      <div class="cimetric"><div class="lab"><b>Weight</b><small>Optional</small></div><label class="wt"><input id="ciw" inputmode="decimal" value="${c.weight}" aria-label="Weight in kg"><span>kg</span></label></div>
+      <button class="pill-btn mint" data-cisend>Send to Kyle</button>`;
+  }
   if (S.sheet === 'momentum') {
     const week = [['M', 70, 'on'], ['T', 78, 'on'], ['W', 84, 'now'], ['T', 0, ''], ['F', 0, ''], ['S', 0, ''], ['S', 0, '']];
     return `<div class="mom-big">
@@ -748,7 +1018,7 @@ function sheetHTML() {
         <span class="st" style="background:${m.st[1]};color:${m.st[2]}">${m.st[0]}</span></div>`).join('')}</div>
       <div><div class="eyebrow" style="margin-bottom:10px">This week</div>
         <div class="trend">${week.map(([d, v, c]) => `<div class="${c}"><i style="height:${Math.round((v || 8) * 0.85)}px"></i>${d}</div>`).join('')}</div></div>
-      <p class="foot">Built from your workouts, meal logs and Sunday check-in. Kyle sees the same view.</p>
+      <div class="preview"><span class="acc">${accBars(freqInfo().n)}</span><span><b>Accuracy: ${freqInfo().acc}</b><small>From your workouts, meals and ${freqInfo().label.toLowerCase()} check-ins. Kyle sees the same view.</small></span></div>
       <button class="pill-btn white" data-go="progress">See all progress</button>`;
   }
   const { plan: pl } = plan(); const ex = pl[S.idx]?.ex;
@@ -803,17 +1073,17 @@ function restHTML() {
 // ---------------------------------------------------------------------------
 const $ = id => document.getElementById(id);
 const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-const TABS = [['home', 'Home'], ['train', 'Train'], ['fuel', 'Fuel'], ['progress', 'Progress'], ['chat', 'Kyle']];
+const TABS = [['home', 'Home'], ['train', 'Train'], ['fuel', 'Fuel'], ['progress', 'Progress'], ['community', 'Community']];
 
 function render(keepScroll) {
   const sc = $('screen'), top = sc.scrollTop;
   const v = S.view;
   $('view').innerHTML = v === 'home' ? vHome() : v === 'train' ? vTrain() : v === 'workout' ? vWorkout() : v === 'finish' ? vFinish()
-    : v === 'fuel' ? vFuel() : v === 'progress' ? vProgress() : vChat();
+    : v === 'fuel' ? vFuel() : v === 'progress' ? vProgress() : v === 'onboard' ? vOnboard() : v === 'notifs' ? vNotifs() : v === 'community' ? vCommunity() : vChat();
   const tb = $('tabbar');
-  tb.hidden = v === 'workout' || v === 'finish';
-  const active = v === 'workout' ? 'train' : v;
-  tb.innerHTML = TABS.map(([k, l]) => `<button class="${k === active ? 'on' : ''}" data-go="${k}" aria-label="${l}">${ic(k)}<span>${l}</span>${k === 'chat' ? '<i class="pip"></i>' : ''}</button>`).join('');
+  tb.hidden = v === 'workout' || v === 'finish' || v === 'onboard';
+  const active = v === 'workout' ? 'train' : v === 'chat' || v === 'notifs' ? 'home' : v;
+  tb.innerHTML = TABS.map(([k, l]) => `<button class="${k === active ? 'on' : ''}" data-go="${k}" aria-label="${l}">${ic(k)}<span>${l}</span>${k === 'community' ? '<i class="pip" style="background:var(--violet)"></i>' : ''}</button>`).join('');
 
   let layer = '';
   if (v === 'workout') {
@@ -824,6 +1094,7 @@ function render(keepScroll) {
       <button class="pill-btn mint" data-next>${last ? 'Finish' : 'Next'} ${ic('right')}</button></div>`;
   }
   if (v === 'chat') layer += chatDock();
+  if (v === 'onboard' && S.onb.step >= 1 && S.onb.step <= 4) layer += `<div class="dock"><button class="pill-btn white" data-onb="next">${S.onb.step === 4 ? 'Allow notifications' : 'Continue'}</button></div>`;
   if (S.rest) layer += restHTML();
   if (S.sheet) layer += `<div class="scrim" data-scrim><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${sheetHTML()}</div></div>`;
   $('layer').innerHTML = layer;
@@ -831,10 +1102,19 @@ function render(keepScroll) {
 }
 
 function go(v) {
+  if (S.view === 'notifs') S.read = true;
   S.view = v; S.sheet = null; stopRest();
   try { history.replaceState(null, '', '#' + v); } catch (e) {}
   render(false);
 }
+function showPush(title, body, sheet) {
+  const el = $('push');
+  el.innerHTML = `<img src="assets/kd-mark.png" alt=""><span class="t"><span class="row"><span>KDPT</span><span>now</span></span><b>${title}</b><p>${body}</p></span>`;
+  el.dataset.sheet = sheet; el.hidden = false;
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  clearTimeout(showPush.t); showPush.t = setTimeout(hidePush, 6500);
+}
+function hidePush() { const el = $('push'); el.classList.remove('show'); }
 function toast(m) { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2200); }
 
 function startRest(sec) {
@@ -862,8 +1142,27 @@ document.addEventListener('click', e => {
   const d = t.dataset;
   if (d.scrim !== undefined && e.target !== t) return;
 
+  if (t.id === 'push') { hidePush(); if (S.view !== 'home') S.view = 'home'; S.sheet = t.dataset.sheet; return render(true); }
   if (d.go) return go(d.go);
   if (d.toast) return toast(d.toast);
+  if (d.onb) {
+    const o = S.onb;
+    if (d.onb === 'finish') { go('home'); setTimeout(() => showPush('November sessions are open', 'Your Tue & Sat slots are held until Friday. Tap to confirm.', 'book'), 1400); return; }
+    o.step = Math.max(0, Math.min(5, o.step + (d.onb === 'back' ? -1 : 1))); return render(false);
+  }
+  if (d.goal) { S.onb.goal = d.goal; return render(true); }
+  if (d.days) { S.onb.days = +d.days; return render(true); }
+  if (d.freq) { S.onb.freq = d.freq; return render(true); }
+  if (d.cday) { S.onb.day = d.cday; return render(true); }
+  if (d.notif) { S.notifs[d.notif] = !S.notifs[d.notif]; return render(true); }
+  if (d.like) { S.liked[d.like] = !S.liked[d.like]; return render(true); }
+  if (d.save) { S.saved[d.save] = !S.saved[d.save]; if (S.saved[d.save]) toast('Saved to your Fuel recipes'); return render(true); }
+  if (d.bk) { S.book.sel[+d.bk] = !S.book.sel[+d.bk]; return render(true); }
+  if (d.bookok !== undefined) { S.book.done = true; return render(true); }
+  if (d.autopay !== undefined) { S.autopay = !S.autopay; return render(true); }
+  if (d.payok !== undefined) { S.paid = true; return render(true); }
+  if (d.ci) { S.ci[d.ci] = +d.v; return render(true); }
+  if (d.cisend !== undefined) { const w = $('ciw'); if (w) S.ci.weight = w.value; S.ci.done = true; return render(true); }
   if (d.ptab) { S.progTab = +d.ptab; return render(true); }
   if (d.why !== undefined) { S.why = !S.why; return render(true); }
   if (d.dur) { S.duration = +d.dur; S.idx = 0; return render(true); }
@@ -880,7 +1179,7 @@ document.addEventListener('click', e => {
     if (S.idx < plan().plan.length - 1) { S.idx++; S.why = false; return render(false); }
     S.view = 'finish'; return render(false);
   }
-  if (d.sheet) { S.sheet = d.sheet; if (d.sheet === 'pain') S.pain = { area: null, sev: 3, act: null, sent: false }; return render(true); }
+  if (d.sheet) { if (S.view === 'notifs') S.read = true; S.sheet = d.sheet; if (d.sheet === 'pain') S.pain = { area: null, sev: 3, act: null, sent: false }; return render(true); }
   if (d.scrim !== undefined || d.close !== undefined) {
     S.sheet = S.sheet === 'pain' && S.pain.sent && S.pain.act === 'swap' ? 'swap' : null; return render(true);
   }
@@ -903,6 +1202,8 @@ document.addEventListener('input', e => {
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.sheet) { S.sheet = null; render(true); } });
 
 const h = (location.hash || '').slice(1);
-if (['home', 'train', 'workout', 'fuel', 'progress', 'chat'].includes(h)) S.view = h;
+if (['home', 'train', 'workout', 'fuel', 'progress', 'chat', 'community', 'notifs'].includes(h)) S.view = h;
+else S.view = 'onboard';
 render(false);
+if (S.view === 'home') setTimeout(() => showPush('November sessions are open', 'Your Tue & Sat slots are held until Friday. Tap to confirm.', 'book'), 2500);
 </script>

@@ -109,6 +109,27 @@ The app mixes three reference apps, in three layers:
 
 Momentum is a word, not a score out of 100, as the blueprint recommended.
 
+### Onboarding, community, notifications and payments (21 Oct)
+
+- **Onboarding** (the prototype opens on it; add `#home` to the link to skip):
+  welcome, goal, training days, check-in frequency (weekly, every 2 weeks,
+  monthly, plus a day), then notification choices. The frequency sets
+  Momentum's accuracy label: High, Good or Basic. Stored on
+  `client_details.check_in_frequency`.
+- **Community tab**: the weekly drop (a tip plus 3 high-protein meals,
+  each saveable to Fuel), announcements and past drops. Reactions only, no
+  client-to-client chat. You schedule it from the portal's Community page.
+- **Notifications**: the bell on Home opens an inbox with booking, session,
+  payment, weekly drop and check-in items, each with its action. A sample
+  push banner shows how they arrive on the phone. Clients choose which types
+  they get.
+- **Booking**: November's regular slots are pre-held, and the client confirms
+  or drops dates. The 24-hour change window is a placeholder until you
+  confirm your cancellation policy.
+- **Payments**: the reminder opens a Stripe-style payment sheet with an
+  optional monthly auto-pay. It uses the £120 Online Coaching price from the
+  sales site, because PT session prices aren't published there.
+
 ### Colour system (redesign, 21 Oct)
 
 Black and mint stay as the brand. Each area of the app also has its own

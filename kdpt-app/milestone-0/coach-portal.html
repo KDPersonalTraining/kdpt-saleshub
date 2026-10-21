@@ -340,7 +340,11 @@ const P = {
   send: '<path d="M5 12h13M13 6l6 6-6 6"/>',
   video: '<path d="m9 7.5 8 4.5-8 4.5z" fill="currentColor"/>',
   film: '<rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="12" cy="12" r="3"/>',
-  user: '<circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>'
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>',
+  community: '<circle cx="9" cy="8.5" r="3.2"/><path d="M3 19.5a6 6 0 0 1 12 0M16 5.5a3 3 0 0 1 0 6M18 13.5a5.5 5.5 0 0 1 3 6"/>',
+  card: '<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/>',
+  megaphone: '<path d="M4 10v4h3l7 4V6l-7 4zM17.5 9.5a3.5 3.5 0 0 1 0 5"/>',
+  bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5h4"/>'
 };
 const ic = (n, cls = 'ic', sw = 1.8) => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
 const tint = c => ({ mint: ['rgba(126,213,151,.14)', 'var(--mint)'], amber: ['rgba(255,180,94,.14)', 'var(--amber)'], violet: ['rgba(169,155,255,.14)', 'var(--violet)'],
@@ -360,6 +364,9 @@ const CLIENTS = [
   { id: 'jen', name: 'Jen Hughes', ini: 'JH', hue: 50, type: 'In-person', pkg: '8 PT / month (duo)', prog: 'Strength Block 2 · wk 1', adh: 93, last: 'Today', status: ['mint', 'On track'] },
   { id: 'ray', name: 'Ray Patel', ini: 'RP', hue: 180, type: 'Programme only', pkg: 'Personal programme', prog: 'Full Body 3x · wk 5', adh: 84, last: 'Yesterday', status: ['mint', 'On track'] }
 ];
+// Chosen by each client at onboarding.
+const CHECKIN = { sarah: 'Weekly · Sun', tom: 'Monthly', priya: 'Weekly · Mon', dave: 'Weekly · Sun', ellie: 'Every 2 weeks · Sun', mark: 'Monthly', jen: 'Monthly', ray: 'Every 2 weeks · Fri' };
+const PAY = { sarah: ['mint', 'Paid · Nov'], tom: ['grey', 'Due 1 Nov'], priya: ['mint', 'Paid · Nov'], dave: ['coral', 'Overdue 3 days'], ellie: ['grey', 'Due 1 Nov'], mark: ['mint', 'Paid · Nov'], jen: ['mint', 'Paid · Nov'], ray: ['grey', 'One-off · paid'] };
 const avatar = (c, extra = '') => `<span class="av" style="background:hsl(${c.hue} 30% 18%);color:hsl(${c.hue} 70% 72%);${extra}">${c.ini}</span>`;
 const byId = id => CLIENTS.find(c => c.id === id);
 
@@ -420,8 +427,9 @@ const S = {
   prog: clone(START), saved: clone(START), filter: 'All', q: '', libFilter: 'All',
   done: {}, approved: {}, editing: null, modal: null,
   nut: { kcal: 2100, protein: 140, water: 2.5, show: true, reacted: { 0: true }, fbSent: false },
-  rules: { prog: true, alert: true, release: true, remind: true, aiAnswer: true, aiDraft: true },
-  conv: 'priya', sent: []
+  rules: { payRemind: true, sessRemind: true, drop: true, prog: true, alert: true, release: true, remind: true, aiAnswer: true, aiDraft: true },
+  conv: 'priya', sent: [],
+  drop: { title: 'Plan your protein for the week', body: 'Batch-cook two protein sources on Sunday (chicken thighs and turkey mince work well). It turns most meals into a 10-minute job.', meals: [3, 0, 2], scheduled: false }
 };
 const dirty = () => JSON.stringify(S.prog) !== JSON.stringify(S.saved);
 const changedCount = () => Object.keys(S.prog).reduce((n, d) => n + (JSON.stringify(S.prog[d]) !== JSON.stringify(S.saved[d]) ? 1 : 0), 0);
@@ -434,6 +442,7 @@ const ALERTS = [
   { id: 'a2', c: 'tom', tag: ['amber', 'clock', 'Missed workouts'], why: 'No workout for 9 days. His usual gap is 2–3.' },
   { id: 'a3', c: 'priya', tag: ['amber', 'messages', 'Awaiting reply'], why: '“Can I train legs the day after my 10k?” · 26 h ago' },
   { id: 'a4', c: 'dave', tag: ['grey', 'fuel', 'Meals to review'], why: '6 meals since Thursday, none reviewed.' },
+  { id: 'a6', c: 'dave', tag: ['coral', 'card', 'Payment overdue'], why: '£120 due 18 Oct. Reminders sent 15 and 18 Oct.' },
   { id: 'a5', c: 'ellie', tag: ['violet', 'clip', 'Check-in'], why: 'Sleep 2/5 for the second week running.' }
 ];
 const APPROVALS = [
@@ -519,7 +528,7 @@ function vClient() {
   <div class="prof">
     ${avatar(c)}
     <div class="grow"><h1>${c.name}</h1>
-      <div class="meta"><span class="tag t-grey">${c.type}</span><span class="tag t-grey">${c.pkg}</span><span class="tag t-mint">${ic('train', 'sm')}${c.prog}</span></div></div>
+      <div class="meta"><span class="tag t-grey">${c.type}</span><span class="tag t-grey">${c.pkg}</span><span class="tag t-mint">${ic('train', 'sm')}${c.prog}</span><span class="tag t-violet">${ic('clip', 'sm')}${CHECKIN[c.id]}</span><span class="tag t-${PAY[c.id][0]}">${ic('card', 'sm')}${PAY[c.id][1]}</span></div></div>
     <div style="display:flex;gap:8px"><button class="btn ghost" data-go="messages">${ic('messages', 'sm')}Message</button><button class="btn line" data-go="schedule">${ic('schedule', 'sm')}Book</button></div>
   </div>
   ${c.id === 'sarah' ? `<div class="flag">${ic('pain')}<span><b>Left knee</b> · history of patellar pain. Keep squat depth comfortable; no deep lunges.</span></div>` : ''}
@@ -604,7 +613,8 @@ function tOverview() {
 function tCheckins() {
   const rows = [['Sun 19 Oct', 4, 4, 2, 5, 'Knee a bit tight on lunges'], ['Sun 12 Oct', 4, 3, 3, 5, 'Busy week at work'], ['Sun 5 Oct', 5, 4, 2, 4, ''], ['Sun 28 Sep', 3, 3, 4, 4, 'Bad sleep, new puppy']];
   const dots = (v, col) => `<span class="dots">${[1, 2, 3, 4, 5].map(k => `<i style="${k <= v ? `background:${col}` : ''}"></i>`).join('')}</span>`;
-  return `<div class="card" style="overflow-x:auto">
+  return `<div class="flag" style="background:rgba(169,155,255,.07);border-color:rgba(169,155,255,.25)">${ic('clip')}<span><b>${CHECKIN[S.client]} check-ins</b> · chosen at onboarding. More frequent check-ins make Momentum more accurate.</span></div>
+  <div class="card" style="overflow-x:auto">
     <div class="ci th"><span>Week</span><span>Energy</span><span>Sleep</span><span>Stress</span><span>Diet</span><span>Note</span></div>
     ${rows.map(r => `<div class="ci"><b style="font-weight:600">${r[0]}</b>${dots(r[1], 'var(--mint)')}${dots(r[2], 'var(--violet)')}${dots(r[3], 'var(--coral)')}${dots(r[4], 'var(--amber)')}<span style="color:var(--fg2)">${r[5] || '–'}</span></div>`).join('')}
   </div>`;
@@ -654,11 +664,39 @@ function vLibrary() {
     <span><b>${x.name}</b></span><span class="chips"><span class="tag" style="background:${bg};color:${fg}">${x.pat}</span><span class="tag t-grey">${x.kit}</span>${x.filmed ? '' : '<span class="tag t-amber">To film</span>'}</span></button>`; }).join('')}</div>`;
 }
 
+const RECIPES = [['pasta', 'Creamy Cajun Chicken Pasta', 45], ['potato-bowl', 'Big Mac Loaded Potato Bowl', 42], ['wrap', 'High-Protein Breakfast Wrap', 41], ['turkey-pasta', 'Turkey & Pasta Tomato Bowl', 40], ['breakfast', 'Eggs, Veg & Sourdough', 32]];
+function vCommunity() {
+  const d = S.drop;
+  return `<div class="head"><div><h1>Community</h1><p>One drop every Monday at 07:00: a tip and 3 high-protein meals. Every client gets a push.</p></div>
+    <button class="btn line" data-toast="Post an announcement now">${ic('megaphone', 'sm')}Announcement</button></div>
+  <div class="grid2">
+    <section class="card pad" style="display:grid;gap:16px;align-content:start">
+      <div class="sec" style="margin:0"><h2>Week 44 · Monday 26 October</h2>${d.scheduled ? `<span class="tag t-mint">${ic('check', 'sm')}Scheduled</span>` : `<span class="tag t-grey">Draft</span>`}</div>
+      <label style="display:grid;gap:6px"><span class="eyebrow">Tip of the week</span><input id="tipT" value="${d.title}" style="height:44px;border-radius:12px;background:var(--s1);border:1px solid var(--hair);padding:0 14px;font:700 15px var(--display)"></label>
+      <textarea class="fb" id="tipB" style="border-color:var(--hair);min-height:90px" aria-label="Tip text">${d.body}</textarea>
+      <div><div class="sec" style="margin-bottom:10px"><span class="eyebrow">3 high-protein meals</span><span class="muted">Tap a meal to swap it</span></div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">${d.meals.map((m, i) => { const r = RECIPES[m]; return `<button class="ph" data-meal="${i}" title="Swap meal"><img src="assets/${r[0]}.jpg" alt=""><span class="react" style="background:rgba(0,0,0,.55)">${ic('swap', 'sm')}</span><span class="cap"><b>${r[1]}</b><small style="color:var(--amber)">${r[2]}g protein</small></span></button>`; }).join('')}</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn mint" data-sched>${ic('check', 'sm')}${d.scheduled ? 'Update' : 'Schedule for Monday'}</button><button class="btn violet" data-tipai>${ic('spark', 'sm')}Draft tip with AI</button></div>
+    </section>
+    <section style="display:grid;gap:20px;align-content:start">
+      <div><div class="sec"><h2>Last week's drop</h2><span class="muted">Week 43</span></div>
+        <div class="statrow"><div class="card"><b class="num" style="color:var(--violet)">29/35</b><small>Opened</small></div><div class="card"><b class="num" style="color:var(--coral)">23</b><small>Reactions</small></div><div class="card"><b class="num" style="color:var(--amber)">41</b><small>Meals saved</small></div></div></div>
+      <div><div class="sec"><h2>Announcements</h2></div>
+        <div class="card">${[['flame', 'amber', 'November challenge: 10k steps', '12 clients joined'], ['megaphone', 'sky', 'Studio closed Monday 3 November', 'Posted Mon 19 Oct']].map(([i, c, t, m]) => `<div class="ev" style="padding:14px 18px">${tileHTML(i, c)}<span><b>${t}</b><small>${m}</small></span><span></span></div>`).join('')}</div></div>
+      <div><div class="sec"><h2>Past drops</h2></div>
+        <div class="card">${[['Week 43', 'Front-load your protein'], ['Week 42', 'Sleep: the free recovery tool'], ['Week 41', 'How to warm up in 5 minutes']].map(([w, t]) => `<div class="ev" style="padding:14px 18px">${tileHTML('community', 'violet')}<span><b>${t}</b><small>${w} · tip + 3 meals</small></span><span></span></div>`).join('')}</div></div>
+    </section>
+  </div>`;
+}
+
 function vAutomation() {
   const R = [['prog', 'arrowup', 'mint', 'Progression', 'Add one load jump when every working set hits the top of the range', 'Auto'],
     ['alert', 'pain', 'coral', 'Missed-workout alert', 'Flag a client when their gap is twice their usual', 'Auto'],
     ['release', 'calup', 'sky', 'Booking release', 'Open next month on the 20th at 18:00, regular slots first', 'Auto'],
-    ['remind', 'clip', 'violet', 'Check-in reminder', 'Sunday 09:00, again at 18:00 if not done', 'Auto'],
+    ['remind', 'clip', 'violet', 'Check-in reminder', 'On each client\'s chosen day and frequency, 09:00, again at 18:00 if not done', 'Auto'],
+    ['payRemind', 'card', 'amber', 'Payment reminders', '3 days before, on the day, then every 3 days until paid. Alert me after 3 days', 'Auto'],
+    ['sessRemind', 'bell', 'sky', 'Session reminders', 'The evening before, with the cancellation cut-off', 'Auto'],
+    ['drop', 'community', 'violet', 'Weekly drop', 'Monday 07:00 with a push to every client', 'Auto'],
     ['aiAnswer', 'messages', 'violet', 'Assistant answers', 'Questions about the client\'s own plan. Anything else goes to you', 'Auto'],
     ['aiDraft', 'spark', 'violet', 'Assistant drafts', 'Programme changes, nutrition feedback and replies', 'Needs approval']];
   return `<div class="head"><div><h1>Automation</h1><p>Your rules, applied the same way to every client.</p></div></div>
@@ -669,7 +707,7 @@ function vAutomation() {
 // ---------------------------------------------------------------------------
 // Render
 // ---------------------------------------------------------------------------
-const NAV = [['today', 'Today', 5, 'coral'], ['clients', 'Clients'], ['programmes', 'Programmes'], ['schedule', 'Schedule'], ['messages', 'Messages', 3, 'mint'], ['library', 'Library'], ['automation', 'Automation']];
+const NAV = [['today', 'Today', 6, 'coral'], ['clients', 'Clients'], ['programmes', 'Programmes'], ['schedule', 'Schedule'], ['messages', 'Messages', 3, 'mint'], ['community', 'Community'], ['library', 'Library'], ['automation', 'Automation']];
 const $ = id => document.getElementById(id);
 
 function render(keep) {
@@ -680,7 +718,7 @@ function render(keep) {
     <div class="me"><img src="assets/kd-mark.png" alt="" style="width:34px;height:34px;border-radius:50%;background:#000;object-fit:contain;padding:8px 5px;border:1px solid var(--hair)"><span><b>Kyle</b><small>Head coach</small></span></div>`;
   const v = S.view;
   $('main').innerHTML = `<div class="fade" style="display:grid;gap:24px">${v === 'today' ? vToday() : v === 'clients' ? vClients() : v === 'client' ? vClient() : v === 'programmes' ? vProgrammes()
-    : v === 'schedule' ? vSchedule() : v === 'messages' ? vMessages() : v === 'library' ? vLibrary() : vAutomation()}</div>`;
+    : v === 'schedule' ? vSchedule() : v === 'messages' ? vMessages() : v === 'library' ? vLibrary() : v === 'community' ? vCommunity() : vAutomation()}</div>`;
   if (!keep) $('main').firstElementChild.classList.add('fade'); else $('main').firstElementChild.classList.remove('fade');
   $('layer').innerHTML = S.modal ? modalHTML() : '';
   window.scrollTo(0, keep ? y : 0);
@@ -734,6 +772,9 @@ document.addEventListener('click', e => {
   if (d.react) { S.nut.reacted[d.react] = !S.nut.reacted[d.react]; return render(true); }
   if (d.sendfb !== undefined) { S.nut.fbSent = true; return render(true); }
   if (d.rule) { S.rules[d.rule] = !S.rules[d.rule]; return render(true); }
+  if (d.meal) { const m = S.drop.meals, i = +d.meal; let n = m[i]; do { n = (n + 1) % RECIPES.length; } while (m.includes(n)); m[i] = n; S.drop.scheduled = false; return render(true); }
+  if (d.sched !== undefined) { S.drop.title = $('tipT').value; S.drop.body = $('tipB').value; S.drop.scheduled = true; toast('Scheduled · Monday 07:00 to 35 clients'); return render(true); }
+  if (d.tipai !== undefined) { $('tipT').value = 'Walk after your biggest meal'; $('tipB').value = 'A 10-minute walk after dinner helps digestion, adds 1,000+ steps and counts towards the November challenge.'; return; }
   if (d.conv) { S.conv = d.conv; return render(true); }
   if (d.aidraft !== undefined) { $('reply').value = S.conv === 'priya' ? 'Good luck Sunday! Keep Monday easy: swap to the upper-body day and we\'ll do legs Wednesday.' : 'Thanks for letting me know. Let\'s go through it Saturday.'; return; }
   if (d.sendmsg !== undefined) { const v = $('reply').value.trim(); if (!v) return; S.sent.push([S.conv, v]); return render(true); }

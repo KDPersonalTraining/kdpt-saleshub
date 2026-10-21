@@ -111,6 +111,10 @@ create table locations (
   active        boolean not null default true
 );
 
+-- Chosen by the client at onboarding. More frequent check-ins make the
+-- Momentum score more accurate (shown to the client as High / Good / Basic).
+create type check_in_frequency as enum ('weekly', 'fortnightly', 'monthly');
+
 -- One row per client: the coaching relationship.
 create table client_details (
   client_id     uuid primary key references profiles (id) on delete cascade,
@@ -122,6 +126,9 @@ create table client_details (
   -- [HEALTH] shown as a flag on the profile header and given to every rule.
   restrictions  text,
   home_equipment text[] not null default '{}',
+  check_in_frequency check_in_frequency not null default 'weekly',
+  check_in_weekday smallint check (check_in_weekday between 1 and 7),  -- ISO; null for monthly
+  training_days_per_week smallint check (training_days_per_week between 1 and 7),
   started_on    date,
   stripe_customer_id text,
   -- Learned normal pattern for alerts, e.g. {"usual_sessions_per_week": 3, "travels": true}
@@ -629,6 +636,8 @@ create table notifications (
   id            uuid primary key default gen_random_uuid(),
   org_id        uuid not null references organisations (id),
   profile_id    uuid not null references profiles (id) on delete cascade,
+  -- 'booking_open', 'session_reminder', 'payment_due', 'payment_overdue',
+  -- 'weekly_drop', 'check_in_due', 'workout_reminder', 'message'
   kind          text not null,
   title         text not null,
   body          text,
@@ -643,10 +652,10 @@ create table posts (
   id            uuid primary key default gen_random_uuid(),
   org_id        uuid not null references organisations (id),
   author_id     uuid not null references profiles (id),
-  kind          text not null check (kind in ('announcement', 'tip', 'recipe', 'poll', 'challenge')),
+  kind          text not null check (kind in ('announcement', 'weekly_drop', 'tip', 'recipe', 'poll', 'challenge')),
   title         text,
   body          text not null,
-  payload       jsonb not null default '{}'::jsonb,   -- poll options, recipe id
+  payload       jsonb not null default '{}'::jsonb,   -- weekly_drop: {"tip": ..., "recipe_ids": [3 ids]}; poll options
   audience      coaching_type[],                      -- null = everyone
   publish_at    timestamptz not null default now(),
   created_at    timestamptz not null default now()
