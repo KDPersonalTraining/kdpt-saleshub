@@ -5,7 +5,9 @@ blueprint (15 Oct 2026). Nothing in this folder is part of the sales site build.
 
 | File | What it is |
 |---|---|
-| `prototype.html` | Clickable prototype of Client Home, Workout and Coach Today, with sample data. Open in a browser, or test on a phone. |
+| `prototype.html` | Client app prototype: Home, Train, the workout flow, Fuel, Progress and messages with Kyle. Sample data. |
+| `coach-portal.html` | Coach portal prototype: Today, Clients, a client profile with programme and nutrition editing, Programmes, Schedule, Messages, Library and Automation. |
+| `assets/` | Photos, recipe images and the KD monogram, cropped from the sales site's own images. |
 | `schema.sql` | Draft Postgres schema for Supabase: every table, enum and row-level security policy. |
 | `rls-test.sql` | Runs the schema against plain Postgres with Supabase stubs, then checks who can see what. |
 
@@ -92,8 +94,20 @@ double-booking is refused. All of them pass on Postgres 16.
 | Filming | Quiet day, Wednesday 28 October | Shot list and filming notes below |
 | Under-18 clients | None | Guardian consent removed. Onboarding refuses anyone under 18; add the flow back if you ever take younger clients |
 
-Still open: the assistant's name, and the final colour set (the prototype
-uses the sales site's colours).
+Still open: the assistant's name.
+
+### Colour system (redesign, 21 Oct)
+
+Black and mint stay as the brand. Each area of the app also has its own
+colour, so it never all blurs into black and green:
+
+| Colour | Used for |
+|---|---|
+| Mint `#7ED597` | Training, main buttons, progress |
+| Amber `#FFB45E` | Nutrition |
+| Violet `#A99BFF` | Check-ins and the assistant |
+| Sky `#6EC6FF` | PT sessions and bookings |
+| Coral `#FF6B5E` | Pain and anything needing attention |
 
 ### Launch roadmap
 
