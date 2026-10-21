@@ -130,6 +130,27 @@ Momentum is a word, not a score out of 100, as the blueprint recommended.
   optional monthly auto-pay. It uses the £120 Online Coaching price from the
   sales site, because PT session prices aren't published there.
 
+### Kyle and Smart Coach (21 Oct)
+
+Clients talk to two separate parties, and the app never mixes them in one
+thread:
+
+| | Kyle | Smart Coach (AI) |
+|---|---|---|
+| Look | KD monogram with a mint ring | Violet orb |
+| Where | Monogram button on Home, top right | Smart Coach button on Home, the "Need an answer now?" row in Kyle's chat, swap sheet |
+| Replies | Within a few hours, as chat bubbles | Instantly, as plain answers that show what they were based on |
+| Hands over | – | Pain, injury and plan changes go to Kyle and appear in his thread with a "handed over" note |
+
+In the portal, everything the AI writes is labelled "Smart Coach draft".
+
+### Visual style (21 Oct)
+
+Labels are plain text with a colour dot instead of pill-shaped tags. Related
+rows sit in grouped lists with hairline dividers, Apple style. Headline titles
+are uppercase and buttons are square-cornered, Gymshark style. The tab bar is
+flat.
+
 ### Colour system (redesign, 21 Oct)
 
 Black and mint stay as the brand. Each area of the app also has its own

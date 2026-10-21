@@ -347,13 +347,7 @@ svg { display: block; }
 .msg { max-width: 80%; padding: 12px 16px; border-radius: 22px; font-size: 15px; }
 .msg.them { background: var(--s2); border-bottom-left-radius: 8px; justify-self: start; }
 .msg.me { background: var(--mint); color: var(--mint-ink); border-bottom-right-radius: 8px; justify-self: end; }
-.msg.ai { background: rgba(169,155,255,.12); border: 1px solid rgba(169,155,255,.25); border-bottom-left-radius: 8px; justify-self: start; }
-.msg.ai .who { color: var(--violet); font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
-.msg.ai .who svg { width: 13px; height: 13px; }
 .stamp { text-align: center; font-size: 11px; color: var(--fg3); margin: 8px 0 2px; }
-.suggests { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
-.suggests button { flex: none; height: 38px; padding: 0 14px; border-radius: 19px; background: var(--s2); border: 1px solid var(--hair); font-size: 13px; color: var(--fg2); display: inline-flex; gap: 6px; align-items: center; }
-.suggests svg { width: 14px; height: 14px; color: var(--violet); }
 .composer { display: flex; gap: 8px; align-items: center; }
 .composer label { flex: 1; min-width: 0; height: 50px; border-radius: 25px; background: var(--s2); display: flex; align-items: center; padding: 0 18px; }
 .composer input { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: 15px var(--body); }
@@ -509,6 +503,89 @@ svg { display: block; }
 
 .toast { position: absolute; left: 50%; top: 60px; transform: translateX(-50%); z-index: 60; background: var(--fg); color: #000; padding: 10px 18px; border-radius: 22px; font-size: 14px; font-weight: 500; white-space: nowrap; max-width: calc(100% - 40px); overflow: hidden; text-overflow: ellipsis; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
 @media (prefers-reduced-motion: no-preference) { .fade { animation: fade .28s ease; } @keyframes fade { from { opacity: 0; transform: translateY(6px); } } }
+
+/* ---- Refined system ----------------------------------------------------
+   Labels are plain text with a colour dot, never pills. Related rows sit in
+   one grouped list with hairline dividers. Calls to action are square-cornered
+   and uppercase. The tab bar is flat. Kyle is mint with his monogram;
+   Smart Coach is violet with the orb. */
+.card { border-radius: 16px; }
+.chip { height: auto; padding: 0; border-radius: 0; background: none !important; gap: 6px; font-size: 13px; color: var(--fg2); }
+.chip.glass { backdrop-filter: none; -webkit-backdrop-filter: none; border: 0; color: #fff; text-shadow: 0 1px 10px rgba(0,0,0,.7); }
+.ex-meta { gap: 18px; }
+.label-dot { display: inline-flex; align-items: center; gap: 7px; font: 700 11px var(--display); letter-spacing: .14em; text-transform: uppercase; }
+.label-dot::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.hero { border-radius: 20px; }
+.hero .tag { background: none; font: 700 11px var(--display); letter-spacing: .18em; text-transform: uppercase; }
+.hero h2, .ex-title h1, .finish h1 { text-transform: uppercase; letter-spacing: -.01em; }
+.play { border-radius: 16px; }
+.pill-btn { border-radius: 14px; height: 54px; font: 800 13px var(--display); letter-spacing: .1em; text-transform: uppercase; }
+.pill-btn svg { width: 18px; height: 18px; }
+.timebtn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 10px; background: rgba(0,0,0,.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: #fff; font: 700 13px var(--display); }
+.timebtn svg { width: 15px; height: 15px; }
+.tabbar { left: 0; right: 0; bottom: 0; height: calc(64px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); border-radius: 0; border: 0; border-top: 1px solid var(--hair); background: rgba(8,9,9,.86); }
+.tabbar .pip { top: 9px; }
+.group { background: var(--s2); border-radius: 16px; overflow: hidden; display: grid; --inset: 68px; }
+.group > * { background: none !important; border-radius: 0 !important; border: 0 !important; position: relative; }
+.group > * + *::before { content: ""; position: absolute; top: 0; left: var(--inset); right: 0; height: 1px; background: var(--hair); }
+.st { background: none !important; padding: 0 !important; display: inline-flex; align-items: center; gap: 6px; }
+.st::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.cta { background: none !important; padding: 0; height: auto; margin-top: 8px; font: 700 12px var(--display); letter-spacing: .1em; text-transform: uppercase; gap: 4px; }
+.cta::after { content: "→"; font-family: var(--body); }
+.react { background: none; padding: 0 12px 0 0; height: 32px; }
+.react.on { background: none; color: var(--violet); }
+.drop { border-radius: 20px; }
+.summary { gap: 18px; }
+.seg { border-radius: 10px; padding: 3px; } .seg button { border-radius: 8px; height: 34px; }
+.area { border-radius: 12px; } .daychips button { border-radius: 10px; } .dt { border-radius: 12px; }
+.opt, .fopt, .goal { border-radius: 16px; } .tg { border-radius: 14px; }
+.toast { border-radius: 12px; }
+.sheet { border-radius: 26px 26px 0 0; }
+.msg { border-radius: 20px; }
+.mini, .stat { border-radius: 16px; }
+
+/* Kyle and Smart Coach */
+.kd-av { width: 38px; height: 38px; border-radius: 50%; background: #050606; border: 1.5px solid var(--mint); display: grid; place-items: center; position: relative; flex: none; }
+.kd-av img { width: 24px; height: auto; }
+.kd-av .dot { position: absolute; bottom: -1px; right: -1px; top: auto; width: 10px; height: 10px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 2px var(--bg); }
+.orb { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle at 32% 28%, #e3dcff 0%, #a99bff 38%, #4b3cc4 100%); display: grid; place-items: center; color: #fff; box-shadow: 0 0 22px rgba(169,155,255,.35); flex: none; }
+.orb svg { width: 20px; height: 20px; }
+.orb.sm { width: 24px; height: 24px; box-shadow: none; } .orb.sm svg { width: 12px; height: 12px; }
+.orb.lg { width: 92px; height: 92px; } .orb.lg svg { width: 38px; height: 38px; }
+@media (prefers-reduced-motion: no-preference) { .orb.lg { animation: breathe 4s ease-in-out infinite; } @keyframes breathe { 50% { box-shadow: 0 0 52px rgba(169,155,255,.6); transform: scale(1.04); } } }
+.convo-head { display: flex; align-items: center; gap: 12px; padding-top: 6px; }
+.convo-head .t { flex: 1; min-width: 0; }
+.convo-head b { font: 700 18px var(--display); display: block; }
+.convo-head small { font-size: 12px; }
+.switchto { display: inline-flex; align-items: center; gap: 8px; font: 700 12px var(--display); letter-spacing: .08em; text-transform: uppercase; }
+.ai-empty { display: grid; justify-items: center; text-align: center; gap: 12px; padding: 24px 0 6px; }
+.ai-empty h2 { font-size: 24px; font-weight: 800; }
+.ai-empty p { margin: 0; color: var(--fg2); max-width: 28ch; }
+.prompt { display: flex; gap: 12px; align-items: center; padding: 15px 16px; text-align: left; width: 100%; font-size: 15px; }
+.prompt svg { width: 18px; height: 18px; color: var(--violet); flex: none; }
+.prompt span { flex: 1; }
+.ai-thread { display: grid; gap: 18px; }
+.q { justify-self: end; max-width: 82%; background: var(--s3); padding: 10px 14px; border-radius: 18px 18px 4px 18px; font-size: 15px; }
+.a { display: grid; gap: 10px; }
+.a .who { display: flex; gap: 8px; align-items: center; font: 700 11px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--violet); }
+.a p { margin: 0; font-size: 16px; line-height: 1.6; }
+.a .src { font-size: 12px; color: var(--fg3); display: flex; gap: 6px; align-items: center; }
+.a .src svg { width: 13px; height: 13px; }
+.a .go { justify-self: start; font: 700 12px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--violet); }
+.a .go::after { content: " →"; font-family: var(--body); }
+.handoff { display: flex; gap: 12px; align-items: center; padding: 14px; border-radius: 14px; background: rgba(126,213,151,.07); border: 1px solid rgba(126,213,151,.22); text-align: left; width: 100%; }
+.handoff .t { flex: 1; }
+.handoff b { display: block; font-weight: 600; font-size: 15px; }
+.handoff small { color: var(--fg2); font-size: 13px; }
+.disclaimer { font-size: 11px; color: var(--fg3); text-align: center; margin: 0; }
+.composer.ai .round { background: var(--violet); color: #120d2b; }
+.sysnote { display: flex; gap: 8px; justify-content: center; align-items: center; font-size: 12px; color: var(--fg3); margin: 10px 0 2px; }
+.sets { gap: 0; background: var(--s1); border-radius: 16px; overflow: hidden; }
+.setrow { border: 0; border-radius: 0; background: none; padding: 12px 12px 12px 14px; }
+.setrow + .setrow { box-shadow: inset 0 1px 0 var(--hair); }
+.setrow.done { background: rgba(126,213,151,.06); }
+.target { border-radius: 16px; }
+.quote { border-left: 2px solid var(--violet); padding: 2px 0 2px 10px; margin-bottom: 6px; font-size: 13px; opacity: .85; }
 </style>
 
 <div class="device" id="device">
@@ -644,7 +721,7 @@ function fitToTime(minutes) {
 const S = { onb: { step: 0, goal: 'strength', days: 3, freq: 'weekly', day: 'Sun' },
   notifs: { workout: true, booking: true, session: true, payment: true, drop: true, checkin: true },
   book: { sel: null, done: false }, paid: false, autopay: true, ci: { sleep: 4, energy: 4, stress: 2, diet: 4, weight: '67.8', done: false },
-  liked: {}, saved: {}, read: false,
+  liked: {}, saved: {}, read: false, ai: [], handed: false,
   view: 'home', duration: 60, idx: 0, logs: {}, swaps: {}, why: false, sheet: null,
   pain: { area: null, sev: 3, act: null, sent: false }, rest: null, progTab: 0, chat: [] };
 const plan = () => fitToTime(S.duration);
@@ -666,7 +743,7 @@ const vHome = () => {
   return `<div class="page fade">
     <div class="topbar"><img src="assets/kd-mark.png" alt="KD Personal Training"><div class="right">
       <button class="ib" data-go="notifs" aria-label="Notifications">${ic('bell')}${S.read ? '' : '<span class="badge">3</span>'}</button>
-      <button class="ib" data-go="chat" aria-label="Messages from Kyle">${ic('chat')}<span class="dot"></span></button>
+      <button class="kd-av" data-go="chat" aria-label="Messages from Kyle"><img src="assets/kd-mark.png" alt=""><span class="dot"></span></button>
       <button class="avatar" data-toast="Profile and settings">SM</button></div></div>
     <div class="greet"><div class="eyebrow">Wednesday 21 October</div><h1>Morning, Sarah</h1></div>
 
@@ -678,7 +755,7 @@ const vHome = () => {
 
     <button class="hero" data-go="workout" aria-label="Start ${WORKOUT.name}">
       <img src="assets/gym.jpg" alt="">
-      <span class="chip glass tag" style="color:#fff">${ic('flame')} Today</span>
+      <span class="tag label-dot" style="color:var(--mint)">Today</span>
       <div class="in">
         <div><h2>${WORKOUT.name}</h2>
           <div class="meta num"><span>${ic('clock')} ${p.minutes} min</span><span>${ic('layers')} ${p.plan.length} exercises</span></div></div>
@@ -693,7 +770,7 @@ const vHome = () => {
       <button class="act" data-go="fuel"><i style="background:rgba(255,180,94,.14);color:var(--amber)">${ic('camera')}</i>Log meal</button>
       <button class="act" data-sheet="book"><i style="background:rgba(110,198,255,.14);color:var(--sky)">${ic('cal')}</i>Book</button>
       <button class="act" data-sheet="checkin"><i style="background:rgba(169,155,255,.14);color:var(--violet)">${ic('clip')}</i>Check-in</button>
-      <button class="act" data-go="chat"><i style="background:var(--s2);color:var(--fg)">${ic('spark')}</i>Ask</button>
+      <button class="act" data-go="coachai"><i style="background:none"><span class="orb" style="width:60px;height:60px;box-shadow:none">${ic('spark')}</span></i>Smart Coach</button>
     </div>
 
     <button class="card session" data-toast="Session details and directions">
@@ -715,11 +792,11 @@ const vTrain = () => {
   return `<div class="page fade">
     <div class="greet" style="padding-top:6px"><div class="eyebrow">Your programme</div><h1>Strength Block 1</h1></div>
     <div class="card block">
-      <div class="sec-head"><span class="d" style="font-weight:700">Week 6 <span style="color:var(--fg3)">of 8</span></span><span class="chip" style="background:rgba(126,213,151,.14);color:var(--mint);height:26px">${ic('bolt')} On track</span></div>
+      <div class="sec-head"><span class="d" style="font-weight:700">Week 6 <span style="color:var(--fg3)">of 8</span></span><span class="chip" style="color:var(--mint)">${ic('bolt')} On track</span></div>
       <div class="segs">${Array.from({ length: 8 }, (_, i) => `<i class="${i < 5 ? 'on' : i === 5 ? 'cur' : ''}"></i>`).join('')}</div>
     </div>
-    <div style="display:grid;gap:10px">${rows.map(([n, m, c]) => `
-      <button class="card wrow ${c}" ${c === 'today' ? 'data-go="workout"' : `data-toast="${n}"`}>
+    <div class="group" style="--inset:82px">${rows.map(([n, m, c]) => `
+      <button class="wrow ${c}" ${c === 'today' ? 'data-go="workout"' : `data-toast="${n}"`}>
         <span class="tile">${c === 'done' ? ic('check') : c === 'today' ? ic('play') : ic('train')}</span>
         <span class="t"><b>${n}</b><span>${m}</span></span>
         <span class="chev">${ic('right')}</span>
@@ -744,7 +821,7 @@ const vWorkout = () => {
       <div class="ctl">
         <button class="round glass" data-go="home" aria-label="Leave workout" style="color:#fff">${ic('back')}</button>
         <div class="dots">${pl.map((_, i) => `<i class="${i === S.idx ? 'on' : i < S.idx ? 'done' : ''}"></i>`).join('')}</div>
-        <button class="chip glass num" data-sheet="time" aria-label="Change session length">${ic('clock')} ${minutes}′</button>
+        <button class="timebtn num" data-sheet="time" aria-label="Change session length">${ic('clock')} ${minutes} MIN</button>
       </div>
       <span class="chip glass playing">${ic('play')} Kyle's demo</span>
     </div>
@@ -870,25 +947,54 @@ const vProgress = () => {
   </div>`;
 };
 
-const vChat = () => `<div class="page fade" style="padding-bottom:200px">
-  <div class="chat-head"><button class="round" style="background:var(--s2);width:40px;height:40px" data-go="home" aria-label="Back">${ic('back')}</button><img src="assets/kd-mark.png" alt=""><span><b>Kyle</b><small>Usually replies within a few hours</small></span></div>
+const vChat = () => `<div class="page fade" style="padding-bottom:110px">
+  <div class="convo-head"><button class="round" style="background:var(--s2);width:40px;height:40px" data-go="home" aria-label="Back">${ic('back')}</button>
+    <span class="kd-av" style="width:44px;height:44px"><img src="assets/kd-mark.png" alt=""><span class="dot"></span></span>
+    <span class="t"><b>Kyle</b><small style="color:var(--mint)">Your coach · replies within a few hours</small></span></div>
+  <button class="handoff" style="background:rgba(169,155,255,.07);border-color:rgba(169,155,255,.22)" data-go="coachai"><span class="orb sm">${ic('spark')}</span><span class="t"><b>Need an answer now?</b><small>Smart Coach answers instantly from your plan</small></span><span class="chev">${ic('right')}</span></button>
   <div class="msgs">
     <div class="stamp">Yesterday</div>
     <div class="msg them">Great session Monday. Leg press goes up today 💪</div>
     <div class="msg me">Thanks! Knee felt a bit tight on the lunges though</div>
     <div class="msg them">Noted. Keep the lunges short-stride and tell me if it's worse.</div>
-    ${S.chat.map(m => m).join('')}
+    ${S.handed ? `<div class="sysnote"><span class="orb sm">${ic('spark')}</span>Smart Coach passed this to Kyle</div>
+    <div class="msg me"><div class="quote">My knee aches during lunges</div>Asked Smart Coach. Can you take a look?</div>` : ''}
+    ${S.chat.map(m => `<div class="msg me">${m}</div>`).join('')}
   </div>
 </div>`;
 
 function chatDock() {
-  return `<div class="dock" style="display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))">
-    <div class="suggests">
-      <button data-ask="swap">${ic('spark')} Can I swap leg press?</button>
-      <button data-ask="protein">${ic('spark')} Protein ideas</button>
-      <button data-ask="knee">${ic('spark')} My knee hurts</button>
-    </div>
-    <div class="composer"><label><input id="msg" placeholder="Message Kyle" aria-label="Message"></label><button class="round" data-toast="Sent" aria-label="Send">${ic('send')}</button></div>
+  return `<div class="dock" style="display:grid;grid-template-columns:minmax(0,1fr);gap:10px">
+    <div class="composer"><label><input id="msg" placeholder="Message Kyle" aria-label="Message Kyle"></label><button class="round" data-sendkyle aria-label="Send">${ic('send')}</button></div>
+  </div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Smart Coach (AI). Answers from the client's own plan; hands anything about
+// pain, injury or changes to the plan to Kyle.
+// ---------------------------------------------------------------------------
+const AI = {
+  swap: { q: 'Can I swap leg press today?', a: 'Yes. Kyle has approved two swaps for Leg Press: Hack Squat (start around 70 kg) or Goblet Squat with a 24 kg dumbbell. Keep the same sets and reps.', src: 'Lower Body A · Kyle\'s approved swaps', go: ['Start workout', 'workout'] },
+  eat: { q: 'What should I eat before a 7am session?', a: 'Keep it light: a banana and a coffee, or a yoghurt 45 minutes before. Have your 30 g protein breakfast afterwards.', src: 'Your nutrition targets · PT Saturday 9:00', go: ['See this week\'s meals', 'community'] },
+  knee: { q: 'My knee aches during lunges', handoff: true, a: 'Pain is something Kyle needs to look at, so I\'ve passed this to him instead of guessing. Until he replies, skip the lunges and use "I have pain" in your workout if it flares up.', src: 'Pain is always handed to Kyle' }
+};
+const vAI = () => {
+  const asked = S.ai, rest = Object.keys(AI).filter(k => !asked.includes(k));
+  return `<div class="page fade" style="padding-bottom:150px">
+  <div class="convo-head"><button class="round" style="background:var(--s2);width:40px;height:40px" data-go="home" aria-label="Back">${ic('back')}</button>
+    <span class="orb">${ic('spark')}</span><span class="t"><b>Smart Coach</b><small style="color:var(--violet)">AI · answers instantly</small></span>
+    <button class="switchto" style="color:var(--mint)" data-go="chat"><span class="kd-av" style="width:30px;height:30px;border-width:1px"><img src="assets/kd-mark.png" alt="" style="width:18px"></span>Kyle</button></div>
+  ${asked.length ? '' : `<div class="ai-empty"><span class="orb lg">${ic('spark')}</span><h2>Ask me anything</h2><p>Training, food or recovery. I answer from your plan, and pass anything I shouldn't answer to Kyle.</p></div>`}
+  <div class="ai-thread">${asked.map(k => { const x = AI[k]; return `<div class="q">${x.q}</div>
+    <div class="a"><span class="who"><span class="orb sm">${ic('spark')}</span>Smart Coach</span><p>${x.a}</p><span class="src">${ic('clip')}${x.src}</span>
+    ${x.handoff ? `<button class="handoff" data-go="chat"><span class="kd-av"><img src="assets/kd-mark.png" alt=""></span><span class="t"><b>Passed to Kyle</b><small>He'll reply in your messages</small></span><span class="chev">${ic('right')}</span></button>` : `<button class="go" data-go="${x.go[1]}">${x.go[0]}</button>`}</div>`; }).join('')}</div>
+  ${rest.length ? `<div><div class="eyebrow" style="margin-bottom:10px">${asked.length ? 'Ask something else' : 'Try asking'}</div><div class="group" style="--inset:46px">${rest.map(k => `<button class="prompt" data-ai="${k}">${ic('spark')}<span>${AI[k].q}</span>${ic('right').replace('class="ic"', 'class="ic" style="color:var(--fg3)"')}</button>`).join('')}</div></div>` : ''}
+</div>`;
+};
+function aiDock() {
+  return `<div class="dock" style="display:grid;grid-template-columns:minmax(0,1fr);gap:8px">
+    <div class="composer ai"><label><input id="aimsg" placeholder="Ask Smart Coach" aria-label="Ask Smart Coach"></label><button class="round" data-toast="Smart Coach is thinking…" aria-label="Ask">${ic('send')}</button></div>
+    <p class="disclaimer">Smart Coach is AI, not a medical professional. Kyle can see every conversation.</p>
   </div>`;
 }
 
@@ -944,7 +1050,7 @@ function vNotifs() {
     ${n.cta && !(n.id === 'pay' && S.paid) && !(n.id === 'book' && S.book.done) ? `<button class="cta" style="background:${n.bg};color:${n.c}" ${n.cta[1].startsWith('go:') ? `data-go="${n.cta[1].slice(3)}"` : `data-sheet="${n.cta[1]}"`}>${n.cta[0]}</button>` : ''}</span></div>`;
   return `<div class="page fade">
     <div class="ntop"><button class="ib" data-go="home" aria-label="Back">${ic('back')}</button><h1>Notifications</h1><button class="ib" data-sheet="notifset" aria-label="Notification settings">${ic('gear')}</button></div>
-    ${['Today', 'Earlier'].map(g => `<div class="ngroup"><div class="eyebrow">${g}</div>${NOTES.filter(n => n.group === g).map(row).join('')}</div>`).join('')}
+    ${['Today', 'Earlier'].map(g => `<div class="ngroup"><div class="eyebrow">${g}</div><div class="group">${NOTES.filter(n => n.group === g).map(row).join('')}</div></div>`).join('')}
   </div>`;
 }
 
@@ -959,14 +1065,14 @@ function vCommunity() {
       <p>Aim for 30g at breakfast. It keeps you full until lunch and makes your daily target far easier to hit.</p>
       <div class="reacts">${r('t1', 'heart', 14)}${r('t2', 'flame', 9)}</div>
     </article>
-    <div class="sec-head"><h2>3 high-protein meals</h2><span class="chip" style="background:rgba(255,180,94,.14);color:var(--amber);height:26px">New</span></div>
-    <div class="meal3">${MEALS3.map(([img, n, p, k], i) => `<div class="m3"><img src="assets/${img}.jpg" alt=""><span><b>${n}</b><span class="macros num"><span>${p}</span><span>${k}</span></span></span>
+    <div class="sec-head"><h2>3 high-protein meals</h2><span class="label-dot" style="color:var(--amber)">New</span></div>
+    <div class="meal3 group" style="--inset:116px">${MEALS3.map(([img, n, p, k], i) => `<div class="m3"><img src="assets/${img}.jpg" alt=""><span><b>${n}</b><span class="macros num"><span>${p}</span><span>${k}</span></span></span>
       <button class="add ${S.saved[i] ? 'on' : ''}" data-save="${i}" aria-label="Save to Fuel">${ic(S.saved[i] ? 'check' : 'plus')}</button></div>`).join('')}</div>
     <div class="sec-head"><h2>From Kyle</h2></div>
-    <button class="ann" data-toast="You're in. Steps count from Sunday"><span class="li" style="background:rgba(255,180,94,.14);color:var(--amber)">${ic('flame')}</span><span class="t"><b>November challenge: 10k steps a day</b><small>12 clients in · tap to join</small></span><span class="chev">${ic('right')}</span></button>
-    <div class="ann"><span class="li" style="background:rgba(110,198,255,.14);color:var(--sky)">${ic('megaphone')}</span><span class="t"><b>Studio closed Monday 3 November</b><small>Online sessions as normal</small></span></div>
+    <div class="group" style="--inset:74px"><button class="ann" data-toast="You're in. Steps count from Sunday"><span class="li" style="background:rgba(255,180,94,.14);color:var(--amber)">${ic('flame')}</span><span class="t"><b>November challenge: 10k steps a day</b><small>12 clients in · tap to join</small></span><span class="chev">${ic('right')}</span></button>
+    <div class="ann"><span class="li" style="background:rgba(110,198,255,.14);color:var(--sky)">${ic('megaphone')}</span><span class="t"><b>Studio closed Monday 3 November</b><small>Online sessions as normal</small></span></div></div>
     <div class="sec-head"><h2>Past drops</h2></div>
-    ${[['Week 42', 'Sleep: the free recovery tool'], ['Week 41', 'How to warm up in 5 minutes']].map(([w, t]) => `<button class="ann" data-toast="${t}"><span class="li" style="background:var(--s3);color:var(--fg2)">${ic('community')}</span><span class="t"><b>${t}</b><small>${w} · tip + 3 meals</small></span><span class="chev">${ic('right')}</span></button>`).join('')}
+    <div class="group" style="--inset:74px">${[['Week 42', 'Sleep: the free recovery tool'], ['Week 41', 'How to warm up in 5 minutes']].map(([w, t]) => `<button class="ann" data-toast="${t}"><span class="li" style="background:var(--s3);color:var(--fg2)">${ic('community')}</span><span class="t"><b>${t}</b><small>${w} · tip + 3 meals</small></span><span class="chev">${ic('right')}</span></button>`).join('')}</div>
   </div>`;
 }
 
@@ -1012,7 +1118,7 @@ function sheetHTML() {
         <div><b class="word" style="font:800 30px var(--display);color:var(--mint);letter-spacing:-.02em">Strong</b><div class="eyebrow" style="margin-top:2px">Week 6 of 8</div></div>
         <p>Your best week of the block so far. One more workout and a protein snack closes the rings.</p>
       </div>
-      <div class="contrib">${MOM.map(m => `<div class="crow">
+      <div class="contrib group">${MOM.map(m => `<div class="crow">
         <span class="li" style="background:${m.tr};color:${m.col}">${ic(m.icon)}</span>
         <span><b>${m.k}</b><small>${m.val}</small><div class="bar"><i style="width:${Math.round(m.pct * 100)}%;background:${m.col}"></i></div></span>
         <span class="st" style="background:${m.st[1]};color:${m.st[2]}">${m.st[0]}</span></div>`).join('')}</div>
@@ -1033,7 +1139,7 @@ function sheetHTML() {
   if (S.sheet === 'swap') {
     return ex.alts.length ? `<div><h3>Swap ${ex.name}</h3><div class="sub">Kyle's approved options · today only</div></div>
       <div class="opts">${ex.alts.map(([n, w, k]) => `<button class="opt" data-alt="${n}"><span class="tile">${ic(k)}</span><span><b>${n}</b><span>${w}</span></span></button>`).join('')}</div>`
-      : `<div><h3>No swaps yet</h3><div class="sub">Skip this one or ask Kyle.</div></div><button class="pill-btn dark" data-go="chat">Ask Kyle</button>`;
+      : `<div><h3>No swaps yet</h3><div class="sub">Skip this one or ask Kyle.</div></div><button class="pill-btn dark" data-go="coachai">Ask Smart Coach</button>`;
   }
   if (S.sheet === 'pain') {
     const p = S.pain;
@@ -1079,9 +1185,9 @@ function render(keepScroll) {
   const sc = $('screen'), top = sc.scrollTop;
   const v = S.view;
   $('view').innerHTML = v === 'home' ? vHome() : v === 'train' ? vTrain() : v === 'workout' ? vWorkout() : v === 'finish' ? vFinish()
-    : v === 'fuel' ? vFuel() : v === 'progress' ? vProgress() : v === 'onboard' ? vOnboard() : v === 'notifs' ? vNotifs() : v === 'community' ? vCommunity() : vChat();
+    : v === 'fuel' ? vFuel() : v === 'progress' ? vProgress() : v === 'onboard' ? vOnboard() : v === 'notifs' ? vNotifs() : v === 'community' ? vCommunity() : v === 'coachai' ? vAI() : vChat();
   const tb = $('tabbar');
-  tb.hidden = v === 'workout' || v === 'finish' || v === 'onboard';
+  tb.hidden = ['workout', 'finish', 'onboard', 'chat', 'coachai'].includes(v);
   const active = v === 'workout' ? 'train' : v === 'chat' || v === 'notifs' ? 'home' : v;
   tb.innerHTML = TABS.map(([k, l]) => `<button class="${k === active ? 'on' : ''}" data-go="${k}" aria-label="${l}">${ic(k)}<span>${l}</span>${k === 'community' ? '<i class="pip" style="background:var(--violet)"></i>' : ''}</button>`).join('');
 
@@ -1094,6 +1200,7 @@ function render(keepScroll) {
       <button class="pill-btn mint" data-next>${last ? 'Finish' : 'Next'} ${ic('right')}</button></div>`;
   }
   if (v === 'chat') layer += chatDock();
+  if (v === 'coachai') layer += aiDock();
   if (v === 'onboard' && S.onb.step >= 1 && S.onb.step <= 4) layer += `<div class="dock"><button class="pill-btn white" data-onb="next">${S.onb.step === 4 ? 'Allow notifications' : 'Continue'}</button></div>`;
   if (S.rest) layer += restHTML();
   if (S.sheet) layer += `<div class="scrim" data-scrim><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${sheetHTML()}</div></div>`;
@@ -1130,11 +1237,6 @@ function startRest(sec) {
 }
 function stopRest() { if (S.rest) clearInterval(S.rest.timer); S.rest = null; }
 
-const ANSWERS = {
-  swap: ['Can I swap leg press?', 'Yes. Kyle has approved Hack Squat or Goblet Squat for today. Tap ⇄ during the exercise to swap.'],
-  protein: ['Protein ideas', 'Greek yoghurt with berries (20g) or a chicken wrap from your recipes (41g) would close today\'s gap.'],
-  knee: ['My knee hurts', 'I\'ve passed this to Kyle. Use "I have pain" in your workout so he sees exactly where and how bad.']
-};
 
 document.addEventListener('click', e => {
   const t = e.target.closest('button, [data-scrim]');
@@ -1187,10 +1289,14 @@ document.addEventListener('click', e => {
   if (d.area) { S.pain.area = d.area; return render(true); }
   if (d.act) { S.pain.act = d.act; return render(true); }
   if (d.sendpain !== undefined) { S.pain.sent = true; return render(true); }
-  if (d.ask) {
-    const [q, a] = ANSWERS[d.ask];
-    S.chat.push(`<div class="msg me">${q}</div>`, `<div class="msg ai"><div class="who">${ic('spark')} Assistant</div>${a}</div>`);
+  if (d.ai) {
+    if (!S.ai.includes(d.ai)) S.ai.push(d.ai);
+    if (AI[d.ai].handoff) S.handed = true;
     render(true); const sc = $('screen'); sc.scrollTop = sc.scrollHeight; return;
+  }
+  if (d.sendkyle !== undefined) {
+    const v = $('msg').value.trim(); if (!v) return;
+    S.chat.push(v.replace(/</g, '&lt;')); render(true); const sc = $('screen'); sc.scrollTop = sc.scrollHeight; return;
   }
 });
 document.addEventListener('input', e => {
@@ -1202,7 +1308,7 @@ document.addEventListener('input', e => {
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.sheet) { S.sheet = null; render(true); } });
 
 const h = (location.hash || '').slice(1);
-if (['home', 'train', 'workout', 'fuel', 'progress', 'chat', 'community', 'notifs'].includes(h)) S.view = h;
+if (['home', 'train', 'workout', 'fuel', 'progress', 'chat', 'community', 'notifs', 'coachai'].includes(h)) S.view = h;
 else S.view = 'onboard';
 render(false);
 if (S.view === 'home') setTimeout(() => showPush('November sessions are open', 'Your Tue & Sat slots are held until Friday. Tap to confirm.', 'book'), 2500);
