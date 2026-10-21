@@ -41,7 +41,7 @@ create table profiles (
   role          user_role not null default 'client',
   full_name     text not null,
   preferred_name text,
-  date_of_birth date,                -- drives the under-18 flow
+  date_of_birth date,                -- onboarding refuses under-18s (adult clients only at launch)
   phone         text,
   text_scale    numeric(3,2) not null default 1.00 check (text_scale between 0.9 and 1.6),
   avatar_path   text,
@@ -66,7 +66,7 @@ create table invites (
 
 create type consent_kind as enum (
   'terms', 'privacy_notice', 'health_data', 'progress_photos',
-  'ai_assistant', 'marketing_email', 'guardian'
+  'ai_assistant', 'marketing_email'
 );
 
 -- Append-only. Withdrawal is a new row with granted = false.
@@ -77,9 +77,6 @@ create table consents (
   kind          consent_kind not null,
   granted       boolean not null,
   document_version text not null,          -- e.g. 'privacy-2026-11'
-  -- For under-18s: the parent or guardian who gave consent.
-  guardian_name text,
-  guardian_email text,
   recorded_at   timestamptz not null default now()
 );
 create index on consents (client_id, kind, recorded_at desc);
@@ -423,7 +420,7 @@ create table body_measurements (
 );
 create index on body_measurements (client_id, metric, measured_on desc);
 
--- [HEALTH] Off by default for under-18s (enforced in the app, checked by consent).
+-- [HEALTH] Only stored when the client has granted progress_photos consent.
 create table progress_photos (
   id            uuid primary key default gen_random_uuid(),
   org_id        uuid not null references organisations (id),
