@@ -96,6 +96,19 @@ double-booking is refused. All of them pass on Postgres 16.
 
 Still open: the assistant's name.
 
+### Showing data without overwhelming (21 Oct)
+
+The app mixes three reference apps, in three layers:
+
+1. **Glance (Oura).** Home shows one Momentum word ("Strong") and one
+   sentence. No numbers to decode.
+2. **Tap (Whoop).** Tapping Momentum shows what built it: training, fuel and
+   recovery, each with a status, plus this week's trend.
+3. **Explore (Apple Fitness).** Progress holds the charts, rings and awards
+   for clients who want the detail.
+
+Momentum is a word, not a score out of 100, as the blueprint recommended.
+
 ### Colour system (redesign, 21 Oct)
 
 Black and mint stay as the brand. Each area of the app also has its own

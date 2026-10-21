@@ -100,7 +100,38 @@ svg { display: block; }
 .play { width: 64px; height: 64px; border-radius: 50%; background: var(--mint); color: var(--mint-ink); display: grid; place-items: center; flex: none; box-shadow: 0 10px 30px rgba(126,213,151,.35); }
 .play svg { width: 26px; height: 26px; margin-left: 3px; }
 
-.week-card { padding: 20px; display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 20px; align-items: center; }
+.mom { padding: 18px 18px 18px 16px; display: flex; gap: 16px; align-items: center; width: 100%; text-align: left; }
+.mom .t { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.mom .word { font: 800 26px var(--display); letter-spacing: -.02em; color: var(--mint); line-height: 1.1; }
+.mom .t small { color: var(--fg2); font-size: 14px; }
+.mom-big { display: grid; justify-items: center; gap: 10px; text-align: center; }
+.mom-big .wrap { position: relative; width: 184px; height: 184px; }
+.mom-big .wrap .c { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; }
+.mom-big .wrap b { font: 800 30px var(--display); color: var(--mint); letter-spacing: -.02em; }
+.mom-big .wrap small { color: var(--fg3); font-size: 12px; }
+.mom-big p { margin: 0; color: var(--fg2); font-size: 15px; max-width: 30ch; }
+.contrib { display: grid; gap: 10px; }
+.crow { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 18px; background: var(--s2); }
+.crow .li { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; }
+.crow .li svg { width: 20px; height: 20px; }
+.crow b { font: 700 15px var(--display); display: block; }
+.crow small { color: var(--fg3); font-size: 12px; }
+.crow .bar { margin-top: 6px; }
+.crow .st { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 10px; white-space: nowrap; }
+.trend { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; height: 110px; padding: 0 4px; }
+.trend div { display: grid; justify-items: center; gap: 6px; height: 100%; align-content: end; font-size: 11px; color: var(--fg3); }
+.trend i { width: 100%; max-width: 30px; border-radius: 8px; background: var(--s3); }
+.trend .on i { background: var(--mint); }
+.trend .now i { background: repeating-linear-gradient(135deg, rgba(126,213,151,.5) 0 4px, rgba(126,213,151,.25) 4px 8px); }
+.trend .now { color: var(--fg); }
+.foot { color: var(--fg3); font-size: 12px; text-align: center; }
+.awards { display: flex; gap: 14px; overflow-x: auto; scrollbar-width: none; }
+.award { flex: none; width: 92px; display: grid; justify-items: center; gap: 8px; text-align: center; font-size: 12px; color: var(--fg2); }
+.award .medal { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; position: relative; }
+.award .medal::before { content: ""; position: absolute; inset: 0; border-radius: 50%; padding: 2px; background: conic-gradient(from 200deg, var(--c), transparent 60%, var(--c)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+.award .medal svg { width: 28px; height: 28px; }
+.award.locked { opacity: .35; }
+.headline { color: var(--fg2); font-size: 15px; margin-top: 6px; }
 .legend { display: grid; gap: 14px; }
 .legend div { display: grid; grid-template-columns: 30px minmax(0,1fr); gap: 10px; align-items: center; }
 .legend .li { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; }
@@ -390,6 +421,18 @@ function ring(size, stroke, pct, color, track = 'var(--s3)') {
       stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - Math.min(pct, 1))}" transform="rotate(-90 ${size / 2} ${size / 2})"/>`;
 }
 
+// Apple-style triple ring: training (outer), fuel, check-in (inner).
+const MOM = [
+  { k: 'Training', icon: 'train', col: 'var(--mint)', tr: 'rgba(126,213,151,.15)', pct: 2 / 3, val: '2 of 3 workouts', st: ['On track', 'rgba(126,213,151,.14)', 'var(--mint)'] },
+  { k: 'Fuel', icon: 'fuel', col: 'var(--amber)', tr: 'rgba(255,180,94,.15)', pct: 5 / 7, val: '5 of 7 protein days', st: ['Nearly', 'rgba(255,180,94,.14)', 'var(--amber)'] },
+  { k: 'Recovery', icon: 'clip', col: 'var(--violet)', tr: 'rgba(169,155,255,.15)', pct: 0.8, val: 'Sleep 4/5 · energy 4/5', st: ['Good', 'rgba(169,155,255,.14)', 'var(--violet)'] }
+];
+function rings(size, stroke) {
+  const gap = stroke + 3;
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-hidden="true" style="flex:none">${MOM.map((m, i) =>
+    `<g transform="translate(${i * gap} ${i * gap})">${ring(size - 2 * i * gap, stroke, m.pct, m.col, m.tr)}</g>`).join('')}</svg>`;
+}
+
 // ---------------------------------------------------------------------------
 // Sample data (invented for testing)
 // ---------------------------------------------------------------------------
@@ -466,6 +509,12 @@ const vHome = () => {
     <div class="topbar"><img src="assets/kd-mark.png" alt="KD Personal Training"><button class="avatar" data-toast="Profile and settings">SM</button></div>
     <div class="greet"><div class="eyebrow">Wednesday 21 October</div><h1>Morning, Sarah</h1></div>
 
+    <button class="card mom" data-sheet="momentum" aria-label="Momentum: strong. See the breakdown">
+      ${rings(96, 9)}
+      <span class="t"><span class="eyebrow">Momentum</span><span class="word">Strong</span><small>2 of 3 workouts done. Protein nearly there.</small></span>
+      <span class="chev">${ic('right')}</span>
+    </button>
+
     <button class="hero" data-go="workout" aria-label="Start ${WORKOUT.name}">
       <img src="assets/gym.jpg" alt="">
       <span class="chip glass tag" style="color:#fff">${ic('flame')} Today</span>
@@ -478,18 +527,6 @@ const vHome = () => {
 
     <div class="strip">${days.map(([d, c, t]) => `<div class="${c}"><i>${t}</i>${d}</div>`).join('')}</div>
 
-    <div class="card week-card">
-      <svg viewBox="0 0 132 132" width="132" height="132" aria-label="This week's rings">
-        ${ring(132, 13, 2 / 3, 'var(--mint)', 'rgba(126,213,151,.15)')}
-        <g transform="translate(17 17)">${ring(98, 13, 0.71, 'var(--amber)', 'rgba(255,180,94,.15)')}</g>
-        <g transform="translate(34 34)">${ring(64, 13, 0.5, 'var(--violet)', 'rgba(169,155,255,.15)')}</g>
-      </svg>
-      <div class="legend">
-        <div><span class="li" style="background:rgba(126,213,151,.15);color:var(--mint)">${ic('train')}</span><span><b class="num">2/3</b><small>Workouts</small></span></div>
-        <div><span class="li" style="background:rgba(255,180,94,.15);color:var(--amber)">${ic('fuel')}</span><span><b class="num">5/7</b><small>Protein days</small></span></div>
-        <div><span class="li" style="background:rgba(169,155,255,.15);color:var(--violet)">${ic('clip')}</span><span><b>Sun</b><small>Check-in due</small></span></div>
-      </div>
-    </div>
 
     <div class="actions">
       <button class="act" data-go="fuel"><i style="background:rgba(255,180,94,.14);color:var(--amber)">${ic('camera')}</i>Log meal</button>
@@ -664,7 +701,9 @@ const vProgress = () => {
       <div class="card mini">${ic('check').replace('class="ic"', 'class="i" style="color:var(--mint)"')}<b class="num">92%</b><small>Sessions completed</small></div>
     </div>`;
   return `<div class="page fade">
-    <div class="greet" style="padding-top:6px"><div class="eyebrow">Since 1 September</div><h1>Progress</h1></div>
+    <div class="greet" style="padding-top:6px"><div class="eyebrow">Since 1 September</div><h1>Progress</h1><p class="headline">Stronger on every main lift, and 3.4 kg lighter.</p></div>
+    <div class="awards">${[['trophy', 'var(--mint)', 'First 130 kg', ''], ['flame', 'var(--amber)', '6-week streak', ''], ['progress', 'var(--violet)', '−3 kg', ''], ['check', 'var(--sky)', '25 PT sessions', ''], ['bolt', 'var(--fg2)', '10 week streak', 'locked']].map(([i, c, l, x]) =>
+      `<button class="award ${x}" style="--c:${c}" data-toast="${x ? 'Keep going: 4 more weeks' : l}"><span class="medal" style="color:${c};background:radial-gradient(circle at 30% 25%, rgba(255,255,255,.08), var(--s2))">${ic(i)}</span>${l}</button>`).join('')}</div>
     <div class="seg" role="tablist">${tabs.map((t, i) => `<button role="tab" class="${S.progTab === i ? 'on' : ''}" data-ptab="${i}">${t}</button>`).join('')}</div>
     ${body}
   </div>`;
@@ -696,6 +735,22 @@ function chatDock() {
 // Sheets
 // ---------------------------------------------------------------------------
 function sheetHTML() {
+  if (S.sheet === 'momentum') {
+    const week = [['M', 70, 'on'], ['T', 78, 'on'], ['W', 84, 'now'], ['T', 0, ''], ['F', 0, ''], ['S', 0, ''], ['S', 0, '']];
+    return `<div class="mom-big">
+        <div class="wrap">${rings(184, 14)}<div class="c">${ic('bolt').replace('class="ic"', 'width="30" height="30" style="color:var(--fg)"')}</div></div>
+        <div><b class="word" style="font:800 30px var(--display);color:var(--mint);letter-spacing:-.02em">Strong</b><div class="eyebrow" style="margin-top:2px">Week 6 of 8</div></div>
+        <p>Your best week of the block so far. One more workout and a protein snack closes the rings.</p>
+      </div>
+      <div class="contrib">${MOM.map(m => `<div class="crow">
+        <span class="li" style="background:${m.tr};color:${m.col}">${ic(m.icon)}</span>
+        <span><b>${m.k}</b><small>${m.val}</small><div class="bar"><i style="width:${Math.round(m.pct * 100)}%;background:${m.col}"></i></div></span>
+        <span class="st" style="background:${m.st[1]};color:${m.st[2]}">${m.st[0]}</span></div>`).join('')}</div>
+      <div><div class="eyebrow" style="margin-bottom:10px">This week</div>
+        <div class="trend">${week.map(([d, v, c]) => `<div class="${c}"><i style="height:${Math.round((v || 8) * 0.85)}px"></i>${d}</div>`).join('')}</div></div>
+      <p class="foot">Built from your workouts, meal logs and Sunday check-in. Kyle sees the same view.</p>
+      <button class="pill-btn white" data-go="progress">See all progress</button>`;
+  }
   const { plan: pl } = plan(); const ex = pl[S.idx]?.ex;
   if (S.sheet === 'time') {
     const full = fitToTime(999).plan, fit = fitToTime(S.duration).plan;
