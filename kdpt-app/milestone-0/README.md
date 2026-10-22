@@ -144,6 +144,28 @@ thread:
 
 In the portal, everything the AI writes is labelled "KAI draft".
 
+### Check-ins and icons (22 Oct)
+
+The check-in is four short steps, with feelings first and the scale last:
+
+1. **How are you feeling?** Five moods (Rough to Great) and a free-text note.
+2. **How was your week?** Sleep, energy, stress, food and motivation on 1–5
+   scales, plus any aches.
+3. **Wins beyond the scale.** Opens with "Would you rather lose 5 lbs, or look
+   like you've lost 5 lbs?", followed by tickable wins (clothes fit better,
+   more energy, lifting heavier and so on). A progress photo and
+   measurements or weight are optional and hidden by default.
+4. **How can your coach help?** Support options (more accountability, help
+   with food, a call, encouragement) and a note.
+
+Answers go into `check_ins.answers`, so the questions can change without a
+migration. The portal's Check-ins tab shows mood, the client's own words,
+wins, scores and what support they asked for.
+
+Icons are a custom solid two-tone set. In lists and actions each icon sits on
+a solid colour tile, like Apple's Settings app. KAI's mark is the open arc of
+the D in the KD logo.
+
 ### Visual style (21 Oct)
 
 Labels are plain text with a colour dot instead of pill-shaped tags. Related
