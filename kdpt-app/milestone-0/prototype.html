@@ -585,34 +585,34 @@ svg { display: block; }
 .setrow + .setrow { box-shadow: inset 0 1px 0 var(--hair); }
 .setrow.done { background: rgba(126,213,151,.06); }
 .target { border-radius: 16px; }
-/* Icon tiles: solid colour with a soft top light, dark glyph. The tile takes
-   its colour from the element's own `color`, so markup only sets one value. */
-.li, .gi, .act i:not(:has(.orb)), .wintile, .suptile {
-  background: linear-gradient(160deg, rgba(255,255,255,.34) 0%, rgba(255,255,255,0) 58%), currentColor !important;
-  box-shadow: inset 0 0 0 .5px rgba(255,255,255,.18), 0 6px 18px -8px currentColor;
-}
-.li svg, .gi svg, .act i:not(:has(.orb)) svg, .wintile svg, .suptile svg { color: #0b0c0b; }
-.li { border-radius: 12px !important; }
-.li svg { width: 22px !important; height: 22px !important; }
-.act i { width: 64px; height: 64px; border-radius: 19px; }
+/* Icons follow the tab bar: bare white glyphs, no tiles. Colour appears only
+   where it means something: mint for training and selection, coral for pain,
+   violet for KAI, and the ring colours on Momentum. */
+.li, .gi, .act i:not(:has(.orb)), .wintile, .suptile { background: none !important; box-shadow: none !important; color: var(--fg) !important; }
+.li svg, .gi svg, .act i svg, .wintile svg, .suptile svg { color: inherit; }
+.li { width: 28px !important; height: 28px !important; border-radius: 0 !important; }
+.li svg { width: 24px !important; height: 24px !important; }
+.crow .li { color: var(--k) !important; }
+.actions { background: var(--s2); border-radius: 16px; padding: 18px 6px 14px; }
+.act { color: var(--fg2); font-weight: 500; font-size: 12px; gap: 10px; }
+.act i { width: 40px; height: 34px; border-radius: 0; }
 .act i svg { width: 30px; height: 30px; }
-.act { color: var(--fg); font-weight: 500; }
-.gi { width: 48px !important; height: 48px !important; border-radius: 14px !important; }
-.gi svg { width: 26px; height: 26px; }
+.act .orb { width: 34px !important; height: 34px !important; }
+.gi { width: auto !important; height: auto !important; border-radius: 0 !important; justify-self: start; }
+.gi svg { width: 32px; height: 32px; }
+.goal[aria-pressed="true"] .gi { color: var(--mint) !important; }
+.group { --inset: 56px !important; }
 .tabbar svg { width: 25px; height: 25px; }
 .tabbar button { color: #5d635f; }
 .wrow .tile svg { width: 26px; height: 26px; }
+.wrow .tile { background: var(--s3); color: var(--fg); border-radius: 14px; }
+.wrow.today .tile { background: var(--mint); color: var(--mint-ink); }
+.wrow.done .tile { background: none; color: var(--mint); }
 .dock .round svg { width: 24px; height: 24px; }
 .orb svg { width: 60%; height: 60%; }
 
 /* Check-in */
 .ci-wrap { min-height: 100%; }
-.moods { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-.mood { display: grid; justify-items: center; gap: 8px; font-size: 13px; color: var(--fg3); }
-.mood i { width: 100%; aspect-ratio: 1; max-width: 100%; border-radius: 50%; background: var(--c); opacity: .5; transition: transform .25s, opacity .25s; position: relative; }
-.mood i::after { content: ""; position: absolute; inset: 22%; border-radius: 50%; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.7), rgba(255,255,255,0) 60%); }
-.mood[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
-.mood[aria-pressed="true"] i { opacity: 1; transform: scale(1.08); box-shadow: 0 8px 26px -6px var(--c); }
 .words { width: 100%; min-height: 96px; background: var(--s2); border: 0; border-radius: 16px; padding: 14px 16px; color: var(--fg); font: 15px/1.5 var(--body); resize: none; }
 .words:focus { outline: 2px solid var(--mint); }
 .quotecard { display: grid; gap: 10px; padding: 18px; border-radius: 16px; background: linear-gradient(150deg, rgba(126,213,151,.16), rgba(126,213,151,.03)); }
@@ -645,6 +645,32 @@ svg { display: block; }
 .ci-done .orbok svg { width: 44px; height: 44px; }
 .ci-sum { width: 100%; text-align: left; }
 .ci-sum .optrow b { font-size: 14px; }
+.mind { width: 210px; height: 210px; margin: 4px auto 0; border-radius: 46% 54% 52% 48% / 50% 46% 54% 50%;
+  background: radial-gradient(circle at 34% 28%, rgba(255,255,255,.6), rgba(255,255,255,0) 42%), radial-gradient(circle at 50% 58%, var(--c) 0%, color-mix(in srgb, var(--c) 35%, #000) 85%);
+  box-shadow: 0 40px 90px -36px var(--c); transition: background .5s, box-shadow .5s; }
+@media (prefers-reduced-motion: no-preference) { .mind { animation: morph 9s ease-in-out infinite; }
+  @keyframes morph { 33% { border-radius: 55% 45% 43% 57% / 46% 55% 45% 54%; transform: rotate(8deg) scale(1.02); } 66% { border-radius: 47% 53% 58% 42% / 55% 47% 53% 45%; transform: rotate(-6deg); } } }
+.mindword { display: block; text-align: center; font: 800 36px var(--display); text-transform: uppercase; letter-spacing: -.01em; margin-top: 22px; }
+.moodrange { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--coral), var(--amber), #c9cfcb, var(--sky), var(--mint)); margin-top: 6px; }
+.moodrange::-webkit-slider-thumb { -webkit-appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
+.moodrange::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 0; }
+.moodlabels { display: flex; justify-content: space-between; font-size: 12px; color: var(--fg3); margin-top: 10px; }
+.scale5 { gap: 4px; }
+.scale5 button { height: 38px; border-radius: 5px; background: var(--s2); font-size: 13px; color: var(--fg3); transition: background .2s; }
+.scale5 button:first-child { border-radius: 12px 5px 5px 12px; }
+.scale5 button:last-child { border-radius: 5px 12px 12px 5px; }
+.scale5 button.lit { background: color-mix(in srgb, var(--c) 55%, transparent); color: #0b0c0b; }
+.scale5 button[aria-pressed="true"] { background: var(--c); color: #0b0c0b; }
+.cimetric .lab b svg { width: 22px; height: 22px; }
+.wins { gap: 10px; }
+.win { flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px; min-height: 104px; border-radius: 16px; font-size: 14px; position: relative; }
+.win .wintile { width: auto; height: auto; }
+.win .wintile svg { width: 28px; height: 28px; }
+.win[aria-pressed="true"] { border-color: var(--mint); background: rgba(126,213,151,.07); }
+.win[aria-pressed="true"] .wintile { color: var(--mint) !important; }
+.win[aria-pressed="true"]::after { content: ""; position: absolute; top: 14px; right: 14px; width: 20px; height: 20px; border-radius: 50%; background: var(--mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5' fill='none' stroke='%2303140a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 13px no-repeat; }
+.sup .suptile { width: 28px; height: 28px; }
+.sup .suptile svg { width: 24px; height: 24px; }
 .quote { border-left: 2px solid var(--violet); padding: 2px 0 2px 10px; margin-bottom: 6px; font-size: 13px; opacity: .85; }
 </style>
 
@@ -809,7 +835,7 @@ const S = { onb: { step: 0, goal: 'strength', days: 3, freq: 'weekly', day: 'Sun
   view: 'home', duration: 60, idx: 0, logs: {}, swaps: {}, why: false, sheet: null,
   pain: { area: null, sev: 3, act: null, sent: false }, rest: null, progTab: 0, chat: [] };
 const plan = () => fitToTime(S.duration);
-const newCheckin = () => ({ step: 1, mood: null, words: '', sleep: 4, energy: 3, stress: 3, food: 4, motivation: 4, aches: 'None',
+const newCheckin = () => ({ step: 1, mood: 3, words: '', sleep: 4, energy: 3, stress: 3, food: 4, motivation: 4, aches: 'None',
   wins: {}, photo: false, measure: false, waist: '', weight: '', support: {}, note: '' });
 function setsFor(ex, n) {
   const cur = S.logs[ex.id] || [];
@@ -1183,7 +1209,7 @@ function vCheckin() {
     return `<div class="ci-done fade"><span class="orbok">${ic('check')}</span>
       <div><h1>Check-in sent</h1><p class="lead" style="margin-top:8px">Your coach will reply before your next session. Momentum updated.</p></div>
       <div class="group ci-sum" style="--inset:62px">
-        <div class="optrow"><span class="li" style="color:${(MOODS.find(m => m[0] === c.mood) || MOODS[3])[1]}">${ic('sun')}</span><span class="t"><b>Feeling ${(c.mood || 'Good').toLowerCase()}</b><small>${c.words ? c.words.slice(0, 60) : 'No note this week'}</small></span></div>
+        <div class="optrow"><span class="li" style="color:${MOODS[c.mood][1]}!important">${ic('sun')}</span><span class="t"><b>Feeling ${MOODS[c.mood][0].toLowerCase()}</b><small>${c.words ? c.words.slice(0, 60) : 'No note this week'}</small></span></div>
         <div class="optrow"><span class="li" style="color:var(--mint)">${ic('trophy')}</span><span class="t"><b>${wins.length} win${wins.length === 1 ? '' : 's'} beyond the scale</b><small>${wins.map(w => w[1]).join(' · ') || 'Next week'}</small></span></div>
         <div class="optrow"><span class="li" style="color:var(--sky)">${ic('chat')}</span><span class="t"><b>Support</b><small>${sup.map(x => x[1]).join(' · ') || 'Nothing extra'}</small></span></div>
       </div>
@@ -1192,12 +1218,13 @@ function vCheckin() {
   const titles = ['', 'How are you feeling?', 'How was your week?', 'Wins beyond the scale', 'How can your coach help?'];
   let body = '';
   if (c.step === 1) body = `
-    <div class="moods">${MOODS.map(([m, col]) => `<button class="mood" style="--c:${col}" aria-pressed="${c.mood === m}" data-mood="${m}"><i></i>${m}</button>`).join('')}</div>
+    <div><div class="mind" id="mind" style="--c:${MOODS[c.mood][1]}"></div><b class="mindword" id="mindword">${MOODS[c.mood][0]}</b></div>
+    <div><input type="range" class="moodrange" id="moodr" min="0" max="4" step="1" value="${c.mood}" aria-label="How you're feeling"><div class="moodlabels">${MOODS.map(m => `<span>${m[0]}</span>`).join('')}</div></div>
     <div><div class="eyebrow" style="margin-bottom:10px">In your own words</div>
       <textarea class="words" id="ciwords" placeholder="What's been going on? Work, family, how training felt…">${c.words}</textarea></div>`;
   if (c.step === 2) body = `
-    ${WEEK.map(([k, l, icon, col, lo, hi]) => `<div class="cimetric"><div class="lab"><b style="display:flex;align-items:center;gap:10px"><span class="li" style="color:${col};width:30px;height:30px;display:inline-grid;place-items:center;border-radius:9px!important">${ic(icon)}</span>${l}</b><small>${lo} → ${hi}</small></div>
-      <div class="scale5">${[1, 2, 3, 4, 5].map(v => `<button class="num" style="--c:${col}" aria-pressed="${c[k] === v}" data-cim="${k}" data-v="${v}">${v}</button>`).join('')}</div></div>`).join('')}
+    ${WEEK.map(([k, l, icon, col, lo, hi]) => `<div class="cimetric"><div class="lab"><b style="display:flex;align-items:center;gap:10px">${ic(icon)}${l}</b><small>${lo} → ${hi}</small></div>
+      <div class="scale5">${[1, 2, 3, 4, 5].map(v => `<button class="num ${v < c[k] ? 'lit' : ''}" style="--c:${col}" aria-pressed="${c[k] === v}" data-cim="${k}" data-v="${v}">${v}</button>`).join('')}</div></div>`).join('')}
     <div><div class="eyebrow" style="margin-bottom:10px">Any aches or niggles?</div><div class="daychips">${['None', 'Knee', 'Back', 'Shoulder', 'Hip', 'Other'].map(a => `<button aria-pressed="${c.aches === a}" data-ache="${a}">${a}</button>`).join('')}</div></div>`;
   if (c.step === 3) body = `
     <div class="quotecard"><p>Would you rather lose 5 lbs, or look like you've lost 5 lbs?</p><small><img src="assets/kd-mark.png" alt="">It's not about the number on the scales</small></div>
@@ -1252,7 +1279,7 @@ function sheetHTML() {
         <p>Your best week of the block so far. One more workout and a protein snack closes the rings.</p>
       </div>
       <div class="contrib group">${MOM.map(m => `<div class="crow">
-        <span class="li" style="background:${m.tr};color:${m.col}">${ic(m.icon)}</span>
+        <span class="li" style="--k:${m.col}">${ic(m.icon)}</span>
         <span><b>${m.k}</b><small>${m.val}</small><div class="bar"><i style="width:${Math.round(m.pct * 100)}%;background:${m.col}"></i></div></span>
         <span class="st" style="background:${m.st[1]};color:${m.st[2]}">${m.st[0]}</span></div>`).join('')}</div>
       <div><div class="eyebrow" style="margin-bottom:10px">This week</div>
@@ -1407,7 +1434,6 @@ document.addEventListener('click', e => {
     if (d.ci === 'close') return go('home');
     S.ci.step = Math.max(1, Math.min(5, S.ci.step + (d.ci === 'back' ? -1 : 1))); return render(false);
   }
-  if (d.mood) { saveCheckinText(); S.ci.mood = d.mood; return render(true); }
   if (d.cim) { S.ci[d.cim] = +d.v; return render(true); }
   if (d.ache) { S.ci.aches = d.ache; return render(true); }
   if (d.win) { S.ci.wins[d.win] = !S.ci.wins[d.win]; return render(true); }
@@ -1450,6 +1476,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('input', e => {
   const i = e.target;
+  if (i.id === 'moodr') { const m = MOODS[+i.value]; S.ci.mood = +i.value; $('mind').style.setProperty('--c', m[1]); $('mindword').textContent = m[0]; return; }
   if (i.id === 'sev') { S.pain.sev = +i.value; $('sevnum').textContent = i.value; return; }
   if (!i.dataset.set) return;
   const ex = plan().plan[S.idx].ex; S.logs[ex.id][+i.dataset.set][i.dataset.k] = i.value;

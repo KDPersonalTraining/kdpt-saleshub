@@ -162,9 +162,12 @@ Answers go into `check_ins.answers`, so the questions can change without a
 migration. The portal's Check-ins tab shows mood, the client's own words,
 wins, scores and what support they asked for.
 
-Icons are a custom solid two-tone set. In lists and actions each icon sits on
-a solid colour tile, like Apple's Settings app. KAI's mark is the open arc of
-the D in the KD logo.
+Icons are a custom solid two-tone set, shown as plain white glyphs the
+way the tab bar shows them. Colour appears only where it means something:
+mint for training and selection, coral for pain, violet for KAI, and the ring
+colours on Momentum. KAI's mark is the open arc of the D in the KD logo. Mood
+in the check-in is a single colour shape with a slider, similar to Apple
+Health's State of Mind, and the 1–5 scores are fill-up meters.
 
 ### Visual style (21 Oct)
 
