@@ -294,7 +294,7 @@ textarea.fb { width: 100%; min-height: 120px; resize: vertical; background: var(
 /* ---- Refined system ----------------------------------------------------
    Status labels are plain coloured text with a dot, not pills. Filters are
    underlined text tabs. Corners are tighter and buttons squarer.
-   Smart Coach (AI) is always violet with the orb; Kyle is mint. */
+   KAI (AI) is always violet with the orb; Kyle is mint. */
 .card { border-radius: 12px; }
 .tag { background: none !important; padding: 0; height: auto; border-radius: 0; gap: 6px; font-weight: 500; }
 .tag:not(:has(svg))::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
@@ -471,7 +471,7 @@ const changedCount = () => Object.keys(S.prog).reduce((n, d) => n + (JSON.string
 const ALERTS = [
   { id: 'a1', c: 'sarah', tag: ['coral', 'pain', 'Pain · knee 4/10'], why: 'During leg press this morning. Swapped to box squat and finished.' },
   { id: 'a2', c: 'tom', tag: ['amber', 'clock', 'Missed workouts'], why: 'No workout for 9 days. His usual gap is 2–3.' },
-  { id: 'a3', c: 'priya', tag: ['amber', 'messages', 'Awaiting reply'], why: 'Handed over by Smart Coach: “Can I train legs the day after my 10k?” · 26 h ago' },
+  { id: 'a3', c: 'priya', tag: ['amber', 'messages', 'Awaiting reply'], why: 'Handed over by KAI: “Can I train legs the day after my 10k?” · 26 h ago' },
   { id: 'a4', c: 'dave', tag: ['grey', 'fuel', 'Meals to review'], why: '6 meals since Thursday, none reviewed.' },
   { id: 'a6', c: 'dave', tag: ['coral', 'card', 'Payment overdue'], why: '£120 due 18 Oct. Reminders sent 15 and 18 Oct.' },
   { id: 'a5', c: 'ellie', tag: ['violet', 'clip', 'Check-in'], why: 'Sleep 2/5 for the second week running.' }
@@ -498,13 +498,13 @@ function vToday() {
           <div class="acts">${S.done[a.id] ? `<span class="tag t-mint">${ic('check', 'sm')}${S.done[a.id]}</span>` : `
             <button class="iconbtn" title="Open client" aria-label="Open ${c.name}" data-client="${c.id}">${ic('open')}</button>
             <button class="iconbtn" title="Reply" aria-label="Reply" data-done="${a.id}" data-l="Replied">${ic('reply')}</button>
-            <button class="iconbtn" title="Smart Coach draft" aria-label="Smart Coach draft" data-done="${a.id}" data-l="Drafting" style="color:var(--violet)">${ic('spark')}</button>
+            <button class="iconbtn" title="KAI draft" aria-label="KAI draft" data-done="${a.id}" data-l="Drafting" style="color:var(--violet)">${ic('spark')}</button>
             <button class="iconbtn" title="Snooze" aria-label="Snooze" data-done="${a.id}" data-l="Snoozed">${ic('snooze')}</button>`}</div>
         </div>`; }).join('')}</div>
     </section>
     <section style="display:grid;gap:20px;align-content:start">
       <div>
-        <div class="sec"><h2><span class="orb">${ic('spark')}</span> Smart Coach drafts</h2><span class="muted">Nothing changes until you approve</span></div>
+        <div class="sec"><h2><span class="orb">${ic('spark')}</span> KAI drafts</h2><span class="muted">Nothing changes until you approve</span></div>
         <div class="card">${APPROVALS.map(p => { const c = byId(p.c); const [bg, fg] = tint(p.kind[0]); return `
           <div class="appr">
             <div class="top"><span style="display:flex;gap:10px;align-items:center">${avatar(c, 'width:30px;height:30px;font-size:11px')}<b>${c.name.split(' ')[0]}</b></span><span class="tag" style="background:${bg};color:${fg}">${p.kind[1]}</span></div>
@@ -575,7 +575,7 @@ function tTraining() {
   <div class="toolbar">
     <div class="days">${Object.keys(S.prog).map(d => `<button class="day ${S.day === d ? 'on' : ''}" data-day="${d}">${d}</button>`).join('')}</div>
     <div style="display:flex;gap:8px;align-items:center;color:var(--fg2)">${ic('clock', 'sm')}<span class="num">~${minutes(rows)} min</span>
-      <button class="btn violet" data-toast="Smart Coach drafts the next block for your approval">${ic('spark', 'sm')}Smart Coach: next block</button></div>
+      <button class="btn violet" data-toast="KAI drafts the next block for your approval">${ic('spark', 'sm')}KAI: next block</button></div>
   </div>
   <div class="card editor">
     <div class="erow th"><span></span><span>Exercise</span><span>Sets</span><span>Reps</span><span>Rest</span><span>If short on time</span><span>Next session</span><span></span></div>
@@ -615,7 +615,7 @@ function tNutrition(c) {
       </div>
     </section>
     <section class="card pad" style="display:grid;gap:14px;align-content:start">
-      <div class="sec" style="margin:0"><h2>Weekly feedback</h2><span class="sc-label"><span class="orb">${ic('spark')}</span>Smart Coach draft</span></div>
+      <div class="sec" style="margin:0"><h2>Weekly feedback</h2><span class="sc-label"><span class="orb">${ic('spark')}</span>KAI draft</span></div>
       ${n.fbSent ? `<div class="flag" style="background:rgba(126,213,151,.08);border-color:rgba(126,213,151,.25)">${ic('check')}<span>Sent to ${c.name.split(' ')[0]} · shows at the top of her Fuel tab</span></div>` :
       `<textarea class="fb" id="fb" aria-label="Feedback">Breakfasts are spot on, ${c.name.split(' ')[0]}: 30g+ protein every day. Lunches are good too. You're averaging 112g against 140g, so add a protein snack mid-afternoon (Greek yoghurt or a shake) to close the gap.</textarea>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn mint" data-sendfb>${ic('send', 'sm')}Send</button><button class="btn line" data-toast="Redrafting from this week's meals">${ic('spark', 'sm')}Redraft</button></div>`}
@@ -672,14 +672,14 @@ function vSchedule() {
 
 function vMessages() {
   const convs = [['priya', '“Can I train legs the day after my 10k?”', true], ['sarah', 'Knee felt a bit tight on the lunges', true], ['tom', 'Sorry, been mad busy at work', true], ['dave', 'Thanks for the feedback!', false], ['ellie', 'See you at 12:15', false]];
-  const th = { priya: [['them', 'Hey Kyle, race is Sunday!'], ['sys', 'Smart Coach handed this over: race-day advice is your call'], ['them', 'Can I train legs the day after my 10k?']], sarah: [['me', 'Great session Monday. Leg press goes up today 💪'], ['them', 'Knee felt a bit tight on the lunges'], ['sys', 'Smart Coach handed this over: pain is always yours'], ['them', 'My knee aches during lunges. Can you take a look?']],
+  const th = { priya: [['them', 'Hey Kyle, race is Sunday!'], ['sys', 'KAI handed this over: race-day advice is your call'], ['them', 'Can I train legs the day after my 10k?']], sarah: [['me', 'Great session Monday. Leg press goes up today 💪'], ['them', 'Knee felt a bit tight on the lunges'], ['sys', 'KAI handed this over: pain is always yours'], ['them', 'My knee aches during lunges. Can you take a look?']],
     tom: [['me', 'All good Tom? Not seen a workout in a while'], ['them', 'Sorry, been mad busy at work']], dave: [['me', 'Feedback is in your Fuel tab'], ['them', 'Thanks for the feedback!']], ellie: [['them', 'See you at 12:15']] };
   const cur = th[S.conv].concat(S.sent.filter(m => m[0] === S.conv).map(m => ['me', m[1]]));
   return `<div class="head"><div><h1>Messages</h1></div></div>
   <div class="card msgs-wrap">
     <div class="list">${convs.map(([id, last, un]) => `<button class="conv ${S.conv === id ? 'on' : ''}" data-conv="${id}">${avatar(byId(id))}<span><b>${byId(id).name}</b><small>${last}</small></span>${un ? '<i class="dot"></i>' : ''}</button>`).join('')}</div>
     <div class="thread"><div class="body">${cur.map(([w, t]) => w === 'sys' ? `<div class="sysnote"><span class="orb">${ic('spark')}</span>${t}</div>` : `<div class="bub ${w}">${t}</div>`).join('')}</div>
-      <div class="comp"><button class="btn violet" data-aidraft>${ic('spark', 'sm')}Smart Coach draft</button><input id="reply" placeholder="Reply to ${byId(S.conv).name.split(' ')[0]}" aria-label="Reply"><button class="btn mint" data-sendmsg aria-label="Send">${ic('send', 'sm')}</button></div></div>
+      <div class="comp"><button class="btn violet" data-aidraft>${ic('spark', 'sm')}KAI draft</button><input id="reply" placeholder="Reply to ${byId(S.conv).name.split(' ')[0]}" aria-label="Reply"><button class="btn mint" data-sendmsg aria-label="Send">${ic('send', 'sm')}</button></div></div>
   </div>`;
 }
 
@@ -707,7 +707,7 @@ function vCommunity() {
       <textarea class="fb" id="tipB" style="border-color:var(--hair);min-height:90px" aria-label="Tip text">${d.body}</textarea>
       <div><div class="sec" style="margin-bottom:10px"><span class="eyebrow">3 high-protein meals</span><span class="muted">Tap a meal to swap it</span></div>
         <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">${d.meals.map((m, i) => { const r = RECIPES[m]; return `<button class="ph" data-meal="${i}" title="Swap meal"><img src="assets/${r[0]}.jpg" alt=""><span class="react" style="background:rgba(0,0,0,.55)">${ic('swap', 'sm')}</span><span class="cap"><b>${r[1]}</b><small style="color:var(--amber)">${r[2]}g protein</small></span></button>`; }).join('')}</div></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn mint" data-sched>${ic('check', 'sm')}${d.scheduled ? 'Update' : 'Schedule for Monday'}</button><button class="btn violet" data-tipai>${ic('spark', 'sm')}Smart Coach draft</button></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn mint" data-sched>${ic('check', 'sm')}${d.scheduled ? 'Update' : 'Schedule for Monday'}</button><button class="btn violet" data-tipai>${ic('spark', 'sm')}KAI draft</button></div>
     </section>
     <section style="display:grid;gap:20px;align-content:start">
       <div><div class="sec"><h2>Last week's drop</h2><span class="muted">Week 43</span></div>
@@ -728,8 +728,8 @@ function vAutomation() {
     ['payRemind', 'card', 'amber', 'Payment reminders', '3 days before, on the day, then every 3 days until paid. Alert me after 3 days', 'Auto'],
     ['sessRemind', 'bell', 'sky', 'Session reminders', 'The evening before, with the cancellation cut-off', 'Auto'],
     ['drop', 'community', 'violet', 'Weekly drop', 'Monday 07:00 with a push to every client', 'Auto'],
-    ['aiAnswer', 'messages', 'violet', 'Smart Coach answers', 'Questions about the client\'s own plan. Pain, injury and plan changes come to you', 'Auto'],
-    ['aiDraft', 'spark', 'violet', 'Smart Coach drafts', 'Programme changes, nutrition feedback, replies and weekly tips', 'Needs approval']];
+    ['aiAnswer', 'messages', 'violet', 'KAI answers', 'Questions about the client\'s own plan. Pain, injury and plan changes come to you', 'Auto'],
+    ['aiDraft', 'spark', 'violet', 'KAI drafts', 'Programme changes, nutrition feedback, replies and weekly tips', 'Needs approval']];
   return `<div class="head"><div><h1>Automation</h1><p>Your rules, applied the same way to every client.</p></div></div>
   <div class="card rules">${R.map(([k, i, c, t, d, m]) => `<div class="rule">${tileHTML(i, c)}<span><b>${t}</b><small>${d}</small></span>
     <span class="right"><span class="tag ${m === 'Auto' ? 't-grey' : 't-violet'}">${m}</span><span class="switch"><button role="switch" aria-checked="${S.rules[k]}" data-rule="${k}" aria-label="${t}"></button></span></span></div>`).join('')}</div>`;

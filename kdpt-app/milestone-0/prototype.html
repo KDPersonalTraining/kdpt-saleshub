@@ -508,7 +508,7 @@ svg { display: block; }
    Labels are plain text with a colour dot, never pills. Related rows sit in
    one grouped list with hairline dividers. Calls to action are square-cornered
    and uppercase. The tab bar is flat. Kyle is mint with his monogram;
-   Smart Coach is violet with the orb. */
+   KAI is violet with the orb. */
 .card { border-radius: 16px; }
 .chip { height: auto; padding: 0; border-radius: 0; background: none !important; gap: 6px; font-size: 13px; color: var(--fg2); }
 .chip.glass { backdrop-filter: none; -webkit-backdrop-filter: none; border: 0; color: #fff; text-shadow: 0 1px 10px rgba(0,0,0,.7); }
@@ -544,7 +544,7 @@ svg { display: block; }
 .msg { border-radius: 20px; }
 .mini, .stat { border-radius: 16px; }
 
-/* Kyle and Smart Coach */
+/* Kyle and KAI */
 .kd-av { width: 38px; height: 38px; border-radius: 50%; background: #050606; border: 1.5px solid var(--mint); display: grid; place-items: center; position: relative; flex: none; }
 .kd-av img { width: 24px; height: auto; }
 .kd-av .dot { position: absolute; bottom: -1px; right: -1px; top: auto; width: 10px; height: 10px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 2px var(--bg); }
@@ -770,7 +770,7 @@ const vHome = () => {
       <button class="act" data-go="fuel"><i style="background:rgba(255,180,94,.14);color:var(--amber)">${ic('camera')}</i>Log meal</button>
       <button class="act" data-sheet="book"><i style="background:rgba(110,198,255,.14);color:var(--sky)">${ic('cal')}</i>Book</button>
       <button class="act" data-sheet="checkin"><i style="background:rgba(169,155,255,.14);color:var(--violet)">${ic('clip')}</i>Check-in</button>
-      <button class="act" data-go="coachai"><i style="background:none"><span class="orb" style="width:60px;height:60px;box-shadow:none">${ic('spark')}</span></i>Smart Coach</button>
+      <button class="act" data-go="coachai"><i style="background:none"><span class="orb" style="width:60px;height:60px;box-shadow:none">${ic('spark')}</span></i>Ask KAI</button>
     </div>
 
     <button class="card session" data-toast="Session details and directions">
@@ -951,14 +951,14 @@ const vChat = () => `<div class="page fade" style="padding-bottom:110px">
   <div class="convo-head"><button class="round" style="background:var(--s2);width:40px;height:40px" data-go="home" aria-label="Back">${ic('back')}</button>
     <span class="kd-av" style="width:44px;height:44px"><img src="assets/kd-mark.png" alt=""><span class="dot"></span></span>
     <span class="t"><b>Kyle</b><small style="color:var(--mint)">Your coach · replies within a few hours</small></span></div>
-  <button class="handoff" style="background:rgba(169,155,255,.07);border-color:rgba(169,155,255,.22)" data-go="coachai"><span class="orb sm">${ic('spark')}</span><span class="t"><b>Need an answer now?</b><small>Smart Coach answers instantly from your plan</small></span><span class="chev">${ic('right')}</span></button>
+  <button class="handoff" style="background:rgba(169,155,255,.07);border-color:rgba(169,155,255,.22)" data-go="coachai"><span class="orb sm">${ic('spark')}</span><span class="t"><b>Need an answer now?</b><small>Ask KAI, your AI assistant</small></span><span class="chev">${ic('right')}</span></button>
   <div class="msgs">
     <div class="stamp">Yesterday</div>
     <div class="msg them">Great session Monday. Leg press goes up today 💪</div>
     <div class="msg me">Thanks! Knee felt a bit tight on the lunges though</div>
     <div class="msg them">Noted. Keep the lunges short-stride and tell me if it's worse.</div>
-    ${S.handed ? `<div class="sysnote"><span class="orb sm">${ic('spark')}</span>Smart Coach passed this to Kyle</div>
-    <div class="msg me"><div class="quote">My knee aches during lunges</div>Asked Smart Coach. Can you take a look?</div>` : ''}
+    ${S.handed ? `<div class="sysnote"><span class="orb sm">${ic('spark')}</span>KAI passed this to your coach</div>
+    <div class="msg me"><div class="quote">My knee aches during lunges</div>Asked KAI about this. Can you take a look?</div>` : ''}
     ${S.chat.map(m => `<div class="msg me">${m}</div>`).join('')}
   </div>
 </div>`;
@@ -970,31 +970,31 @@ function chatDock() {
 }
 
 // ---------------------------------------------------------------------------
-// Smart Coach (AI). Answers from the client's own plan; hands anything about
-// pain, injury or changes to the plan to Kyle.
+// KAI (AI). Answers from the client's own plan; hands anything about
+// pain, injury or changes to the plan to the client's coach.
 // ---------------------------------------------------------------------------
 const AI = {
-  swap: { q: 'Can I swap leg press today?', a: 'Yes. Kyle has approved two swaps for Leg Press: Hack Squat (start around 70 kg) or Goblet Squat with a 24 kg dumbbell. Keep the same sets and reps.', src: 'Lower Body A · Kyle\'s approved swaps', go: ['Start workout', 'workout'] },
+  swap: { q: 'Can I swap leg press today?', a: 'Yes. Your coach has approved two swaps for Leg Press: Hack Squat (start around 70 kg) or Goblet Squat with a 24 kg dumbbell. Keep the same sets and reps.', src: 'Lower Body A · your coach\'s approved swaps', go: ['Start workout', 'workout'] },
   eat: { q: 'What should I eat before a 7am session?', a: 'Keep it light: a banana and a coffee, or a yoghurt 45 minutes before. Have your 30 g protein breakfast afterwards.', src: 'Your nutrition targets · PT Saturday 9:00', go: ['See this week\'s meals', 'community'] },
-  knee: { q: 'My knee aches during lunges', handoff: true, a: 'Pain is something Kyle needs to look at, so I\'ve passed this to him instead of guessing. Until he replies, skip the lunges and use "I have pain" in your workout if it flares up.', src: 'Pain is always handed to Kyle' }
+  knee: { q: 'My knee aches during lunges', handoff: true, a: 'Pain is something your coach needs to look at, so I\'ve passed this on instead of guessing. Until they reply, skip the lunges and use "I have pain" in your workout if it flares up.', src: 'Pain always goes to your coach' }
 };
 const vAI = () => {
   const asked = S.ai, rest = Object.keys(AI).filter(k => !asked.includes(k));
   return `<div class="page fade" style="padding-bottom:150px">
   <div class="convo-head"><button class="round" style="background:var(--s2);width:40px;height:40px" data-go="home" aria-label="Back">${ic('back')}</button>
-    <span class="orb">${ic('spark')}</span><span class="t"><b>Smart Coach</b><small style="color:var(--violet)">AI · answers instantly</small></span>
-    <button class="switchto" style="color:var(--mint)" data-go="chat"><span class="kd-av" style="width:30px;height:30px;border-width:1px"><img src="assets/kd-mark.png" alt="" style="width:18px"></span>Kyle</button></div>
-  ${asked.length ? '' : `<div class="ai-empty"><span class="orb lg">${ic('spark')}</span><h2>Ask me anything</h2><p>Training, food or recovery. I answer from your plan, and pass anything I shouldn't answer to Kyle.</p></div>`}
+    <span class="orb">${ic('spark')}</span><span class="t"><b>KAI</b><small style="color:var(--violet)">Your AI assistant</small></span>
+    <button class="switchto" style="color:var(--mint)" data-go="chat"><span class="kd-av" style="width:30px;height:30px;border-width:1px"><img src="assets/kd-mark.png" alt="" style="width:18px"></span>Coach</button></div>
+  ${asked.length ? '' : `<div class="ai-empty"><span class="orb lg">${ic('spark')}</span><h2>Ask me anything</h2><p>Training, food or recovery. I answer from your plan, and pass anything I shouldn't answer to your coach.</p></div>`}
   <div class="ai-thread">${asked.map(k => { const x = AI[k]; return `<div class="q">${x.q}</div>
-    <div class="a"><span class="who"><span class="orb sm">${ic('spark')}</span>Smart Coach</span><p>${x.a}</p><span class="src">${ic('clip')}${x.src}</span>
-    ${x.handoff ? `<button class="handoff" data-go="chat"><span class="kd-av"><img src="assets/kd-mark.png" alt=""></span><span class="t"><b>Passed to Kyle</b><small>He'll reply in your messages</small></span><span class="chev">${ic('right')}</span></button>` : `<button class="go" data-go="${x.go[1]}">${x.go[0]}</button>`}</div>`; }).join('')}</div>
+    <div class="a"><span class="who"><span class="orb sm">${ic('spark')}</span>KAI</span><p>${x.a}</p><span class="src">${ic('clip')}${x.src}</span>
+    ${x.handoff ? `<button class="handoff" data-go="chat"><span class="kd-av"><img src="assets/kd-mark.png" alt=""></span><span class="t"><b>Passed to your coach</b><small>Kyle will reply in your messages</small></span><span class="chev">${ic('right')}</span></button>` : `<button class="go" data-go="${x.go[1]}">${x.go[0]}</button>`}</div>`; }).join('')}</div>
   ${rest.length ? `<div><div class="eyebrow" style="margin-bottom:10px">${asked.length ? 'Ask something else' : 'Try asking'}</div><div class="group" style="--inset:46px">${rest.map(k => `<button class="prompt" data-ai="${k}">${ic('spark')}<span>${AI[k].q}</span>${ic('right').replace('class="ic"', 'class="ic" style="color:var(--fg3)"')}</button>`).join('')}</div></div>` : ''}
 </div>`;
 };
 function aiDock() {
   return `<div class="dock" style="display:grid;grid-template-columns:minmax(0,1fr);gap:8px">
-    <div class="composer ai"><label><input id="aimsg" placeholder="Ask Smart Coach" aria-label="Ask Smart Coach"></label><button class="round" data-toast="Smart Coach is thinking…" aria-label="Ask">${ic('send')}</button></div>
-    <p class="disclaimer">Smart Coach is AI, not a medical professional. Kyle can see every conversation.</p>
+    <div class="composer ai"><label><input id="aimsg" placeholder="Ask KAI" aria-label="Ask KAI"></label><button class="round" data-toast="KAI is thinking…" aria-label="Ask">${ic('send')}</button></div>
+    <p class="disclaimer">KAI is AI, not a medical professional. Your coach can see every conversation.</p>
   </div>`;
 }
 
@@ -1109,7 +1109,7 @@ function sheetHTML() {
     return `<div><h3>${freqInfo().label} check-in</h3><div class="sub">About two minutes</div></div>
       ${M.map(([k, l, col, lo, hi]) => `<div class="cimetric"><div class="lab"><b>${l}</b><small>${lo} → ${hi}</small></div><div class="scale5">${[1, 2, 3, 4, 5].map(v => `<button class="num" style="--c:${col}" aria-pressed="${c[k] === v}" data-ci="${k}" data-v="${v}">${v}</button>`).join('')}</div></div>`).join('')}
       <div class="cimetric"><div class="lab"><b>Weight</b><small>Optional</small></div><label class="wt"><input id="ciw" inputmode="decimal" value="${c.weight}" aria-label="Weight in kg"><span>kg</span></label></div>
-      <button class="pill-btn mint" data-cisend>Send to Kyle</button>`;
+      <button class="pill-btn mint" data-cisend>Send to your coach</button>`;
   }
   if (S.sheet === 'momentum') {
     const week = [['M', 70, 'on'], ['T', 78, 'on'], ['W', 84, 'now'], ['T', 0, ''], ['F', 0, ''], ['S', 0, ''], ['S', 0, '']];
@@ -1124,7 +1124,7 @@ function sheetHTML() {
         <span class="st" style="background:${m.st[1]};color:${m.st[2]}">${m.st[0]}</span></div>`).join('')}</div>
       <div><div class="eyebrow" style="margin-bottom:10px">This week</div>
         <div class="trend">${week.map(([d, v, c]) => `<div class="${c}"><i style="height:${Math.round((v || 8) * 0.85)}px"></i>${d}</div>`).join('')}</div></div>
-      <div class="preview"><span class="acc">${accBars(freqInfo().n)}</span><span><b>Accuracy: ${freqInfo().acc}</b><small>From your workouts, meals and ${freqInfo().label.toLowerCase()} check-ins. Kyle sees the same view.</small></span></div>
+      <div class="preview"><span class="acc">${accBars(freqInfo().n)}</span><span><b>Accuracy: ${freqInfo().acc}</b><small>From your workouts, meals and ${freqInfo().label.toLowerCase()} check-ins. Your coach sees the same view.</small></span></div>
       <button class="pill-btn white" data-go="progress">See all progress</button>`;
   }
   const { plan: pl } = plan(); const ex = pl[S.idx]?.ex;
@@ -1137,13 +1137,13 @@ function sheetHTML() {
       <button class="pill-btn white" data-close>Done</button>`;
   }
   if (S.sheet === 'swap') {
-    return ex.alts.length ? `<div><h3>Swap ${ex.name}</h3><div class="sub">Kyle's approved options · today only</div></div>
+    return ex.alts.length ? `<div><h3>Swap ${ex.name}</h3><div class="sub">Your coach's approved options · today only</div></div>
       <div class="opts">${ex.alts.map(([n, w, k]) => `<button class="opt" data-alt="${n}"><span class="tile">${ic(k)}</span><span><b>${n}</b><span>${w}</span></span></button>`).join('')}</div>`
-      : `<div><h3>No swaps yet</h3><div class="sub">Skip this one or ask Kyle.</div></div><button class="pill-btn dark" data-go="coachai">Ask Smart Coach</button>`;
+      : `<div><h3>No swaps yet</h3><div class="sub">Skip this one or ask your coach.</div></div><button class="pill-btn dark" data-go="coachai">Ask KAI</button>`;
   }
   if (S.sheet === 'pain') {
     const p = S.pain;
-    if (p.sent) return `<div class="sent"><span class="ok">${ic('check', 'ic', 2.6)}</span><h3>Kyle's been told</h3>
+    if (p.sent) return `<div class="sent"><span class="ok">${ic('check', 'ic', 2.6)}</span><h3>Your coach has been told</h3>
       <p>If the pain is sharp or sudden, stop and get it checked. The app can't diagnose injuries.</p></div>
       <button class="pill-btn white" data-close>${p.act === 'swap' ? 'Choose a swap' : 'Done'}</button>`;
     const ready = p.area && p.act;
@@ -1156,7 +1156,7 @@ function sheetHTML() {
         <button aria-pressed="${p.act === 'skip'}" data-act="skip">${ic('skip')}Skip it</button>
         <button aria-pressed="${p.act === 'stop'}" data-act="stop">${ic('stop')}Stop today</button>
       </div>
-      <button class="pill-btn ${ready ? 'mint' : 'dark'}" data-sendpain ${ready ? '' : 'disabled style="opacity:.5"'}>Send to Kyle</button>`;
+      <button class="pill-btn ${ready ? 'mint' : 'dark'}" data-sendpain ${ready ? '' : 'disabled style="opacity:.5"'}>Send to your coach</button>`;
   }
   return '';
 }

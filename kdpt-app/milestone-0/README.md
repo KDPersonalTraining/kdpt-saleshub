@@ -130,19 +130,19 @@ Momentum is a word, not a score out of 100, as the blueprint recommended.
   optional monthly auto-pay. It uses the £120 Online Coaching price from the
   sales site, because PT session prices aren't published there.
 
-### Kyle and Smart Coach (21 Oct)
+### Kyle and KAI (21 Oct)
 
 Clients talk to two separate parties, and the app never mixes them in one
 thread:
 
-| | Kyle | Smart Coach (AI) |
+| | Kyle | KAI (AI assistant) |
 |---|---|---|
 | Look | KD monogram with a mint ring | Violet orb |
-| Where | Monogram button on Home, top right | Smart Coach button on Home, the "Need an answer now?" row in Kyle's chat, swap sheet |
+| Where | Monogram button on Home, top right | KAI button on Home, the "Need an answer now?" row in Kyle's chat, swap sheet |
 | Replies | Within a few hours, as chat bubbles | Instantly, as plain answers that show what they were based on |
-| Hands over | – | Pain, injury and plan changes go to Kyle and appear in his thread with a "handed over" note |
+| Hands over | – | Pain, injury and plan changes go to Kyle and are marked "Passed to your coach" for the client and appear in his thread with a "handed over" note |
 
-In the portal, everything the AI writes is labelled "Smart Coach draft".
+In the portal, everything the AI writes is labelled "KAI draft".
 
 ### Visual style (21 Oct)
 
