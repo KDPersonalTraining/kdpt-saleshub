@@ -132,6 +132,21 @@ exception when insufficient_privilege then null;
 end $$;
 select pg_temp.expect('Sam cannot promote self', (select count(*) from profiles where role = 'coach' and id = auth.uid()), 0);
 
+-- Sam logs food and posts to the group.
+insert into food_log_items (id, org_id, client_id, logged_on, slot, name, kcal, protein_g, carbs_g, fat_g) values
+  ('40000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a',
+   '00000000-0000-0000-0000-000000000002', current_date, 'breakfast', 'Greek yoghurt 0%', 100, 17, 6, 0);
+insert into posts (id, org_id, author_id, kind, body) values
+  ('50000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a',
+   '00000000-0000-0000-0000-000000000002', 'client_post', '10k done!');
+select pg_temp.expect('Sam sees own post', (select count(*) from posts), 1);
+do $$ begin
+  insert into posts (org_id, author_id, kind, body) values
+    ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', 'announcement', 'Studio closed');
+  raise exception 'FAIL Sam posted an announcement';
+exception when insufficient_privilege then raise notice 'ok   Sam cannot post announcements';
+end $$;
+
 -- Jo (client) -----------------------------------------------------------------
 select pg_temp.as_user('00000000-0000-0000-0000-000000000003');
 select pg_temp.expect('Jo cannot see Sam''s sets',     (select count(*) from set_logs), 0);
@@ -139,6 +154,13 @@ select pg_temp.expect('Jo cannot see Sam''s sessions', (select count(*) from wor
 select pg_temp.expect('Jo cannot see Sam''s pain',     (select count(*) from pain_reports), 0);
 select pg_temp.expect('Jo cannot see Sam''s plan',     (select count(*) from programmes), 0);
 select pg_temp.expect('Jo cannot see Sam''s profile',  (select count(*) from profiles where full_name = 'Sam'), 0);
+select pg_temp.expect('Jo cannot see Sam''s food log', (select count(*) from food_log_items), 0);
+select pg_temp.expect('Jo sees Sam''s group post',     (select count(*) from posts), 1);
+insert into post_comments (org_id, post_id, author_id, body) values
+  ('00000000-0000-0000-0000-00000000000a', '50000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000003', 'Amazing!');
+select pg_temp.expect('Jo can comment', (select count(*) from post_comments), 1);
+delete from posts where id = '50000000-0000-0000-0000-000000000001';
+select pg_temp.expect('Jo cannot delete Sam''s post', (select count(*) from posts), 1);
 
 -- Kyle (coach) ----------------------------------------------------------------
 select pg_temp.as_user('00000000-0000-0000-0000-000000000001');
@@ -147,6 +169,12 @@ select pg_temp.expect('Kyle sees Sam''s sets',  (select count(*) from set_logs),
 select pg_temp.expect('Kyle sees pain report',  (select count(*) from pain_reports), 1);
 select pg_temp.expect('Kyle sees coach notes',  (select count(*) from coach_notes), 1);
 select pg_temp.expect('Kyle sees all profiles', (select count(*) from profiles), 3);
+select pg_temp.expect('Kyle sees Sam''s food log', (select count(*) from food_log_items), 1);
+update posts set hidden_at = now(), hidden_by = auth.uid() where id = '50000000-0000-0000-0000-000000000001';
+
+select pg_temp.as_user('00000000-0000-0000-0000-000000000003');
+select pg_temp.expect('Jo cannot see a hidden post', (select count(*) from posts), 0);
+select pg_temp.as_user('00000000-0000-0000-0000-000000000001');
 
 -- Database refuses a coach double-booking.
 reset role;

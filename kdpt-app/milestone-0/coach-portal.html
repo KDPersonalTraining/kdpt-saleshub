@@ -320,7 +320,7 @@ textarea.fb { width: 100%; min-height: 120px; resize: vertical; background: var(
 .orb { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 32% 28%, #e3dcff 0%, #a99bff 38%, #4b3cc4 100%); display: inline-grid; place-items: center; color: #fff; flex: none; }
 .orb svg { width: 12px; height: 12px; }
 .sc-label { display: inline-flex; gap: 8px; align-items: center; color: var(--violet); font-weight: 600; font-size: 12px; }
-.tile.solid { background: var(--s3); color: var(--fg) !important; box-shadow: none; }
+.tile.solid { background: color-mix(in srgb, currentColor 13%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 45%, transparent); }
 .tile.solid svg { width: 22px; height: 22px; }
 .nav svg { width: 21px; height: 21px; }
 .nav { color: #8a908c; }
@@ -337,6 +337,53 @@ textarea.fb { width: 100%; min-height: 120px; resize: vertical; background: var(
 .cirow .mets div { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .cirow .need small { display: block; color: var(--fg3); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-family: var(--display); font-weight: 600; margin-bottom: 4px; }
 .cirow .need b { font-weight: 600; font-size: 13px; }
+.targets.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 900px) { .targets.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ntable { overflow-x: auto; }
+.nr { display: grid; grid-template-columns: 96px repeat(4, minmax(96px, 1fr)) 40px; gap: 12px; align-items: center; padding: 12px 18px; border-top: 1px solid var(--hair); min-width: 640px; font-size: 14px; }
+.nr.th { border-top: 0; color: var(--fg3); font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; }
+.nr.avg { background: var(--s1); font-weight: 600; }
+.nr .c { display: inline-flex; align-items: center; gap: 7px; }
+.nr .c::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.nr .c small { color: var(--fg3); font-size: 12px; }
+.modes { display: inline-grid; grid-template-columns: 1fr 1fr; background: var(--s1); border: 1px solid var(--hair); border-radius: 8px; padding: 3px; }
+.modes button { height: 32px; padding: 0 12px; border-radius: 6px; font-size: 13px; color: var(--fg3); white-space: nowrap; }
+.modes button.on { background: var(--s4); color: var(--fg); }
+.srules { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
+@media (max-width: 900px) { .srules { grid-template-columns: minmax(0, 1fr); } }
+.srules > div { padding: 16px 18px; display: grid; gap: 6px; align-content: start; border-left: 1px solid var(--hair); }
+.srules > div:first-child { border-left: 0; }
+.srules b { font-weight: 600; }
+.srules small { color: var(--fg3); font-size: 12px; }
+.calwrap { overflow-x: auto; }
+.cal { display: grid; grid-template-columns: 50px repeat(7, minmax(108px, 1fr)); min-width: 820px; }
+.cal .colh { padding: 12px 8px; font-size: 12px; color: var(--fg3); border-bottom: 1px solid var(--hair); border-left: 1px solid var(--hair); }
+.cal .colh b { display: block; font: 800 20px var(--display); color: var(--fg); }
+.cal .colh.today b { color: var(--mint); }
+.cal .times { position: relative; }
+.cal .times span { position: absolute; right: 8px; font-size: 10px; color: var(--fg3); transform: translateY(-50%); }
+.cal .col { position: relative; border-left: 1px solid var(--hair); background-image: repeating-linear-gradient(to bottom, transparent 0 43px, var(--hair) 43px 44px); }
+.ev2 { position: absolute; left: 4px; right: 4px; border-radius: 7px; padding: 5px 8px; font-size: 11px; overflow: hidden; text-align: left; line-height: 1.3; }
+.ev2 b { display: block; font: 700 12px var(--display); }
+.ev2.studio { background: rgba(126,213,151,.16); box-shadow: inset 3px 0 0 var(--mint); }
+.ev2.gym { background: rgba(110,198,255,.16); box-shadow: inset 3px 0 0 var(--sky); }
+.ev2.online { background: rgba(169,155,255,.16); box-shadow: inset 3px 0 0 var(--violet); }
+.ev2.busy { background: repeating-linear-gradient(135deg, rgba(255,255,255,.06) 0 6px, rgba(255,255,255,.02) 6px 12px); color: var(--fg3); box-shadow: inset 0 0 0 1px var(--hair); }
+.ev2.block { background: repeating-linear-gradient(135deg, rgba(255,107,94,.16) 0 6px, rgba(255,107,94,.05) 6px 12px); color: var(--coral); box-shadow: inset 0 0 0 1px rgba(255,107,94,.35); }
+.req { padding: 14px 18px; border-top: 1px solid var(--hair); display: grid; gap: 8px; }
+.req:first-child { border-top: 0; }
+.req .who { display: flex; gap: 10px; align-items: center; }
+.req .who b { font-weight: 600; }
+.req .mv { font-size: 13px; color: var(--fg2); }
+.req .mv s { color: var(--fg3); }
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fields label { display: grid; gap: 6px; font-size: 12px; color: var(--fg3); }
+.fields select, .fields input { height: 40px; border-radius: 8px; background: var(--s1); border: 1px solid var(--hair); padding: 0 10px; color: var(--fg); }
+.fields .full { grid-column: 1 / -1; }
+.mod { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 18px; border-top: 1px solid var(--hair); }
+.mod:first-child { border-top: 0; }
+.mod p { margin: 2px 0 0; color: var(--fg2); font-size: 13px; }
+.mod.hidden p { text-decoration: line-through; color: var(--fg3); }
 .sysnote { display: flex; gap: 8px; align-items: center; justify-content: center; color: var(--fg3); font-size: 12px; margin: 6px 0; }
 </style>
 
@@ -496,10 +543,11 @@ const S = {
   view: 'today', client: 'sarah', ctab: 'training', day: 'Lower A',
   prog: clone(START), saved: clone(START), filter: 'All', q: '', libFilter: 'All',
   done: {}, approved: {}, editing: null, modal: null,
-  nut: { kcal: 2100, protein: 140, water: 2.5, show: true, reacted: { 0: true }, fbSent: false },
+  nut: { kcal: 2100, protein: 140, carbs: 210, fat: 70, show: true, reacted: { 0: true }, fbSent: false },
+  bmode: 'coach', reqDone: {}, blocks: [], hidden: {},
   rules: { payRemind: true, sessRemind: true, drop: true, prog: true, alert: true, release: true, remind: true, aiAnswer: true, aiDraft: true },
   conv: 'priya', sent: [],
-  drop: { title: 'Plan your protein for the week', body: 'Batch-cook two protein sources on Sunday (chicken thighs and turkey mince work well). It turns most meals into a 10-minute job.', meals: [3, 0, 2], scheduled: false }
+  drop: { q: 'What\'s your go-to meal when you\'re short on time?', title: 'Plan your protein for the week', body: 'Batch-cook two protein sources on Sunday (chicken thighs and turkey mince work well). It turns most meals into a 10-minute job.', meals: [3, 0, 2], scheduled: false }
 };
 const dirty = () => JSON.stringify(S.prog) !== JSON.stringify(S.saved);
 const changedCount = () => Object.keys(S.prog).reduce((n, d) => n + (JSON.stringify(S.prog[d]) !== JSON.stringify(S.saved[d]) ? 1 : 0), 0);
@@ -635,33 +683,49 @@ function tTraining() {
     <span style="display:flex;gap:8px"><button class="btn line" data-discard>Discard</button><button class="btn mint" data-publish>${ic('check', 'sm')}Publish</button></span></div>` : ''}`;
 }
 
+// Sarah's last 7 days from her food log: kcal, protein, carbs, fat (null = nothing logged).
+const WEEK_LOG = [['Mon 13', 2050, 142, 205, 68], ['Tue 14', 1890, 131, 190, 66], ['Wed 15', 2210, 118, 240, 80], ['Thu 16', 1760, 138, 160, 58],
+  ['Fri 17', 2400, 104, 260, 92], ['Sat 18', null], ['Sun 19', 1980, 135, 198, 70]];
 function tNutrition(c) {
-  const n = S.nut;
+  const n = S.nut, first = c.name.split(' ')[0];
   const meals = [['breakfast', 'Breakfast · Mon', '32g protein'], ['wrap', 'Lunch · Tue', '38g protein'], ['wrap', 'Lunch · Mon', '41g protein'], ['pasta', 'Dinner · Mon', '45g protein'], ['potato-bowl', 'Dinner · Tue', '42g protein'], ['turkey-pasta', 'Lunch · Wed', '40g protein']];
   const tgt = (key, label, icon, col, unit, step) => `<div class="tgt"><span class="lbl" style="color:${col}">${ic(icon, 'sm')}<span style="color:var(--fg2)">${label}</span></span>
-    <span class="val"><b class="num">${key === 'water' ? n[key].toFixed(1) : n[key].toLocaleString('en-GB')}<small>${unit}</small></b>
+    <span class="val"><b class="num">${n[key].toLocaleString('en-GB')}<small>${unit}</small></b>
     <span class="stepper"><button data-nut="${key}" data-d="${-step}" aria-label="Decrease">−</button><button data-nut="${key}" data-d="${step}" aria-label="Increase">+</button></span></span></div>`;
+  const T = [n.kcal, n.protein, n.carbs, n.fat];
+  const col = (v, t) => { const r = v / t; return r < 0.9 ? 'var(--amber)' : r > 1.1 ? 'var(--coral)' : 'var(--mint)'; };
+  const logged = WEEK_LOG.filter(d => d[1] !== null), avg = [1, 2, 3, 4].map(i => Math.round(logged.reduce((a, d) => a + d[i], 0) / logged.length));
+  const cell = (v, i) => `<span class="c num" style="color:${col(v, T[i])}">${v.toLocaleString('en-GB')}<small>${i ? 'g' : ''}</small></span>`;
   return `
+  <div class="card pad">
+    <div class="sec"><h2>Targets</h2><span class="switch"><span class="muted">Show numbers to ${first}</span><button role="switch" aria-checked="${n.show}" data-toggle-show aria-label="Show numbers to client"></button></span></div>
+    <div class="targets four">${tgt('kcal', 'Calories', 'flame', 'var(--fg)', 'kcal', 50)}${tgt('protein', 'Protein', 'fuel', 'var(--amber)', 'g', 5)}${tgt('carbs', 'Carbs', 'bolt', 'var(--sky)', 'g', 5)}${tgt('fat', 'Fat', 'drop', 'var(--violet)', 'g', 5)}</div>
+  </div>
   <div class="grid2">
     <section style="display:grid;gap:20px;align-content:start">
-      <div class="card pad">
-        <div class="sec"><h2>Targets</h2><span class="switch"><span class="muted">Show numbers to ${c.name.split(' ')[0]}</span><button role="switch" aria-checked="${n.show}" data-toggle-show aria-label="Show numbers to client"></button></span></div>
-        <div class="targets">${tgt('kcal', 'Calories', 'flame', 'var(--fg)', 'kcal', 50)}${tgt('protein', 'Protein', 'fuel', 'var(--amber)', 'g', 5)}${tgt('water', 'Water', 'drop', 'var(--sky)', 'L', 0.5)}</div>
+      <div>
+        <div class="sec"><h2>Week in review</h2><span class="muted"><span style="color:var(--mint)">●</span> on target <span style="color:var(--amber)">●</span> under <span style="color:var(--coral)">●</span> over (±10%)</span></div>
+        <div class="card ntable">
+          <div class="nr th"><span>Day</span><span>Calories</span><span>Protein</span><span>Carbs</span><span>Fat</span><span></span></div>
+          ${WEEK_LOG.map(d => d[1] === null ? `<div class="nr"><span>${d[0]}</span><span style="grid-column:2 / -1;color:var(--fg3)">Nothing logged</span></div>`
+            : `<div class="nr"><span>${d[0]}</span>${[1, 2, 3, 4].map(i => cell(d[i], i - 1)).join('')}<button class="iconbtn" data-toast="Opens ${d[0]}: every food and photo" aria-label="Open day">${ic('right', 'sm')}</button></div>`).join('')}
+          <div class="nr avg"><span>Average</span>${avg.map((v, i) => cell(v, i)).join('')}<span></span></div>
+        </div>
       </div>
       <div>
-        <div class="sec"><h2>This week's meals</h2><span class="muted">${meals.length} logged · tap ♥ to react</span></div>
+        <div class="sec"><h2>Photos logged this week</h2><span class="muted">${meals.length} photos · tap ♥ to react</span></div>
         <div class="photos">${meals.map(([img, t, p], i) => `<div class="ph"><img src="assets/${img}.jpg" alt="${t}"><button class="react ${n.reacted[i] ? 'on' : ''}" data-react="${i}" aria-label="React">${ic('heart', 'sm')}</button><div class="cap"><b>${t}</b><small>${p}</small></div></div>`).join('')}</div>
       </div>
     </section>
     <section class="card pad" style="display:grid;gap:14px;align-content:start">
       <div class="sec" style="margin:0"><h2>Weekly feedback</h2><span class="sc-label"><span class="orb">${ic('spark')}</span>KAI draft</span></div>
-      ${n.fbSent ? `<div class="flag" style="background:rgba(126,213,151,.08);border-color:rgba(126,213,151,.25)">${ic('check')}<span>Sent to ${c.name.split(' ')[0]} · shows at the top of her Fuel tab</span></div>` :
-      `<textarea class="fb" id="fb" aria-label="Feedback">Breakfasts are spot on, ${c.name.split(' ')[0]}: 30g+ protein every day. Lunches are good too. You're averaging 112g against 140g, so add a protein snack mid-afternoon (Greek yoghurt or a shake) to close the gap.</textarea>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn mint" data-sendfb>${ic('send', 'sm')}Send</button><button class="btn line" data-toast="Redrafting from this week's meals">${ic('spark', 'sm')}Redraft</button></div>`}
+      ${n.fbSent ? `<div class="flag" style="background:rgba(126,213,151,.08);border-color:rgba(126,213,151,.25)">${ic('check')}<span>Sent to ${first} · shows at the bottom of her Fuel tab</span></div>` :
+      `<textarea class="fb" id="fb" aria-label="Feedback">Protein's up to ${avg[1]}g on average, ${first}, nice work. Friday ran over on calories and carbs and protein dipped, so plan Friday's dinner ahead. Dinners are light on veg: add a side salad or frozen veg.</textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn mint" data-sendfb>${ic('send', 'sm')}Send</button><button class="btn line" data-toast="Redrafting from this week's food log">${ic('spark', 'sm')}Redraft</button></div>`}
       <div class="statrow" style="margin-top:6px">
-        <div class="card" style="background:var(--s1)"><b class="num" style="color:var(--amber)">112g</b><small>Avg protein</small></div>
-        <div class="card" style="background:var(--s1)"><b class="num">1,890</b><small>Avg kcal</small></div>
-        <div class="card" style="background:var(--s1)"><b class="num">5/7</b><small>Days logged</small></div>
+        <div class="card" style="background:var(--s1)"><b class="num" style="color:var(--amber)">${avg[1]}g</b><small>Avg protein</small></div>
+        <div class="card" style="background:var(--s1)"><b class="num">${avg[0].toLocaleString('en-GB')}</b><small>Avg kcal</small></div>
+        <div class="card" style="background:var(--s1)"><b class="num">${logged.length}/7</b><small>Days logged</small></div>
       </div>
     </section>
   </div>`;
@@ -704,16 +768,75 @@ function vProgrammes() {
     <div class="foot"><span class="tag t-grey">${ic('clients', 'sm')}${a} clients</span><span style="display:flex;gap:6px"><button class="btn line" data-toast="Opens the template editor">Edit</button><button class="btn ghost" data-toast="Pick a client to assign ${n}">Assign</button></span></div></div>`).join('')}</div>`;
 }
 
+// Week of 19 October. Busy blocks come from Google Calendar (times only, no
+// titles are stored). Blocks are time off Kyle sets here; they are also
+// written to his Google Calendar.
+const DAYS = [['Mon', 19], ['Tue', 20], ['Wed', 21], ['Thu', 22], ['Fri', 23], ['Sat', 24], ['Sun', 25]];
+const CAL_START = 6, CAL_END = 20, HOUR = 44;
+const EVENTS = [
+  [0, 7, 1, 'studio', 'Sarah M', 'Studio'], [0, 12, 1.5, 'busy', 'Busy', 'Google Calendar'], [0, 18, 1, 'gym', 'Tom R', 'Gym'],
+  [1, 6.5, 1, 'studio', 'Mark & Jen', 'Studio · duo'], [1, 17.5, 1, 'online', 'Ray P', 'Online'],
+  [2, 7, 1, 'studio', 'Sarah M', 'Studio'], [2, 9.5, 1, 'studio', 'Mark & Jen', 'Studio · duo'], [2, 12.25, 0.75, 'online', 'Ellie B', 'Online call'], [2, 14, 1, 'busy', 'Busy', 'Google Calendar'], [2, 17.75, 1, 'gym', 'Tom R', 'Gym'],
+  [3, 6, 14, 'block', 'Day off', 'Blocked by you · weekly'],
+  [4, 6.5, 1, 'studio', 'Mark & Jen', 'Studio · duo'], [4, 12, 2, 'busy', 'Busy', 'Google Calendar'],
+  [5, 9, 1, 'studio', 'Sarah M', 'Studio'], [5, 10.5, 1, 'online', 'Priya S', 'Online'],
+  [6, 6, 14, 'block', 'Day off', 'Blocked by you · weekly']
+];
+const REQS = [
+  { id: 'r1', c: 'sarah', from: 'Sat 7 Nov · 9:00', to: 'Fri 6 Nov · 18:00', note: 'Away Saturday morning' },
+  { id: 'r2', c: 'tom', from: 'Tue 3 Nov · 17:45', to: 'Wed 4 Nov · 17:45', note: 'Late meeting at work' }
+];
+const hhmm = h => `${Math.floor(h)}:${String(Math.round(h % 1 * 60)).padStart(2, '0')}`;
+
 function vSchedule() {
-  const days = [['Mon', 19], ['Tue', 20], ['Wed', 21], ['Thu', 22], ['Fri', 23], ['Sat', 24], ['Sun', 25]];
-  const S_ = { 19: [['07:00', 'Sarah M', 'studio'], ['18:00', 'Tom R', 'gym']], 20: [['06:30', 'Mark & Jen', 'studio'], ['12:00', 'Open', 'open'], ['17:30', 'Ray P', 'online']],
-    21: [['07:00', 'Sarah M', 'studio'], ['09:30', 'Mark & Jen', 'studio'], ['12:15', 'Ellie B', 'online'], ['17:45', 'Tom R', 'gym']], 22: [['07:00', 'Open', 'open'], ['18:00', 'Priya S', 'online']],
-    23: [['06:30', 'Mark & Jen', 'studio'], ['10:00', 'Open', 'open']], 24: [['09:00', 'Sarah M', 'studio'], ['10:30', 'Open', 'open']], 25: [] };
-  return `<div class="head"><div><h1>Schedule</h1><p>Clients self-book into open slots, within their monthly allowance.</p></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag t-sky" style="height:40px;padding:0 14px;border-radius:12px">${ic('calup', 'sm')}November opens 20 Oct · 31 of 38 booked</span><button class="btn ghost" data-toast="Edit weekly availability">${ic('clock', 'sm')}Availability</button></div></div>
-  <div class="chips"><span class="tag t-mint">Studio</span><span class="tag t-sky">Gym</span><span class="tag t-violet">Online</span><span class="tag t-grey">Open slot</span></div>
-  <div class="week">${days.map(([d, n]) => `<div class="wday ${n === 21 ? 'today' : ''}"><h3>${d}<b class="num">${n}</b></h3>${(S_[n] || []).map(([t, w, k]) =>
-    `<button class="slot ${k}" data-toast="${k === 'open' ? 'Open slot · clients can book this' : w + ' · ' + t}"><b class="num">${t}</b>${w}</button>`).join('') || '<span style="color:var(--fg3);font-size:12px">Day off</span>'}</div>`).join('')}</div>`;
+  const evs = EVENTS.concat(S.blocks.map(b => [b.day, b.from, b.to - b.from, 'block', b.reason || 'Blocked', 'Blocked by you' + (b.weekly ? ' · weekly' : '')]));
+  const H = (CAL_END - CAL_START) * HOUR;
+  return `<div class="head"><div><h1>Schedule</h1><p>${S.bmode === 'coach' ? 'You set every session. Clients confirm, or ask to move one.' : 'Clients pick from your open times, within their monthly allowance.'}</p></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="tag t-mint">${ic('check', 'sm')}Google Calendar synced 2 min ago</span>
+      <button class="btn white" data-blockopen>${ic('close', 'sm')}Block time</button><button class="btn mint" data-toast="November drafted from everyone's regular slots. Review, then send on the 20th">${ic('schedule', 'sm')}Schedule November</button></div></div>
+  <div class="card srules">
+    <div><span class="eyebrow">Who sets sessions</span><span class="modes">${[['coach', 'You schedule'], ['self', 'Clients pick']].map(([k, l]) => `<button class="${S.bmode === k ? 'on' : ''}" data-bmode="${k}">${l}</button>`).join('')}</span>
+      <small>${S.bmode === 'coach' ? 'You place each client into their regular slot. They can only request changes.' : 'Clients choose open slots themselves. You still approve changes inside 24 hours.'}</small></div>
+    <div><span class="eyebrow">Monthly cycle</span><b>Sessions go out on the 20th</b><small>Clients confirm by the 25th. Anything unconfirmed stays booked.</small></div>
+    <div><span class="eyebrow">Busy time</span><b>Google Calendar blocks your diary</b><small>Anything in your Google Calendar can't be booked. Time you block here is added to it too.</small></div>
+  </div>
+  <div class="grid2" style="grid-template-columns:minmax(0,2.2fr) minmax(0,1fr)">
+    <section class="card calwrap">
+      <div class="cal">
+        <div style="border-bottom:1px solid var(--hair)"></div>
+        ${DAYS.map(([d, n]) => `<div class="colh ${n === 21 ? 'today' : ''}">${d}<b class="num">${n}</b></div>`).join('')}
+        <div class="times" style="height:${H}px">${Array.from({ length: CAL_END - CAL_START }, (_, i) => `<span style="top:${i * HOUR}px">${CAL_START + i}:00</span>`).join('')}</div>
+        ${DAYS.map((_, di) => `<div class="col" style="height:${H}px">${evs.filter(e => e[0] === di).map(([, st, len, k, t, sub]) =>
+          `<button class="ev2 ${k}" style="top:${(st - CAL_START) * HOUR + 1}px;height:${len * HOUR - 3}px" data-toast="${t} · ${hhmm(st)}–${hhmm(st + len)}"><b>${len >= 0.75 ? `${hhmm(st)} ` : ''}${t}</b>${len >= 1 ? sub : ''}</button>`).join('')}</div>`).join('')}
+      </div>
+      <div class="chips" style="padding:12px 16px;border-top:1px solid var(--hair)"><span class="tag t-mint">Studio</span><span class="tag t-sky">Gym</span><span class="tag t-violet">Online</span><span class="tag t-grey">Busy in Google</span><span class="tag t-coral">Blocked by you</span></div>
+    </section>
+    <section style="display:grid;gap:20px;align-content:start">
+      <div><div class="sec"><h2>Change requests</h2><span class="muted">${REQS.filter(r => !S.reqDone[r.id]).length} waiting</span></div>
+        <div class="card">${REQS.map(r => { const c = byId(r.c); return `<div class="req"><div class="who">${avatar(c, 'width:30px;height:30px;font-size:11px')}<b>${c.name}</b></div>
+          <div class="mv"><s>${r.from}</s> → <b style="color:var(--fg)">${r.to}</b><br>“${r.note}”</div>
+          ${S.reqDone[r.id] ? `<span class="tag t-mint">${ic('check', 'sm')}${S.reqDone[r.id]}</span>` : `<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn mint" data-req="${r.id}" data-l="Approved · calendar updated">Approve</button><button class="btn ghost" data-req="${r.id}" data-l="Offered Fri 6 Nov · 7:00">Offer another time</button><button class="btn line" data-req="${r.id}" data-l="Declined · original kept">Decline</button></div>`}</div>`; }).join('')}</div></div>
+      <div><div class="sec"><h2>Time off</h2><button class="muted" data-blockopen>+ Block time</button></div>
+        <div class="card">${[['Thursdays', 'All day · weekly'], ['Sundays', 'All day · weekly'], ['22–29 Dec', 'Christmas · all day']].concat(S.blocks.map(b => [`${DAYS[b.day][0]} ${DAYS[b.day][1]} Oct`, `${hhmm(b.from)}–${hhmm(b.to)} · ${b.reason || 'Blocked'}`]))
+          .map(([t, d]) => `<div class="ev" style="padding:12px 18px">${tileHTML('close', 'coral')}<span><b>${t}</b><small>${d}</small></span><span></span></div>`).join('')}</div></div>
+    </section>
+  </div>`;
+}
+function blockModal() {
+  const opt = (arr, sel) => arr.map(([v, l]) => `<option value="${v}" ${v === sel ? 'selected' : ''}>${l}</option>`).join('');
+  const hours = Array.from({ length: 29 }, (_, i) => { const h = 6 + i / 2; return [h, hhmm(h)]; });
+  return `<div class="scrim" data-scrim><div class="modal" role="dialog" aria-modal="true">
+    <div class="sec" style="margin:0"><h2>Block time</h2><button class="iconbtn" data-closemodal aria-label="Close">${ic('close')}</button></div>
+    <span style="color:var(--fg3)">Clients can't be scheduled into blocked time. It's added to your Google Calendar too.</span>
+    <div class="fields">
+      <label class="full">Day<select id="bday">${opt(DAYS.map(([d, n], i) => [i, `${d} ${n} October`]), 3)}</select></label>
+      <label>From<select id="bfrom">${opt(hours, 12)}</select></label>
+      <label>To<select id="bto">${opt(hours, 14)}</select></label>
+      <label class="full">Reason (only you see this)<input id="breason" placeholder="e.g. Dentist, school run, holiday"></label>
+    </div>
+    <span class="switch"><button role="switch" aria-checked="${!!S.bweekly}" data-bweekly aria-label="Repeat every week"></button><span class="muted">Repeat every week</span></span>
+    <button class="btn mint" data-blocksave style="justify-self:start">${ic('check', 'sm')}Block it</button>
+  </div></div>`;
 }
 
 function vMessages() {
@@ -744,19 +867,24 @@ function vLibrary() {
 const RECIPES = [['pasta', 'Creamy Cajun Chicken Pasta', 45], ['potato-bowl', 'Big Mac Loaded Potato Bowl', 42], ['wrap', 'High-Protein Breakfast Wrap', 41], ['turkey-pasta', 'Turkey & Pasta Tomato Bowl', 40], ['breakfast', 'Eggs, Veg & Sourdough', 32]];
 function vCommunity() {
   const d = S.drop;
-  return `<div class="head"><div><h1>Community</h1><p>One drop every Monday at 07:00: a tip and 3 high-protein meals. Every client gets a push.</p></div>
+  return `<div class="head"><div><h1>Community</h1><p>Your tip and 3 meals go out every Wednesday at 07:00, the question of the week every Monday. Clients can post, like and comment, and you can hide anything.</p></div>
     <button class="btn line" data-toast="Post an announcement now">${ic('megaphone', 'sm')}Announcement</button></div>
   <div class="grid2">
     <section class="card pad" style="display:grid;gap:16px;align-content:start">
-      <div class="sec" style="margin:0"><h2>Week 44 · Monday 26 October</h2>${d.scheduled ? `<span class="tag t-mint">${ic('check', 'sm')}Scheduled</span>` : `<span class="tag t-grey">Draft</span>`}</div>
-      <label style="display:grid;gap:6px"><span class="eyebrow">Tip of the week</span><input id="tipT" value="${d.title}" style="height:44px;border-radius:12px;background:var(--s1);border:1px solid var(--hair);padding:0 14px;font:700 15px var(--display)"></label>
+      <div class="sec" style="margin:0"><h2>Week 44 · Wednesday 28 October</h2>${d.scheduled ? `<span class="tag t-mint">${ic('check', 'sm')}Scheduled</span>` : `<span class="tag t-grey">Draft</span>`}</div>
+      <label style="display:grid;gap:6px"><span class="eyebrow">Question of the week · Monday 26 Oct</span><input id="qT" value="${d.q}" style="height:44px;border-radius:8px;background:var(--s1);border:1px solid var(--hair);padding:0 14px;font:600 15px var(--body)"></label>
+      <label style="display:grid;gap:6px"><span class="eyebrow">Tip of the week · Wednesday 28 Oct</span><input id="tipT" value="${d.title}" style="height:44px;border-radius:12px;background:var(--s1);border:1px solid var(--hair);padding:0 14px;font:700 15px var(--display)"></label>
       <textarea class="fb" id="tipB" style="border-color:var(--hair);min-height:90px" aria-label="Tip text">${d.body}</textarea>
       <div><div class="sec" style="margin-bottom:10px"><span class="eyebrow">3 high-protein meals</span><span class="muted">Tap a meal to swap it</span></div>
         <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">${d.meals.map((m, i) => { const r = RECIPES[m]; return `<button class="ph" data-meal="${i}" title="Swap meal"><img src="assets/${r[0]}.jpg" alt=""><span class="react" style="background:rgba(0,0,0,.55)">${ic('swap', 'sm')}</span><span class="cap"><b>${r[1]}</b><small style="color:var(--amber)">${r[2]}g protein</small></span></button>`; }).join('')}</div></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn mint" data-sched>${ic('check', 'sm')}${d.scheduled ? 'Update' : 'Schedule for Monday'}</button><button class="btn violet" data-tipai>${ic('spark', 'sm')}KAI draft</button></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn mint" data-sched>${ic('check', 'sm')}${d.scheduled ? 'Update' : 'Schedule'}</button><button class="btn violet" data-tipai>${ic('spark', 'sm')}KAI draft</button></div>
     </section>
     <section style="display:grid;gap:20px;align-content:start">
-      <div><div class="sec"><h2>Last week's drop</h2><span class="muted">Week 43</span></div>
+      <div><div class="sec"><h2>Latest in the group</h2><span class="muted">Hide anything that shouldn't be there</span></div>
+        <div class="card">${[['m1', 'priya', '10k done this morning! 52:40, a new PB 🎉', '2 h · post'], ['m2', 'mark', 'Training with Jen. No skipping when someone\'s waiting for you 😂', 'Mon · answer'], ['m3', 'tom', 'Made the Big Mac bowl twice already', 'Thu · comment']].map(([id, c, t, w]) =>
+          `<div class="mod ${S.hidden[id] ? 'hidden' : ''}">${avatar(byId(c), 'width:30px;height:30px;font-size:11px')}<span><b>${byId(c).name.split(' ')[0]}</b> <small style="color:var(--fg3)">${w}</small><p>${t}</p></span>
+           <span style="display:flex;gap:2px"><button class="iconbtn" data-toast="Liked" aria-label="Like">${ic('heart', 'sm')}</button><button class="iconbtn" data-hide="${id}" aria-label="${S.hidden[id] ? 'Show' : 'Hide'}">${ic(S.hidden[id] ? 'open' : 'close', 'sm')}</button></span></div>`).join('')}</div></div>
+      <div><div class="sec"><h2>Last week</h2><span class="muted">Week 43</span></div>
         <div class="statrow"><div class="card"><b class="num" style="color:var(--violet)">29/35</b><small>Opened</small></div><div class="card"><b class="num" style="color:var(--coral)">23</b><small>Reactions</small></div><div class="card"><b class="num" style="color:var(--amber)">41</b><small>Meals saved</small></div></div></div>
       <div><div class="sec"><h2>Announcements</h2></div>
         <div class="card">${[['flame', 'amber', 'November challenge: 10k steps', '12 clients joined'], ['megaphone', 'sky', 'Studio closed Monday 3 November', 'Posted Mon 19 Oct']].map(([i, c, t, m]) => `<div class="ev" style="padding:14px 18px">${tileHTML(i, c)}<span><b>${t}</b><small>${m}</small></span><span></span></div>`).join('')}</div></div>
@@ -773,7 +901,7 @@ function vAutomation() {
     ['remind', 'clip', 'violet', 'Check-in reminder', 'On each client\'s chosen day and frequency, 09:00, again at 18:00 if not done', 'Auto'],
     ['payRemind', 'card', 'amber', 'Payment reminders', '3 days before, on the day, then every 3 days until paid. Alert me after 3 days', 'Auto'],
     ['sessRemind', 'bell', 'sky', 'Session reminders', 'The evening before, with the cancellation cut-off', 'Auto'],
-    ['drop', 'community', 'violet', 'Weekly drop', 'Monday 07:00 with a push to every client', 'Auto'],
+    ['drop', 'community', 'violet', 'Community posts', 'Question of the week Monday 07:00; tip and 3 meals Wednesday 07:00', 'Auto'],
     ['aiAnswer', 'messages', 'violet', 'KAI answers', 'Questions about the client\'s own plan. Pain, injury and plan changes come to you', 'Auto'],
     ['aiDraft', 'spark', 'violet', 'KAI drafts', 'Programme changes, nutrition feedback, replies and weekly tips', 'Needs approval']];
   return `<div class="head"><div><h1>Automation</h1><p>Your rules, applied the same way to every client.</p></div></div>
@@ -797,7 +925,7 @@ function render(keep) {
   $('main').innerHTML = `<div class="fade" style="display:grid;gap:24px">${v === 'today' ? vToday() : v === 'clients' ? vClients() : v === 'client' ? vClient() : v === 'programmes' ? vProgrammes()
     : v === 'schedule' ? vSchedule() : v === 'messages' ? vMessages() : v === 'library' ? vLibrary() : v === 'community' ? vCommunity() : vAutomation()}</div>`;
   if (!keep) $('main').firstElementChild.classList.add('fade'); else $('main').firstElementChild.classList.remove('fade');
-  $('layer').innerHTML = S.modal ? modalHTML() : '';
+  $('layer').innerHTML = !S.modal ? '' : S.modal.mode === 'block' ? blockModal() : modalHTML();
   window.scrollTo(0, keep ? y : 0);
 }
 function modalHTML() {
@@ -849,8 +977,19 @@ document.addEventListener('click', e => {
   if (d.react) { S.nut.reacted[d.react] = !S.nut.reacted[d.react]; return render(true); }
   if (d.sendfb !== undefined) { S.nut.fbSent = true; return render(true); }
   if (d.rule) { S.rules[d.rule] = !S.rules[d.rule]; return render(true); }
+  if (d.bmode) { S.bmode = d.bmode; return render(true); }
+  if (d.req) { S.reqDone[d.req] = d.l; return render(true); }
+  if (d.blockopen !== undefined) { S.modal = { mode: 'block' }; return render(true); }
+  if (d.bweekly !== undefined) { S.bweekly = !S.bweekly; return render(true); }
+  if (d.blocksave !== undefined) {
+    const from = +$('bfrom').value, to = +$('bto').value;
+    if (to <= from) { toast('End time must be after the start'); return; }
+    S.blocks.push({ day: +$('bday').value, from, to, reason: $('breason').value.trim(), weekly: !!S.bweekly });
+    S.modal = null; toast('Blocked · added to your Google Calendar'); return render(true);
+  }
+  if (d.hide) { S.hidden[d.hide] = !S.hidden[d.hide]; return render(true); }
   if (d.meal) { const m = S.drop.meals, i = +d.meal; let n = m[i]; do { n = (n + 1) % RECIPES.length; } while (m.includes(n)); m[i] = n; S.drop.scheduled = false; return render(true); }
-  if (d.sched !== undefined) { S.drop.title = $('tipT').value; S.drop.body = $('tipB').value; S.drop.scheduled = true; toast('Scheduled · Monday 07:00 to 35 clients'); return render(true); }
+  if (d.sched !== undefined) { S.drop.title = $('tipT').value; S.drop.body = $('tipB').value; S.drop.q = $('qT').value; S.drop.scheduled = true; toast('Scheduled · question Monday, tip and meals Wednesday'); return render(true); }
   if (d.tipai !== undefined) { $('tipT').value = 'Walk after your biggest meal'; $('tipB').value = 'A 10-minute walk after dinner helps digestion, adds 1,000+ steps and counts towards the November challenge.'; return; }
   if (d.conv) { S.conv = d.conv; return render(true); }
   if (d.aidraft !== undefined) { $('reply').value = S.conv === 'priya' ? 'Good luck Sunday! Keep Monday easy: swap to the upper-body day and we\'ll do legs Wednesday.' : 'Thanks for letting me know. Let\'s go through it Saturday.'; return; }

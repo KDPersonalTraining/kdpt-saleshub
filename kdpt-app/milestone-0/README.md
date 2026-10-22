@@ -144,6 +144,46 @@ thread:
 
 In the portal, everything the AI writes is labelled "KAI draft".
 
+### Bookings, Fuel, Progress and Community rebuilt (22 Oct)
+
+- **Bookings: you schedule.** The default mode is "You schedule". On the 20th,
+  each client gets the month's sessions placed in their regular slots. They
+  confirm, or ask to move one to a time you have free, and you approve, offer
+  another time or decline in the portal's Schedule page. A "Clients pick"
+  mode exists if you ever want self-booking.
+- **Google Calendar** is connected once. Anything already in it counts as busy
+  (times only, titles are never stored), and every session and block you add
+  is written back to it. Block time off in the portal (one-off or weekly) or
+  just add it to Google Calendar. Tables: `calendar_connections`,
+  `calendar_busy`, `booking_change_requests`.
+- **Fuel** is a real tracker:
+  - It shows a calories ring, protein, carbs and fat bars, and meals grouped
+    by breakfast, lunch, snacks and dinner.
+  - Food is added by search, barcode, KDPT recipes or quick add.
+  - A water tracker and your weekly review sit at the bottom.
+  - In the portal, a week-in-review table colours each day on target, under or
+    over (±10%).
+  - Data lives in `foods` (shared Open Food Facts rows plus KDPT recipes) and
+    `food_log_items`, with macros copied at log time.
+- **Progress** has four tabs:
+  - **Strength:** pick a lift and see every session's top set, estimated 1-rep
+    max and change, plus "Total lifted" with a plain explanation.
+  - **Records:** this month's personal bests and what counts as one.
+  - **Body:** measurements, photos, step-by-step how-to guides, and weight off
+    by default.
+  - **Consistency:** a labelled day-by-week calendar with a key.
+- **Community** has two tabs:
+  - **Feed:** a group chat where you and clients post, like and comment. The
+    question of the week is pinned.
+  - **Library:** sorted into Meals, Weekly tips (Wednesdays), Question of the
+    week (Mondays), Announcements, and Challenges & more.
+  - Coaches can hide anything. Clients can only create `client_post` entries
+    and delete their own.
+- **Icons** sit in a bordered tile tinted with their own colour.
+
+The access checks now cover food logs, group posts, comments and hiding, with
+30 checks in total.
+
 ### Check-ins and icons (22 Oct)
 
 The check-in is four short steps, with feelings first and the scale last:

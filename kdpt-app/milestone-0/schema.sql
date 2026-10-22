@@ -449,6 +449,9 @@ create table nutrition_settings (
   show_numbers  boolean not null default false,  -- coach decides per client
   kcal_target   int,
   protein_g_target int,
+  carbs_g_target int,
+  fat_g_target  int,
+  water_ml_target int,
   notes         text
 );
 
@@ -498,6 +501,49 @@ create table recipes (
 
 alter table meals
   add constraint meals_recipe_fk foreign key (recipe_id) references recipes (id) on delete set null;
+
+-- The food database. Shared rows (org_id null) come from Open Food Facts and
+-- are found by search or barcode; KDPT recipes and a client's own quick-adds
+-- belong to the organisation. Values are per serving.
+create table foods (
+  id            uuid primary key default gen_random_uuid(),
+  org_id        uuid references organisations (id),
+  source        text not null check (source in ('open_food_facts', 'kdpt_recipe', 'client_custom')),
+  external_id   text,
+  barcode       text,
+  name          text not null,
+  serving_desc  text not null,             -- '1 slice', '170 g pot'
+  serving_g     numeric(6,1),
+  kcal          numeric(6,1) not null,
+  protein_g     numeric(6,1) not null,
+  carbs_g       numeric(6,1) not null,
+  fat_g         numeric(6,1) not null,
+  recipe_id     uuid references recipes (id) on delete cascade,
+  created_by    uuid references profiles (id),
+  created_at    timestamptz not null default now(),
+  unique (source, external_id)
+);
+create index on foods (barcode) where barcode is not null;
+
+-- One row per food a client logs. Macros are copied at log time so editing a
+-- food never rewrites someone's history. Created on the phone, like set_logs.
+create table food_log_items (
+  id            uuid primary key,
+  org_id        uuid not null references organisations (id),
+  client_id     uuid not null references profiles (id) on delete cascade,
+  logged_on     date not null,
+  slot          meal_slot not null,
+  food_id       uuid references foods (id) on delete set null,
+  servings      numeric(5,2) not null default 1 check (servings > 0),
+  name          text not null,
+  kcal          numeric(7,1) not null,
+  protein_g     numeric(7,1) not null,
+  carbs_g       numeric(7,1) not null,
+  fat_g         numeric(7,1) not null,
+  meal_id       uuid references meals (id) on delete set null,   -- optional photo
+  created_at    timestamptz not null default now()
+);
+create index on food_log_items (client_id, logged_on);
 
 -- ---------------------------------------------------------------------------
 -- 8. Scheduling
@@ -576,6 +622,47 @@ create index on bookings (client_id, starts_at);
 
 -- Postgres itself refuses a double-booking for the coach.
 create extension if not exists btree_gist;
+-- Clients don't move bookings themselves (organisations.settings.booking_mode
+-- = 'coach_schedules', the default); they ask, and the coach decides.
+create type change_request_status as enum ('pending', 'approved', 'declined', 'countered');
+
+create table booking_change_requests (
+  id            uuid primary key default gen_random_uuid(),
+  org_id        uuid not null references organisations (id),
+  client_id     uuid not null references profiles (id) on delete cascade,
+  booking_id    uuid not null references bookings (id) on delete cascade,
+  requested_starts_at timestamptz not null,
+  client_note   text,
+  status        change_request_status not null default 'pending',
+  coach_reply   text,
+  countered_starts_at timestamptz,
+  decided_at    timestamptz,
+  created_at    timestamptz not null default now()
+);
+
+-- The coach's Google Calendar. Busy times are read from it (times only, never
+-- titles) and every booking and block is written back to it.
+create table calendar_connections (
+  coach_id      uuid primary key references profiles (id) on delete cascade,
+  org_id        uuid not null references organisations (id),
+  provider      text not null default 'google',
+  calendar_id   text not null,
+  refresh_token_encrypted bytea not null,  -- server only: no RLS policy grants access
+  sync_token    text,
+  last_synced_at timestamptz
+);
+
+create table calendar_busy (
+  id            uuid primary key default gen_random_uuid(),
+  org_id        uuid not null references organisations (id),
+  coach_id      uuid not null references profiles (id) on delete cascade,
+  starts_at     timestamptz not null,
+  ends_at       timestamptz not null,
+  external_id   text not null,
+  unique (coach_id, external_id)
+);
+create index on calendar_busy (coach_id, starts_at);
+
 alter table bookings add constraint no_coach_overlap
   exclude using gist (coach_id with =, tstzrange(starts_at, ends_at) with &&)
   where (status in ('held', 'confirmed'));
@@ -652,14 +739,29 @@ create table posts (
   id            uuid primary key default gen_random_uuid(),
   org_id        uuid not null references organisations (id),
   author_id     uuid not null references profiles (id),
-  kind          text not null check (kind in ('announcement', 'weekly_drop', 'tip', 'recipe', 'poll', 'challenge')),
+  -- client_post is the only kind a client can create.
+  kind          text not null check (kind in ('announcement', 'weekly_drop', 'tip', 'recipe', 'question', 'poll', 'challenge', 'client_post')),
   title         text,
   body          text not null,
   payload       jsonb not null default '{}'::jsonb,   -- weekly_drop: {"tip": ..., "recipe_ids": [3 ids]}; poll options
   audience      coaching_type[],                      -- null = everyone
   publish_at    timestamptz not null default now(),
+  pinned        boolean not null default false,
+  hidden_at     timestamptz,                          -- set by a coach; hidden from clients
+  hidden_by     uuid references profiles (id),
   created_at    timestamptz not null default now()
 );
+
+create table post_comments (
+  id            uuid primary key default gen_random_uuid(),
+  org_id        uuid not null references organisations (id),
+  post_id       uuid not null references posts (id) on delete cascade,
+  author_id     uuid not null references profiles (id) on delete cascade,
+  body          text not null check (length(body) between 1 and 2000),
+  hidden_at     timestamptz,
+  created_at    timestamptz not null default now()
+);
+create index on post_comments (post_id, created_at);
 
 create table post_reactions (
   post_id       uuid not null references posts (id) on delete cascade,
@@ -799,7 +901,7 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'workout_sessions', 'set_logs', 'substitutions', 'meals',
+    'workout_sessions', 'set_logs', 'substitutions', 'meals', 'food_log_items',
     'body_measurements', 'check_ins'
   ] loop
     execute format($p$
@@ -888,10 +990,47 @@ begin
   end loop;
 end $$;
 
--- Scheduled posts and recipes stay hidden from clients until publish time.
+-- The group feed. Clients see published, unhidden posts (and their own), can
+-- write client_post entries and delete their own; coaches moderate everything.
 drop policy org_read on posts;
 create policy org_read on posts for select
-  using (org_id = app.my_org() and (publish_at <= now() or app.is_staff()));
+  using (org_id = app.my_org()
+         and (app.is_staff() or (publish_at <= now() and (hidden_at is null or author_id = auth.uid()))));
+create policy client_post on posts for insert
+  with check (author_id = auth.uid() and kind = 'client_post' and org_id = app.my_org()
+              and hidden_at is null and not pinned);
+create policy own_delete on posts for delete using (author_id = auth.uid());
+
+create policy org_read on post_comments for select
+  using (org_id = app.my_org() and (hidden_at is null or app.is_staff() or author_id = auth.uid()));
+create policy own_write on post_comments for insert
+  with check (author_id = auth.uid() and org_id = app.my_org() and hidden_at is null);
+create policy own_delete on post_comments for delete using (author_id = auth.uid());
+create policy staff_all on post_comments for all
+  using (app.is_staff() and org_id = app.my_org())
+  with check (app.is_staff() and org_id = app.my_org());
+
+-- Foods: everyone reads the shared database and their organisation's foods.
+create policy read_foods on foods for select using (org_id is null or org_id = app.my_org());
+create policy client_custom on foods for insert
+  with check (source = 'client_custom' and created_by = auth.uid() and org_id = app.my_org());
+create policy staff_write on foods for all
+  using (app.is_staff() and org_id = app.my_org())
+  with check (app.is_staff() and org_id = app.my_org());
+
+-- Booking changes: a client asks; only staff decide.
+create policy client_read on booking_change_requests for select using (client_id = auth.uid());
+create policy client_ask on booking_change_requests for insert
+  with check (client_id = auth.uid() and status = 'pending' and org_id = app.my_org()
+              and exists (select 1 from bookings b where b.id = booking_id and b.client_id = auth.uid()));
+create policy staff_org on booking_change_requests for all
+  using (app.is_staff() and org_id = app.my_org())
+  with check (app.is_staff() and org_id = app.my_org());
+
+-- calendar_busy is staff-only; calendar_connections has no policy at all.
+create policy staff_org on calendar_busy for all
+  using (app.is_staff() and org_id = app.my_org())
+  with check (app.is_staff() and org_id = app.my_org());
 drop policy org_read on recipes;
 create policy org_read on recipes for select
   using (org_id = app.my_org() and (publish_at is null or publish_at <= now() or app.is_staff()));

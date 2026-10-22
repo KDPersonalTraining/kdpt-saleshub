@@ -50,7 +50,7 @@ svg { display: block; }
   .statusbar i { width: 120px; height: 34px; border-radius: 20px; background: #000; position: absolute; left: 50%; top: 11px; transform: translateX(-50%); }
   .screen { padding-top: 34px; }
 }
-.page { padding: 12px var(--gut-r) 120px var(--gut); display: grid; gap: 22px; }
+.page { padding: 12px var(--gut-r) 120px var(--gut); display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
 .page.flush { padding-top: 0; }
 
 /* ---- Tab bar ----------------------------------------------------------- */
@@ -232,7 +232,7 @@ svg { display: block; }
 
 /* ---- Sheets & overlays ------------------------------------------------- */
 .scrim { position: absolute; inset: 0; z-index: 40; background: rgba(0,0,0,.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; align-items: flex-end; }
-.sheet { width: 100%; background: var(--s1); border-top: 1px solid var(--hair); border-radius: 34px 34px 0 0; padding: 12px var(--gut-r) calc(28px + env(safe-area-inset-bottom, 0px)) var(--gut); display: grid; gap: 20px; max-height: 92%; overflow-y: auto; }
+.sheet { grid-template-columns: minmax(0, 1fr); width: 100%; background: var(--s1); border-top: 1px solid var(--hair); border-radius: 34px 34px 0 0; padding: 12px var(--gut-r) calc(28px + env(safe-area-inset-bottom, 0px)) var(--gut); display: grid; gap: 20px; max-height: 92%; overflow-y: auto; }
 @media (prefers-reduced-motion: no-preference) { .sheet { animation: up .32s cubic-bezier(.2,.9,.3,1); } @keyframes up { from { transform: translateY(40px); opacity: .4; } } }
 .grab { width: 40px; height: 5px; border-radius: 3px; background: var(--s3); margin: 0 auto; }
 .sheet h3 { font-size: 24px; font-weight: 800; }
@@ -471,16 +471,6 @@ svg { display: block; }
 .push p { margin: 0; font-size: 14px; color: var(--fg); }
 
 /* Booking, payment, check-in sheets */
-.allow { display: flex; gap: 6px; }
-.allow i { flex: 1; height: 8px; border-radius: 4px; background: var(--s3); transition: background .2s; }
-.allow i.on { background: var(--sky); }
-.dates { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.dt { border-radius: 16px; background: var(--s2); padding: 10px 4px; display: grid; justify-items: center; gap: 1px; border: 1.5px solid transparent; }
-.dt small { color: var(--fg3); font: 600 10px var(--display); letter-spacing: .1em; }
-.dt b { font: 800 20px var(--display); }
-.dt span { color: var(--fg2); font-size: 11px; }
-.dt[aria-pressed="true"] { background: rgba(110,198,255,.12); border-color: var(--sky); }
-.dt[aria-pressed="true"] b { color: var(--sky); }
 .paycard { border-radius: 22px; padding: 18px; background: var(--s2); display: grid; gap: 10px; }
 .line { display: flex; justify-content: space-between; color: var(--fg2); font-size: 14px; }
 .line.total { color: var(--fg); font: 800 24px var(--display); border-top: 1px solid var(--hair); padding-top: 12px; }
@@ -537,7 +527,7 @@ svg { display: block; }
 .drop { border-radius: 20px; }
 .summary { gap: 18px; }
 .seg { border-radius: 10px; padding: 3px; } .seg button { border-radius: 8px; height: 34px; }
-.area { border-radius: 12px; } .daychips button { border-radius: 10px; } .dt { border-radius: 12px; }
+.area { border-radius: 12px; } .daychips button { border-radius: 10px; }
 .opt, .fopt, .goal { border-radius: 16px; } .tg { border-radius: 14px; }
 .toast { border-radius: 12px; }
 .sheet { border-radius: 26px 26px 0 0; }
@@ -585,23 +575,24 @@ svg { display: block; }
 .setrow + .setrow { box-shadow: inset 0 1px 0 var(--hair); }
 .setrow.done { background: rgba(126,213,151,.06); }
 .target { border-radius: 16px; }
-/* Icons follow the tab bar: bare white glyphs, no tiles. Colour appears only
-   where it means something: mint for training and selection, coral for pain,
-   violet for KAI, and the ring colours on Momentum. */
-.li, .gi, .act i:not(:has(.orb)), .wintile, .suptile { background: none !important; box-shadow: none !important; color: var(--fg) !important; }
+/* Icons sit in a bordered tile tinted with their own colour. The tile takes
+   its colour from the element's `color`, so markup only sets one value. */
+.li, .gi, .act i:not(:has(.orb)), .wintile, .suptile {
+  background: color-mix(in srgb, currentColor 13%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 45%, transparent) !important;
+  display: grid; place-items: center; flex: none; }
 .li svg, .gi svg, .act i svg, .wintile svg, .suptile svg { color: inherit; }
-.li { width: 28px !important; height: 28px !important; border-radius: 0 !important; }
-.li svg { width: 24px !important; height: 24px !important; }
+.li { width: 40px !important; height: 40px !important; border-radius: 12px !important; }
+.li svg { width: 22px !important; height: 22px !important; }
 .crow .li { color: var(--k) !important; }
-.actions { background: var(--s2); border-radius: 16px; padding: 18px 6px 14px; }
-.act { color: var(--fg2); font-weight: 500; font-size: 12px; gap: 10px; }
-.act i { width: 40px; height: 34px; border-radius: 0; }
-.act i svg { width: 30px; height: 30px; }
-.act .orb { width: 34px !important; height: 34px !important; }
-.gi { width: auto !important; height: auto !important; border-radius: 0 !important; justify-self: start; }
-.gi svg { width: 32px; height: 32px; }
-.goal[aria-pressed="true"] .gi { color: var(--mint) !important; }
-.group { --inset: 56px !important; }
+.actions { background: var(--s2); border-radius: 16px; padding: 16px 6px 12px; }
+.act { color: var(--fg2); font-weight: 500; font-size: 12px; gap: 9px; }
+.act i { width: 56px; height: 56px; border-radius: 17px; }
+.act i svg { width: 28px; height: 28px; }
+.act .orb { width: 56px !important; height: 56px !important; }
+.gi { width: 48px !important; height: 48px !important; border-radius: 14px !important; }
+.gi svg { width: 26px; height: 26px; }
+.group { --inset: 68px !important; }
 .tabbar svg { width: 25px; height: 25px; }
 .tabbar button { color: #5d635f; }
 .wrow .tile svg { width: 26px; height: 26px; }
@@ -661,16 +652,138 @@ svg { display: block; }
 .scale5 button:last-child { border-radius: 5px 12px 12px 5px; }
 .scale5 button.lit { background: color-mix(in srgb, var(--c) 55%, transparent); color: #0b0c0b; }
 .scale5 button[aria-pressed="true"] { background: var(--c); color: #0b0c0b; }
-.cimetric .lab b svg { width: 22px; height: 22px; }
+.cimetric .lab b svg { width: 18px !important; height: 18px !important; }
 .wins { gap: 10px; }
 .win { flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px; min-height: 104px; border-radius: 16px; font-size: 14px; position: relative; }
-.win .wintile { width: auto; height: auto; }
+.win .wintile { width: 44px; height: 44px; border-radius: 13px; }
 .win .wintile svg { width: 28px; height: 28px; }
 .win[aria-pressed="true"] { border-color: var(--mint); background: rgba(126,213,151,.07); }
 .win[aria-pressed="true"] .wintile { color: var(--mint) !important; }
 .win[aria-pressed="true"]::after { content: ""; position: absolute; top: 14px; right: 14px; width: 20px; height: 20px; border-radius: 50%; background: var(--mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5' fill='none' stroke='%2303140a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 13px no-repeat; }
-.sup .suptile { width: 28px; height: 28px; }
-.sup .suptile svg { width: 24px; height: 24px; }
+.sup .suptile { width: 36px; height: 36px; border-radius: 10px; }
+.sup .suptile svg { width: 20px; height: 20px; }
+/* Fuel */
+.days7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.days7 button { display: grid; justify-items: center; gap: 4px; padding: 8px 0; border-radius: 12px; font-size: 11px; color: var(--fg3); }
+.days7 button b { font: 700 15px var(--display); color: var(--fg2); }
+.days7 button i { width: 5px; height: 5px; border-radius: 50%; background: var(--amber); }
+.days7 button i.none { background: transparent; }
+.days7 button.on { background: var(--fg); color: #000; }
+.days7 button.on b { color: #000; }
+.fsum { padding: 18px; display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 18px; align-items: center; }
+.mrow { display: grid; gap: 5px; }
+.mrow .top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: var(--fg2); }
+.mrow .top b { font: 700 15px var(--display); color: var(--fg); }
+.mrow .top b span { color: var(--fg3); font-weight: 600; font-size: 12px; }
+.mbar { height: 7px; border-radius: 4px; background: var(--s3); overflow: hidden; }
+.mbar i { display: block; height: 100%; border-radius: 4px; }
+.slot-head { display: flex; align-items: center; gap: 12px; padding: 14px 14px 12px; }
+.slot-head b { font: 700 16px var(--display); flex: 1; }
+.slot-head span { color: var(--fg3); font-size: 13px; }
+.addbtn { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: var(--amber); box-shadow: inset 0 0 0 1px rgba(255,180,94,.45); background: rgba(255,180,94,.1); }
+.addbtn svg { width: 18px; height: 18px; }
+.food { display: flex; align-items: center; gap: 12px; padding: 11px 14px; }
+.food .t { flex: 1; min-width: 0; }
+.food b { font-weight: 500; font-size: 15px; display: block; }
+.food small { color: var(--fg3); font-size: 12px; }
+.food .kc { text-align: right; font: 700 14px var(--display); }
+.food .kc small { display: block; font: 500 11px var(--body); color: var(--amber); }
+.food img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; }
+.empty { padding: 4px 14px 16px; color: var(--fg3); font-size: 14px; }
+.water { display: flex; align-items: center; gap: 12px; padding: 14px; }
+.water .cups { display: flex; gap: 4px; flex: 1; }
+.water .cups i { flex: 1; height: 22px; border-radius: 5px; background: var(--s3); }
+.water .cups i.on { background: var(--sky); }
+.search { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 14px; border-radius: 14px; background: var(--s2); color: var(--fg3); }
+.search input { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: 16px var(--body); }
+.search input:focus { outline: none; }
+.tabs4 { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--s2); border-radius: 10px; padding: 3px; }
+.tabs4 button { height: 34px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--fg2); }
+.tabs4 button.on { background: var(--s3); color: var(--fg); }
+.scanbox { aspect-ratio: 4 / 3; max-width: 100%; border-radius: 16px; background: radial-gradient(circle at 50% 40%, #1b1f1d, #090a0a); display: grid; place-items: center; position: relative; color: var(--fg2); text-align: center; font-size: 14px; }
+.scanbox::before { content: ""; position: absolute; inset: 22% 16%; border: 2px solid var(--amber); border-radius: 14px; box-shadow: 0 0 0 999px rgba(0,0,0,.25); }
+.qa { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.qa label { display: grid; gap: 4px; background: var(--s2); border-radius: 12px; padding: 10px 12px; font-size: 12px; color: var(--fg3); }
+.qa input { background: none; border: 0; color: var(--fg); font: 800 20px var(--display); width: 100%; }
+.qa input:focus { outline: none; }
+
+/* Progress */
+.seg.four { grid-template-columns: repeat(4, 1fr); }
+.liftchips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--gut-r)) 0 calc(-1 * var(--gut)); padding: 0 var(--gut-r) 0 var(--gut); }
+.liftchips button { flex: none; height: 36px; padding: 0 14px; border-radius: 10px; background: var(--s2); font-size: 13px; font-weight: 500; color: var(--fg2); }
+.liftchips button.on { background: var(--mint); color: var(--mint-ink); }
+.chart2 { width: 100%; height: auto; margin-top: 12px; }
+.sess { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 12px 14px; font-size: 14px; }
+.sess time { color: var(--fg3); font-size: 12px; }
+.sess b { font: 700 15px var(--display); }
+.sess small { display: block; color: var(--fg3); font-size: 12px; }
+.sess .chg { font: 700 13px var(--display); }
+.explain { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--s1); color: var(--fg2); font-size: 13px; line-height: 1.5; }
+.explain svg { flex: none; width: 18px; height: 18px; color: var(--sky); margin-top: 1px; }
+.vbars { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; align-items: end; height: 90px; margin-top: 12px; }
+.vbars div { display: grid; gap: 4px; justify-items: center; align-content: end; height: 100%; font-size: 10px; color: var(--fg3); }
+.vbars i { width: 100%; border-radius: 5px; background: rgba(110,198,255,.35); }
+.vbars div:last-child i { background: var(--sky); }
+.rec { display: flex; gap: 12px; align-items: center; padding: 13px 14px; }
+.rec .t { flex: 1; min-width: 0; }
+.rec b { font-weight: 600; font-size: 15px; display: block; }
+.rec small { color: var(--fg3); font-size: 12px; }
+.rec .v { text-align: right; font: 800 16px var(--display); }
+.rec .v small { display: block; color: var(--mint); font: 600 11px var(--body); }
+.guide { padding: 0 14px 14px 68px; margin: 0; color: var(--fg2); font-size: 14px; display: grid; gap: 6px; }
+.photos3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.photos3 button { aspect-ratio: 3 / 4; max-width: 100%; border-radius: 14px; border: 1.5px dashed var(--hair); display: grid; place-items: center; align-content: center; gap: 6px; color: var(--fg3); font-size: 12px; }
+.photos3 svg { width: 30px; height: 30px; }
+.cal8 { display: grid; grid-template-columns: 46px repeat(7, 1fr); gap: 5px; align-items: center; padding: 16px; font-size: 11px; color: var(--fg3); }
+.cal8 span.h { text-align: center; font-weight: 600; }
+.cal8 i { aspect-ratio: 1; max-width: 100%; border-radius: 6px; background: var(--s3); }
+.cal8 i.w { background: var(--mint); }
+.cal8 i.pt { background: var(--sky); }
+.cal8 i.x { background: transparent; box-shadow: inset 0 0 0 1.5px var(--coral); }
+.legend2 { display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 0 16px 16px; font-size: 12px; color: var(--fg2); }
+.legend2 span { display: flex; gap: 6px; align-items: center; }
+.legend2 i { width: 12px; height: 12px; border-radius: 3px; }
+
+/* Community */
+.comp { display: flex; gap: 10px; align-items: center; padding: 12px; border-radius: 16px; background: var(--s2); }
+.comp input { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: 15px var(--body); }
+.comp input:focus { outline: none; }
+.comp .postbtn { font: 700 12px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--mint); }
+.post { background: var(--s2); border-radius: 16px; padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.post.pinned { box-shadow: inset 0 0 0 1px rgba(110,198,255,.35); }
+.post .by { display: flex; gap: 10px; align-items: center; }
+.post .by .t { flex: 1; min-width: 0; }
+.post .by .label-dot { flex: 0 1 auto; min-width: 0; font-size: 10px; letter-spacing: .1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.post .by b { font-weight: 600; font-size: 15px; }
+.post .by small { display: block; color: var(--fg3); font-size: 12px; }
+.av { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 700 13px var(--display); flex: none; }
+.coachtag { font: 700 10px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--mint); margin-left: 6px; }
+.post p { margin: 0; font-size: 15px; line-height: 1.5; }
+.post h3 { font-size: 19px; font-weight: 800; }
+.post .strip3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.post .strip3 img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; }
+.post .acts { display: flex; gap: 18px; color: var(--fg2); font-size: 13px; font-weight: 600; }
+.post .acts button { display: inline-flex; gap: 6px; align-items: center; }
+.post .acts svg { width: 18px; height: 18px; }
+.post .acts .on { color: var(--coral); }
+.cmts { display: grid; gap: 10px; padding-top: 4px; border-top: 1px solid var(--hair); }
+.cmt { display: flex; gap: 10px; font-size: 14px; }
+.cmt .av { width: 28px; height: 28px; font-size: 10px; }
+.cmt b { font-weight: 600; margin-right: 6px; }
+.reply { display: flex; gap: 8px; min-width: 0; }
+.reply .addbtn { flex: none; }
+.reply input { flex: 1; min-width: 0; height: 38px; border-radius: 10px; background: var(--s3); border: 0; color: var(--fg); padding: 0 12px; font: 14px var(--body); }
+.board { display: grid; gap: 6px; }
+.board div { display: flex; justify-content: space-between; font-size: 14px; padding: 8px 10px; border-radius: 10px; background: var(--s3); }
+.board div:first-child { background: rgba(255,180,94,.14); color: var(--amber); }
+.cats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cat { display: grid; gap: 14px; padding: 16px; border-radius: 16px; background: var(--s2); text-align: left; min-height: 128px; align-content: space-between; }
+.cat b { font: 700 16px var(--display); display: block; }
+.cat small { color: var(--fg3); font-size: 12px; }
+.cat.wide { grid-column: 1 / -1; min-height: 0; grid-template-columns: auto 1fr; align-items: center; }
+.datebox.sm { width: 46px; height: 48px; border-radius: 12px; }
+.datebox.sm b { font-size: 18px; }
+.datebox.sm small { font-size: 9px; }
 .quote { border-left: 2px solid var(--violet); padding: 2px 0 2px 10px; margin-bottom: 6px; font-size: 13px; opacity: .85; }
 </style>
 
@@ -830,10 +943,13 @@ function fitToTime(minutes) {
 // ---------------------------------------------------------------------------
 const S = { onb: { step: 0, goal: 'strength', days: 3, freq: 'weekly', day: 'Sun' },
   notifs: { workout: true, booking: true, session: true, payment: true, drop: true, checkin: true },
-  book: { sel: null, done: false }, paid: false, autopay: true, ci: null,
+  book: { req: {}, pick: null, done: false }, paid: false, autopay: true, ci: null,
   liked: {}, saved: {}, read: false, ai: [], handed: false,
   view: 'home', duration: 60, idx: 0, logs: {}, swaps: {}, why: false, sheet: null,
-  pain: { area: null, sev: 3, act: null, sent: false }, rest: null, progTab: 0, chat: [] };
+  pain: { area: null, sev: 3, act: null, sent: false }, rest: null, progTab: 0, chat: [],
+  fuelDay: 2, log: { Breakfast: ['eggs', 'sourdough', 'avo'], Lunch: ['wrap'], Snacks: ['yog', 'berries'], Dinner: [] }, water: 6,
+  add: null, lift: 'Leg Press', guide: {}, showWeight: false,
+  comm: { tab: 'feed', cat: null, open: { q1: true }, liked: {}, posts: null } };
 const plan = () => fitToTime(S.duration);
 const newCheckin = () => ({ step: 1, mood: 3, words: '', sleep: 4, energy: 3, stress: 3, food: 4, motivation: 4, aches: 'None',
   wins: {}, photo: false, measure: false, waist: '', weight: '', support: {}, note: '' });
@@ -879,7 +995,7 @@ const vHome = () => {
 
 
     <div class="actions">
-      <button class="act" data-go="fuel"><i style="color:var(--amber)">${ic('camera')}</i>Log meal</button>
+      <button class="act" data-go="fuel"><i style="color:var(--amber)">${ic('fuel')}</i>Log food</button>
       <button class="act" data-sheet="book"><i style="color:var(--sky)">${ic('cal')}</i>Book</button>
       <button class="act" data-checkin><i style="color:var(--violet)">${ic('clip')}</i>Check-in</button>
       <button class="act" data-go="coachai"><i style="background:none"><span class="orb" style="width:60px;height:60px;box-shadow:none">${ic('spark')}</span></i>Ask KAI</button>
@@ -980,35 +1096,86 @@ const vFinish = () => {
   </div>`;
 };
 
-const vFuel = () => `<div class="page fade">
-  <div class="greet" style="padding-top:6px"><div class="eyebrow">Today</div><h1>Fuel</h1></div>
-  <div class="card macro">
-    <svg viewBox="0 0 140 140" width="140" height="140" aria-label="Protein 112 of 140 grams">
-      ${ring(140, 14, 112 / 140, 'var(--amber)', 'rgba(255,180,94,.15)')}
-      <text x="70" y="70" text-anchor="middle" fill="var(--fg)" font-family="Montserrat" font-weight="800" font-size="30">112</text>
-      <text x="70" y="92" text-anchor="middle" fill="var(--fg3)" font-family="Poppins" font-size="12">of 140 g protein</text>
+// Food database sample. In the real app this is Open Food Facts (barcodes)
+// plus Kyle's own recipes; everything stores calories and macros per serving.
+const FOODS = [
+  { id: 'eggs', n: 'Eggs, scrambled', p: '2 large', kcal: 150, P: 13, C: 1, F: 11 },
+  { id: 'sourdough', n: 'Sourdough toast', p: '1 slice', kcal: 120, P: 4, C: 23, F: 1 },
+  { id: 'avo', n: 'Avocado', p: '½ medium', kcal: 120, P: 1.5, C: 6, F: 11 },
+  { id: 'wrap', n: 'High-Protein Breakfast Wrap', p: '1 wrap · KDPT recipe', kcal: 400, P: 41, C: 35, F: 10, img: 'wrap' },
+  { id: 'yog', n: 'Greek yoghurt 0%', p: '170 g pot', kcal: 100, P: 17, C: 6, F: 0 },
+  { id: 'berries', n: 'Blueberries', p: '80 g', kcal: 45, P: 0.5, C: 11, F: 0.3 },
+  { id: 'chicken', n: 'Chicken breast, grilled', p: '150 g', kcal: 165, P: 31, C: 0, F: 3.6 },
+  { id: 'rice', n: 'Basmati rice, cooked', p: '150 g', kcal: 195, P: 4, C: 43, F: 0.5 },
+  { id: 'whey', n: 'Whey protein shake', p: '30 g scoop', kcal: 120, P: 24, C: 3, F: 1.5 },
+  { id: 'oats', n: 'Porridge oats', p: '50 g', kcal: 190, P: 6.5, C: 33, F: 3.5 },
+  { id: 'salmon', n: 'Salmon fillet', p: '130 g', kcal: 270, P: 28, C: 0, F: 17 },
+  { id: 'pasta', n: 'Creamy Cajun Chicken Pasta', p: '1 portion · KDPT recipe', kcal: 480, P: 45, C: 52, F: 10, img: 'pasta' },
+  { id: 'bowl', n: 'Big Mac Loaded Potato Bowl', p: '1 bowl · KDPT recipe', kcal: 540, P: 42, C: 48, F: 18, img: 'potato-bowl' },
+  { id: 'turkey', n: 'Turkey & Pasta Tomato Bowl', p: '1 bowl · KDPT recipe', kcal: 500, P: 40, C: 55, F: 11, img: 'turkey-pasta' },
+  { id: 'banana', n: 'Banana', p: '1 medium', kcal: 105, P: 1.3, C: 27, F: 0.4 },
+  { id: 'almonds', n: 'Almonds', p: '25 g', kcal: 145, P: 5, C: 5, F: 12.5 }
+];
+const food = id => FOODS.find(f => f.id === id);
+const TARGET = { kcal: 2100, P: 140, C: 210, F: 70 };
+const MACROS = [['P', 'Protein', 'var(--amber)'], ['C', 'Carbs', 'var(--sky)'], ['F', 'Fat', 'var(--violet)']];
+const SLOTS = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
+const r0 = n => Math.round(n);
+function dayTotals() {
+  const t = { kcal: 0, P: 0, C: 0, F: 0 };
+  SLOTS.forEach(sl => S.log[sl].forEach(id => { const f = food(id); for (const k in t) t[k] += f[k]; }));
+  return t;
+}
+
+const vFuel = () => {
+  const t = dayTotals(), left = TARGET.kcal - t.kcal;
+  const days = [['M', 19], ['T', 20], ['W', 21], ['T', 22], ['F', 23], ['S', 24], ['S', 25]];
+  return `<div class="page fade">
+  <div class="greet" style="padding-top:6px"><div class="eyebrow">Nutrition</div><h1>Fuel</h1></div>
+  <div class="days7">${days.map(([d, n], i) => `<button class="${S.fuelDay === i ? 'on' : ''}" data-fday="${i}">${d}<b class="num">${n}</b><i class="${i < 3 ? '' : 'none'}"></i></button>`).join('')}</div>
+  <div class="card fsum">
+    <svg viewBox="0 0 132 132" width="132" height="132" aria-label="${r0(t.kcal)} of ${TARGET.kcal} calories">
+      ${ring(132, 12, t.kcal / TARGET.kcal, 'var(--fg)', 'var(--s3)')}
+      <text x="66" y="64" text-anchor="middle" fill="var(--fg)" font-family="Montserrat" font-weight="800" font-size="26">${r0(Math.abs(left)).toLocaleString('en-GB')}</text>
+      <text x="66" y="84" text-anchor="middle" fill="var(--fg3)" font-family="Poppins" font-size="11">${left >= 0 ? 'kcal left' : 'kcal over'}</text>
     </svg>
-    <div class="lines">
-      <div class="line"><small>Calories</small><b class="num">1,640 <span>/ 2,100</span></b><div class="bar"><i style="width:78%;background:var(--fg)"></i></div></div>
-      <div class="line"><small>Water</small><b class="num">1.5 <span>/ 2.5 L</span></b><div class="bar"><i style="width:60%;background:var(--sky)"></i></div></div>
+    <div style="display:grid;gap:12px">
+      <div class="mrow"><div class="top"><span>Calories</span><b class="num">${r0(t.kcal).toLocaleString('en-GB')} <span>/ ${TARGET.kcal.toLocaleString('en-GB')}</span></b></div></div>
+      ${MACROS.map(([k, l, c]) => `<div class="mrow"><div class="top"><span>${l}</span><b class="num">${r0(t[k])} <span>/ ${TARGET[k]} g</span></b></div><div class="mbar"><i style="width:${Math.min(100, t[k] / TARGET[k] * 100)}%;background:${c}"></i></div></div>`).join('')}
     </div>
   </div>
-  <div class="sec-head"><h2>Meals</h2></div>
-  <div class="meals">
-    <button class="meal" data-toast="Meal details"><div class="ph"><img src="assets/breakfast.jpg" alt=""><span class="ok">${ic('check', 'ic', 2.6)}</span></div><b>Breakfast</b><small>8:05 · 32g protein</small></button>
-    <button class="meal" data-toast="Meal details"><div class="ph"><img src="assets/wrap.jpg" alt=""><span class="ok">${ic('check', 'ic', 2.6)}</span></div><b>Lunch</b><small>12:40 · 41g protein</small></button>
-    <button class="meal add" data-toast="Camera opens here"><div class="ph">${ic('camera')}</div><b>Dinner</b><small>Snap or describe</small></button>
-  </div>
+  ${SLOTS.map(sl => { const items = S.log[sl].map(food), kc = items.reduce((a, f) => a + f.kcal, 0); return `
+  <div class="group" style="--inset:14px">
+    <div class="slot-head"><b>${sl}</b><span class="num">${kc ? kc + ' kcal' : ''}</span><button class="addbtn" data-addfood="${sl}" aria-label="Add food to ${sl}">${ic('plus')}</button></div>
+    ${items.length ? items.map((f, i) => `<div class="food">${f.img ? `<img src="assets/${f.img}.jpg" alt="">` : ''}<span class="t"><b>${f.n}</b><small>${f.p}</small></span><span class="kc num">${f.kcal}<small>${f.P}g protein</small></span></div>`).join('')
+      : `<div class="empty">Nothing logged yet. Tap + to add food, scan a barcode or pick one of Kyle's recipes.</div>`}
+  </div>`; }).join('')}
+  <div class="group"><div class="water"><span class="li" style="color:var(--sky)">${ic('drop')}</span><span class="cups">${Array.from({ length: 10 }, (_, i) => `<i class="${i < S.water ? 'on' : ''}"></i>`).join('')}</span><span class="num" style="font:700 14px var(--display)">${(S.water * 0.25).toFixed(2).replace(/0$/, '')} L</span><button class="addbtn" style="color:var(--sky);background:rgba(110,198,255,.1);box-shadow:inset 0 0 0 1px rgba(110,198,255,.45)" data-water aria-label="Add a glass">${ic('plus')}</button></div></div>
   <button class="card note" data-go="chat">
     <img class="mark" src="assets/kd-mark.png" alt="">
-    <span><small>Kyle · weekly feedback</small><p>Breakfasts are spot on. Add a protein snack mid-afternoon.</p></span>
+    <span><small>Kyle · weekly review</small><p>Protein's up to 128g on average, nice. Dinners are light on veg, so add a side salad or frozen veg.</p></span>
   </button>
-  <div class="sec-head"><h2>New recipes</h2><button data-toast="All recipes">See all</button></div>
-  <div class="meals">
-    ${[['pasta', 'Creamy Cajun Chicken Pasta', '480 kcal', '45g protein'], ['potato-bowl', 'Big Mac Potato Bowl', '540 kcal', '42g protein'], ['turkey-pasta', 'Turkey Tomato Pasta', '500 kcal', '40g protein']].map(([img, n, k, pr]) =>
-      `<button class="recipe" data-toast="${n}"><div class="ph"><img src="assets/${img}.jpg" alt=""></div><b>${n}</b><div class="tags num"><span>${pr}</span><span>${k}</span></div></button>`).join('')}
-  </div>
 </div>`;
+};
+
+function addFoodHTML() {
+  const a = S.add, q = (a.q || '').toLowerCase();
+  const list = FOODS.filter(f => (a.tab === 'recipes' ? f.img : true) && f.n.toLowerCase().includes(q));
+  const tabs = [['search', 'Search'], ['scan', 'Scan'], ['recipes', 'Recipes'], ['quick', 'Quick add']];
+  let body = '';
+  if (a.tab === 'search' || a.tab === 'recipes') body = `
+    ${a.tab === 'search' ? `<label class="search">${ic('search')}<input id="fq" placeholder="Search foods" value="${a.q || ''}" aria-label="Search foods"></label>` : ''}
+    <div class="group" style="--inset:14px" id="fres">${foodResults(list)}</div>`;
+  if (a.tab === 'scan') body = `<div class="scanbox"><span>Point the camera at a barcode<br><small style="color:var(--fg3)">Uses your phone's camera in the installed app</small></span></div>`;
+  if (a.tab === 'quick') body = `<div class="qa">${[['qk', 'Calories', 'kcal'], ['qp', 'Protein', 'g'], ['qc', 'Carbs', 'g'], ['qf', 'Fat', 'g']].map(([id, l, u]) => `<label>${l} (${u})<input id="${id}" inputmode="decimal" placeholder="0"></label>`).join('')}</div>
+    <button class="pill-btn mint" data-quickadd>Add to ${a.slot}</button>`;
+  return `<div><h3>Add to ${a.slot}</h3></div>
+    <div class="tabs4">${tabs.map(([k, l]) => `<button class="${a.tab === k ? 'on' : ''}" data-ftab="${k}">${l}</button>`).join('')}</div>${body}`;
+}
+function foodResults(list) {
+  return list.map(f => `<div class="food">${f.img ? `<img src="assets/${f.img}.jpg" alt="">` : ''}<span class="t"><b>${f.n}</b><small class="num">${f.p} · ${f.kcal} kcal · P ${f.P} C ${f.C} F ${f.F}</small></span><button class="addbtn" data-pickfood="${f.id}" aria-label="Add ${f.n}">${ic('plus')}</button></div>`).join('')
+    || `<div class="empty">No matches. Try Quick add to enter the numbers yourself.</div>`;
+}
 
 function lineChart(pts, color, w = 320, h = 120) {
   const min = Math.min(...pts), max = Math.max(...pts), pad = 8;
@@ -1025,36 +1192,86 @@ function lineChart(pts, color, w = 320, h = 120) {
   </svg>`;
 }
 
+// Every logged top set for the main lifts. Est. 1-rep max uses the Epley formula.
+const LIFTS = {
+  'Leg Press': [['1 Sep', 100, 12], ['8 Sep', 100, 12], ['15 Sep', 110, 10], ['22 Sep', 110, 12], ['29 Sep', 110, 12], ['6 Oct', 120, 11], ['13 Oct', 120, 12], ['19 Oct', 130, 10]],
+  'Romanian Deadlift': [['1 Sep', 45, 10], ['8 Sep', 47.5, 10], ['15 Sep', 50, 9], ['22 Sep', 50, 10], ['29 Sep', 52.5, 10], ['6 Oct', 55, 9], ['13 Oct', 57.5, 10], ['19 Oct', 60, 10]],
+  'Hip Thrust': [['3 Sep', 60, 10], ['10 Sep', 65, 10], ['17 Sep', 70, 10], ['24 Sep', 70, 10], ['1 Oct', 75, 10], ['8 Oct', 75, 10], ['15 Oct', 80, 10], ['20 Oct', 80, 12]],
+  'Lat Pulldown': [['2 Sep', 35, 12], ['9 Sep', 35, 12], ['16 Sep', 37.5, 10], ['23 Sep', 37.5, 12], ['30 Sep', 40, 10], ['7 Oct', 40, 11], ['14 Oct', 42.5, 10], ['20 Oct', 42.5, 12]]
+};
+const e1rm = (w, r) => Math.round(w * (1 + r / 30));
+const TOTALS = [[7, 5200], [14, 5650], [21, 6100], [28, 6300], [5, 6900], [12, 7350], [19, 7900], [26, 8420]];
+
+function liftChart(rows) {
+  const W = 320, H = 180, L = 34, B = 24, T = 26, R = 16;
+  const v = rows.map(x => x[1]), lo = Math.floor(Math.min(...v) / 10) * 10, hi = Math.ceil(Math.max(...v) / 10) * 10 || lo + 10;
+  const X = i => L + i * (W - L - R) / (rows.length - 1), Y = n => T + (hi - n) / (hi - lo || 1) * (H - T - B);
+  const ticks = [lo, (lo + hi) / 2, hi];
+  const d = rows.map((x, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)} ${Y(x[1]).toFixed(1)}`).join(' ');
+  return `<svg class="chart2" viewBox="0 0 ${W} ${H}" role="img" aria-label="Top set weight each session">
+    ${ticks.map(t => `<line x1="${L}" x2="${W - R}" y1="${Y(t)}" y2="${Y(t)}" stroke="rgba(255,255,255,.07)"/><text x="${L - 6}" y="${Y(t) + 4}" text-anchor="end" fill="var(--fg3)" font-size="10" font-family="Poppins">${t}</text>`).join('')}
+    <path d="${d}" fill="none" stroke="var(--mint)" stroke-width="2.5" stroke-linejoin="round"/>
+    ${rows.map((x, i) => `<circle cx="${X(i)}" cy="${Y(x[1])}" r="${i === rows.length - 1 ? 5.5 : 3.5}" fill="${i === rows.length - 1 ? 'var(--mint)' : '#151716'}" stroke="var(--mint)" stroke-width="2"/>`).join('')}
+    ${[rows.length - 1].map(i => `<text x="${X(i)}" y="${Y(rows[i][1]) - 11}" text-anchor="middle" fill="var(--fg)" font-size="11" font-weight="700" font-family="Montserrat">${rows[i][1]}</text>`).join('')}
+    ${[0, Math.floor((rows.length - 1) / 2), rows.length - 1].map(i => `<text x="${X(i)}" y="${H - 6}" text-anchor="${i === 0 ? 'start' : i === rows.length - 1 ? 'end' : 'middle'}" fill="var(--fg3)" font-size="10" font-family="Poppins">${rows[i][0]}</text>`).join('')}
+  </svg>`;
+}
+
 const vProgress = () => {
-  const tabs = ['Strength', 'Body', 'Habits'];
-  const heat = [[2,0,2,0,1,'pt',0],[2,0,2,0,2,'pt',0],[1,0,2,0,0,'pt',0],[2,0,2,0,2,'pt',0],[2,0,0,2,0,'pt',0],[2,0,2,0,2,'pt',1],[2,'pt',2,0,0,0,0],[2,'pt',0,0,0,0,0]];
+  const tabs = ['Strength', 'Records', 'Body', 'Consistency'];
   let body = '';
-  if (S.progTab === 0) body = `
-    <div class="card big-stat"><div class="eyebrow">Leg Press · 8 weeks</div><div class="delta num">+30 kg</div><div class="lbl num">100 → 130 kg for 10+ reps</div>
-      ${lineChart([100, 100, 110, 110, 110, 120, 120, 130], '#7ed597')}</div>
-    <div class="pair">
-      <div class="card mini">${ic('trophy').replace('class="ic"', 'class="i" style="color:var(--amber)"')}<b class="num">4</b><small>New bests this block</small></div>
-      <div class="card mini">${ic('weight').replace('class="ic"', 'class="i" style="color:var(--sky)"')}<b class="num">+18%</b><small>Weekly volume</small></div>
-    </div>`;
-  else if (S.progTab === 1) body = `
-    <div class="card big-stat"><div class="eyebrow">Bodyweight · 7-day average</div><div class="delta num" style="color:var(--violet)">−3.4 kg</div><div class="lbl num">71.2 → 67.8 kg since 1 September</div>
-      ${lineChart([71.2, 71.0, 70.6, 70.3, 70.1, 69.6, 69.2, 69.0, 68.6, 68.3, 68.1, 67.8], '#a99bff')}</div>
-    <div class="pair">
-      <div class="card mini">${ic('body').replace('class="ic"', 'class="i" style="color:var(--violet)"')}<b class="num">−5 cm</b><small>Waist</small></div>
-      <button class="card mini" style="text-align:left" data-toast="Photo comparison, private to you and Kyle">${ic('camera').replace('class="ic"', 'class="i" style="color:var(--fg2)"')}<b>Photos</b><small>Compare week 1 and now</small></button>
-    </div>`;
-  else body = `
-    <div class="card"><div class="heat">${heat.map(w => `<div class="col">${w.map(v => `<i class="${v === 'pt' ? 'pt' : v === 2 ? 'l2' : v === 1 ? 'l1' : ''}"></i>`).join('')}</div>`).join('')}</div>
-      <div style="display:flex;gap:16px;padding:0 20px 18px;font-size:12px;color:var(--fg3)"><span style="display:flex;gap:6px;align-items:center"><i style="width:10px;height:10px;border-radius:3px;background:var(--mint)"></i>Workout</span><span style="display:flex;gap:6px;align-items:center"><i style="width:10px;height:10px;border-radius:3px;background:var(--sky)"></i>PT session</span></div></div>
-    <div class="pair">
-      <div class="card mini">${ic('flame').replace('class="ic"', 'class="i" style="color:var(--amber)"')}<b class="num">6 wks</b><small>Streak</small></div>
-      <div class="card mini">${ic('check').replace('class="ic"', 'class="i" style="color:var(--mint)"')}<b class="num">92%</b><small>Sessions completed</small></div>
-    </div>`;
+  if (S.progTab === 0) {
+    const rows = LIFTS[S.lift], f = rows[0], l = rows[rows.length - 1];
+    body = `
+    <div class="liftchips">${Object.keys(LIFTS).map(k => `<button class="${S.lift === k ? 'on' : ''}" data-lift="${k}">${k}</button>`).join('')}</div>
+    <div class="card big-stat"><div class="eyebrow">${S.lift} · top set each session, kg</div>
+      <div class="delta num">+${l[1] - f[1]} kg</div>
+      <div class="lbl num">${f[1]} kg × ${f[2]} on ${f[0]} → ${l[1]} kg × ${l[2]} on ${l[0]}</div>
+      ${liftChart(rows)}</div>
+    <div><div class="sec-head" style="margin-bottom:10px"><h2>Every session</h2></div>
+    <div class="group" style="--inset:14px">${rows.slice().reverse().map((x, i, arr) => { const prev = arr[i + 1]; const ch = prev ? x[1] - prev[1] : 0; const rc = prev && ch === 0 ? x[2] - prev[2] : 0; return `
+      <div class="sess"><time>${x[0]}</time><span><b class="num">${x[1]} kg × ${x[2]}</b><small class="num">Est. 1-rep max ${e1rm(x[1], x[2])} kg</small></span>
+      <span class="chg num" style="color:${ch > 0 || rc > 0 ? 'var(--mint)' : 'var(--fg3)'}">${!prev ? 'Start' : ch > 0 ? `+${ch} kg` : rc > 0 ? `+${rc} rep${rc > 1 ? 's' : ''}` : 'Same'}</span></div>`; }).join('')}</div></div>
+    <div class="card big-stat"><div class="eyebrow">Total lifted this week</div><div class="delta num" style="color:var(--sky);font-size:40px">${TOTALS[7][1].toLocaleString('en-GB')} kg</div>
+      <div class="vbars">${TOTALS.map(([d, v]) => `<div><i style="height:${Math.round(v / 8420 * 70)}px"></i>${d}</div>`).join('')}</div>
+      <div class="explain" style="margin-top:12px">${ic('info')}<span>Every set's weight × reps, added up. If it climbs week to week you're doing more work, and that's what builds strength and muscle.</span></div></div>`;
+  } else if (S.progTab === 1) {
+    const R = [['Leg Press', 'Heaviest weight', '130 kg × 10', '19 Oct', '+10 kg'], ['Leg Press', 'Est. 1-rep max', '173 kg', '19 Oct', '+13 kg'],
+      ['Hip Thrust', 'Most reps at 80 kg', '80 kg × 12', '20 Oct', '+2 reps'], ['Lat Pulldown', 'Most reps at 42.5 kg', '42.5 kg × 12', '20 Oct', '+2 reps'],
+      ['Lower Body A', 'Best session total', '8,420 kg', '19 Oct', '+520 kg']];
+    body = `
+    <div class="card big-stat"><div class="eyebrow">Records set in October</div><div class="delta num">5</div><div class="lbl">Your own personal bests, compared only with you.</div></div>
+    <div class="group">${R.map(([lift, type, v, d, ch]) => `<div class="rec"><span class="li" style="color:var(--amber)">${ic('trophy')}</span><span class="t"><b>${lift}</b><small>${type} · ${d}</small></span><span class="v num">${v}<small>${ch}</small></span></div>`).join('')}</div>
+    <div><div class="eyebrow" style="margin-bottom:10px">What counts as a record?</div>
+    <div class="group" style="--inset:14px">${[['Heaviest weight', 'The most you\'ve lifted for your planned reps.'], ['Est. 1-rep max', 'The most you could lift once, worked out from your sets. You never have to test it.'],
+      ['Most reps', 'More reps than ever at the same weight.'], ['Best session total', 'Your biggest total lifted (weight × reps) in one workout.']].map(([t, d]) => `<div class="rec"><span class="t"><b>${t}</b><small style="font-size:13px">${d}</small></span></div>`).join('')}</div></div>`;
+  } else if (S.progTab === 2) {
+    const M = [['Waist', '78 cm', '−5 cm'], ['Hips', '96 cm', '−3 cm'], ['Chest', '90 cm', '−1 cm'], ['Upper arm', '29 cm', '+0.5 cm'], ['Thigh', '55 cm', '−2 cm']];
+    const G = { measure: ['How to measure', ['Measure first thing in the morning, before eating or drinking.', 'Use a soft tape, snug but not pulling the skin in.', 'Waist: level with your belly button, relaxed, after breathing out.', 'Hips: the widest point around your bum.', 'Arm and thigh: the widest point, always on the same side.', 'Every 2–4 weeks is plenty.']],
+      photo: ['How to take progress photos', ['Same place, same light, same time of day.', 'Phone at chest height, about 2 metres away, or use a timer.', 'Front, side and back, standing relaxed.', 'Wear the same fitted clothes each time.', 'Once a month. Only you and your coach ever see them.']] };
+    body = `
+    <div class="explain">${ic('info')}<span>Measurements and photos pick up changes the scales miss. Everything here is optional and private to you and your coach.</span></div>
+    <div><div class="sec-head" style="margin-bottom:10px"><h2>Measurements</h2><button data-toast="Add today's measurements">+ Add</button></div>
+    <div class="group">${M.map(([n, v, ch]) => `<div class="rec"><span class="li" style="color:var(--violet)">${ic('body')}</span><span class="t"><b>${n}</b><small>Since 1 September</small></span><span class="v num">${v}<small>${ch}</small></span></div>`).join('')}</div></div>
+    <div><div class="sec-head" style="margin-bottom:10px"><h2>Photos</h2></div>
+    <div class="photos3">${['Front', 'Side', 'Back'].map(x => `<button data-toast="Camera opens · photos stay private">${ic('camera')}${x}</button>`).join('')}</div></div>
+    <div class="group">${Object.entries(G).map(([k, [t, steps]]) => `<div><button class="optrow" data-guide="${k}"><span class="li" style="color:var(--sky)">${ic(k === 'measure' ? 'clip' : 'camera')}</span><span class="t"><b>${t}</b><small>${steps.length} quick steps</small></span><span class="chev">${ic(S.guide[k] ? 'down' : 'right')}</span></button>
+      ${S.guide[k] ? `<ol class="guide">${steps.map(x => `<li>${x}</li>`).join('')}</ol>` : ''}</div>`).join('')}</div>
+    <div class="group"><div class="optrow"><span class="li" style="color:#c9cfcb">${ic('weight')}</span><span class="t"><b>Show my weight</b><small>Off by default. It's one number among many</small></span><button class="sw" role="switch" aria-checked="${S.showWeight}" data-showweight aria-label="Show my weight"></button></div>
+      ${S.showWeight ? `<div style="padding:0 14px 14px">${lineChart([71.2, 71.0, 70.6, 70.3, 70.1, 69.6, 69.2, 69.0, 68.6, 68.3, 68.1, 67.8], '#a99bff')}<div class="lbl num" style="color:var(--fg2);font-size:13px">7-day average: 71.2 → 67.8 kg</div></div>` : ''}</div>`;
+  } else {
+    const W = [['7 Sep', 'w,,w,,w,pt,'], ['14 Sep', 'w,,w,,w,pt,'], ['21 Sep', 'w,,x,,w,pt,'], ['28 Sep', 'w,pt,w,,w,,'], ['5 Oct', 'w,,w,,w,pt,'], ['12 Oct', 'w,pt,w,,w,pt,'], ['19 Oct', 'w,pt,w,,,,']];
+    body = `
+    <div class="explain">${ic('info')}<span>Each square is one day, each row is one week. It shows what you planned with your coach and what you did.</span></div>
+    <div class="card"><div class="cal8"><span></span>${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<span class="h">${d}</span>`).join('')}
+      ${W.map(([wk, days]) => `<span class="num">${wk}</span>${days.split(',').map(v => `<i class="${v}" title="${v === 'w' ? 'Workout done' : v === 'pt' ? 'PT session' : v === 'x' ? 'Missed' : 'Rest day'}"></i>`).join('')}`).join('')}</div>
+      <div class="legend2"><span><i style="background:var(--mint)"></i>Workout done</span><span><i style="background:var(--sky)"></i>PT session</span><span><i style="box-shadow:inset 0 0 0 1.5px var(--coral)"></i>Missed</span><span><i style="background:var(--s3)"></i>Rest day</span></div></div>
+    <div class="group">${[['train', 'var(--mint)', 'Workouts done', '19 of 20 planned', '95%'], ['cal', 'var(--sky)', 'PT sessions', '9 of 9 attended', '100%'],
+      ['clip', 'var(--violet)', 'Check-ins', '6 of 7 sent', '86%'], ['flame', 'var(--amber)', 'Streak', 'Weeks with every planned workout done', '4 wks']].map(([i, c, t, d, v]) => `<div class="rec"><span class="li" style="color:${c}">${ic(i)}</span><span class="t"><b>${t}</b><small>${d}</small></span><span class="v num">${v}</span></div>`).join('')}</div>`;
+  }
   return `<div class="page fade">
-    <div class="greet" style="padding-top:6px"><div class="eyebrow">Since 1 September</div><h1>Progress</h1><p class="headline">Stronger on every main lift, and 3.4 kg lighter.</p></div>
-    <div class="awards">${[['trophy', 'var(--mint)', 'First 130 kg', ''], ['flame', 'var(--amber)', '6-week streak', ''], ['progress', 'var(--violet)', '−3 kg', ''], ['check', 'var(--sky)', '25 PT sessions', ''], ['bolt', 'var(--fg2)', '10 week streak', 'locked']].map(([i, c, l, x]) =>
-      `<button class="award ${x}" style="--c:${c}" data-toast="${x ? 'Keep going: 4 more weeks' : l}"><span class="medal" style="color:${c};background:radial-gradient(circle at 30% 25%, rgba(255,255,255,.08), var(--s2))">${ic(i)}</span>${l}</button>`).join('')}</div>
-    <div class="seg" role="tablist">${tabs.map((t, i) => `<button role="tab" class="${S.progTab === i ? 'on' : ''}" data-ptab="${i}">${t}</button>`).join('')}</div>
+    <div class="greet" style="padding-top:6px"><div class="eyebrow">Since 1 September</div><h1>Progress</h1><p class="headline">Stronger on every main lift, and 5 cm off your waist.</p></div>
+    <div class="seg four" role="tablist">${tabs.map((t, i) => `<button role="tab" class="${S.progTab === i ? 'on' : ''}" data-ptab="${i}">${t}</button>`).join('')}</div>
     ${body}
   </div>`;
 };
@@ -1117,7 +1334,7 @@ const GOALS = [['strength', 'trophy', 'var(--mint)', 'Get stronger'], ['fat', 'f
 const FREQ = [['weekly', 'Weekly', 3, 'High', 'Most accurate Momentum'], ['fortnightly', 'Every 2 weeks', 2, 'Good', 'A good balance'], ['monthly', 'Monthly', 1, 'Basic', 'The lightest touch']];
 const NOTIF_TYPES = [['workout', 'train', 'var(--mint)', 'rgba(126,213,151,.14)', 'Workout reminders', 'On your training days'], ['booking', 'cal', 'var(--sky)', 'rgba(110,198,255,.14)', 'Bookings open', 'On the 20th, for next month'],
   ['session', 'clock', 'var(--sky)', 'rgba(110,198,255,.14)', 'Session reminders', 'The evening before'], ['payment', 'card', 'var(--amber)', 'rgba(255,180,94,.14)', 'Payment reminders', '3 days before it\'s due'],
-  ['drop', 'community', 'var(--violet)', 'rgba(169,155,255,.14)', 'Weekly drop', 'Mondays: a tip and 3 meals'], ['checkin', 'clip', 'var(--violet)', 'rgba(169,155,255,.14)', 'Check-in due', 'On your check-in day']];
+  ['drop', 'community', 'var(--violet)', 'rgba(169,155,255,.14)', 'Community', 'Wednesday tips, meals and replies to you'], ['checkin', 'clip', 'var(--violet)', 'rgba(169,155,255,.14)', 'Check-in due', 'On your check-in day']];
 const freqInfo = () => { const f = FREQ.find(x => x[0] === S.onb.freq); return { label: f[1], n: f[2], acc: f[3] }; };
 const accBars = n => [1, 2, 3].map(i => `<i class="${i <= n ? 'on' : ''}"></i>`).join('');
 const toggleList = () => `<div class="toggles">${NOTIF_TYPES.map(([k, i, c, bg, l, sub]) => `<div class="tg"><span class="li" style="background:${bg};color:${c}">${ic(i)}</span><span class="t"><b>${l}</b><small>${sub}</small></span>
@@ -1152,8 +1369,8 @@ function vOnboard() {
 
 const NOTES = [
   { id: 'pay', icon: 'card', c: 'var(--amber)', bg: 'rgba(255,180,94,.14)', t: 'November payment due Sunday', b: '£120.00 · Online Coaching', when: '9:00', cta: ['Pay now', 'pay'], unread: true, group: 'Today' },
-  { id: 'book', icon: 'cal', c: 'var(--sky)', bg: 'rgba(110,198,255,.14)', t: 'November sessions are open', b: 'Your regular Tue & Sat slots are held until Friday.', when: '8:00', cta: ['Confirm slots', 'book'], unread: true, group: 'Today' },
-  { id: 'drop', icon: 'community', c: 'var(--violet)', bg: 'rgba(169,155,255,.14)', t: 'This week\'s drop is here', b: 'Protein at breakfast, plus 3 new high-protein meals.', when: 'Mon', cta: ['Open', 'go:community'], unread: true, group: 'Earlier' },
+  { id: 'book', icon: 'cal', c: 'var(--sky)', bg: 'rgba(110,198,255,.14)', t: 'Your November sessions are scheduled', b: 'Kyle has set 8 sessions on your usual Tue & Sat. Confirm or ask to move one.', when: '8:00', cta: ['Review sessions', 'book'], unread: true, group: 'Today' },
+  { id: 'drop', icon: 'community', c: 'var(--violet)', bg: 'rgba(169,155,255,.14)', t: 'Wednesday tip and 3 new meals', b: 'Front-load your protein, plus 3 high-protein recipes.', when: 'Mon', cta: ['Open', 'go:community'], unread: true, group: 'Earlier' },
   { id: 'sess', icon: 'clock', c: 'var(--sky)', bg: 'rgba(110,198,255,.14)', t: 'PT with Kyle on Saturday', b: '9:00 at the Studio. Free to change until Friday 9:00.', when: 'Mon', group: 'Earlier' },
   { id: 'ci', icon: 'clip', c: 'var(--violet)', bg: 'rgba(169,155,255,.14)', t: 'Check-in done', b: 'Momentum updated. Kyle replied to your note.', when: 'Sun', group: 'Earlier' }
 ];
@@ -1166,25 +1383,66 @@ function vNotifs() {
   </div>`;
 }
 
-const MEALS3 = [['pasta', 'Creamy Cajun Chicken Pasta', '45g protein', '480 kcal'], ['potato-bowl', 'Big Mac Loaded Potato Bowl', '42g protein', '540 kcal'], ['wrap', 'High-Protein Breakfast Wrap', '41g protein', '400 kcal']];
+// The group: Kyle and clients post, like and comment. Everything Kyle sends
+// (meals, Wednesday tips, questions, announcements, challenges) is also filed
+// in the Library by category.
+const PEOPLE = { kyle: ['Kyle', 'KD', 145], sarah: ['Sarah', 'SM', 145], priya: ['Priya', 'PS', 260], mark: ['Mark', 'MH', 100], tom: ['Tom', 'TR', 30], ellie: ['Ellie', 'EB', 330] };
+const avatarP = id => id === 'kyle' ? `<span class="kd-av"><img src="assets/kd-mark.png" alt=""></span>`
+  : `<span class="av" style="background:hsl(${PEOPLE[id][2]} 30% 18%);color:hsl(${PEOPLE[id][2]} 70% 72%)">${PEOPLE[id][1]}</span>`;
+const CATS = [['meals', 'Meals', 'fuel', 'var(--amber)', 'Every recipe Kyle has shared'], ['tips', 'Weekly tips', 'bolt', 'var(--mint)', 'Every Wednesday'],
+  ['questions', 'Question of the week', 'chat', 'var(--sky)', 'Every Monday'], ['news', 'Announcements', 'megaphone', 'var(--violet)', 'Studio news and updates'],
+  ['other', 'Challenges & more', 'trophy', 'var(--coral)', 'Challenge walls, events, anything else']];
+const LIB = {
+  meals: [['pasta', 'Creamy Cajun Chicken Pasta', 'Week 43'], ['potato-bowl', 'Big Mac Loaded Potato Bowl', 'Week 43'], ['wrap', 'High-Protein Breakfast Wrap', 'Week 43'], ['turkey-pasta', 'Turkey & Pasta Tomato Bowl', 'Week 42'], ['breakfast', 'Eggs, Veg & Sourdough', 'Week 42']],
+  tips: [['Week 43', 'Front-load your protein'], ['Week 42', 'Sleep: the free recovery tool'], ['Week 41', 'Warm up properly in 5 minutes'], ['Week 40', 'How to read a food label']],
+  questions: [['Week 43', 'What\'s made training easier this month?', '6 replies'], ['Week 42', 'Favourite high-protein snack?', '11 replies'], ['Week 41', 'What are you proudest of this year?', '9 replies']],
+  news: [['19 Oct', 'Studio closed Monday 3 November'], ['12 Oct', 'November sessions are scheduled on the 20th'], ['1 Oct', 'Welcome to the new KDPT app']],
+  other: [['November', '10k steps a day', '12 joined · live'], ['October', 'Protein target every day', 'Finished · 9 completed it'], ['September', '30-day plank', 'Finished · 14 completed it']]
+};
+function seedPosts() {
+  return [
+    { id: 'q1', by: 'kyle', when: 'Mon', cat: 'questions', pinned: true, title: 'Question of the week', body: 'What\'s one thing that has made training easier for you this month?', likes: 8,
+      cmts: [['priya', 'Laying my gym kit out the night before!'], ['mark', 'Training with Jen. No skipping when someone\'s waiting for you 😂'], ['ellie', 'Shorter 30 minute sessions on busy days']] },
+    { id: 'p1', by: 'priya', when: '2 h', body: '10k done this morning! 52:40, a new PB 🎉 Legs held up so much better thanks to the strength work.', likes: 21, cmts: [['kyle', 'Massive, Priya! That\'s 3 minutes faster than June.']] },
+    { id: 't1', by: 'kyle', when: 'Wed', cat: 'tips', title: 'Front-load your protein', body: 'Aim for 30g at breakfast. It keeps you full until lunch and makes your daily target far easier to hit.', likes: 14, cmts: [] },
+    { id: 'm1', by: 'kyle', when: 'Wed', cat: 'meals', title: 'This week\'s 3 high-protein meals', body: 'All under 550 kcal with 40g+ protein. Tap one in the Library to add it to Fuel.', imgs: ['pasta', 'potato-bowl', 'wrap'], likes: 17, cmts: [['tom', 'Made the Big Mac bowl twice already']] },
+    { id: 'c1', by: 'kyle', when: 'Sun', cat: 'other', title: 'November challenge: 10k steps a day', body: 'Leaderboard updates every evening from your phone\'s step count.', board: [['Mark', '14,210'], ['Sarah', '12,880'], ['Tom', '11,040']], likes: 12, cmts: [] }
+  ];
+}
+function postHTML(p) {
+  const c = S.comm, cat = p.cat && CATS.find(x => x[0] === p.cat), open = c.open[p.id], liked = c.liked[p.id];
+  return `<article class="post ${p.pinned ? 'pinned' : ''}">
+    <div class="by">${avatarP(p.by)}<span class="t"><b>${PEOPLE[p.by][0]}</b>${p.by === 'kyle' ? '<span class="coachtag">Coach</span>' : ''}<small>${p.when}${p.pinned ? ' · Pinned' : ''}</small></span>
+      ${cat ? `<span class="label-dot" style="color:${cat[3]}">${cat[1]}</span>` : ''}</div>
+    ${p.title ? `<h3>${p.title}</h3>` : ''}<p>${p.body}</p>
+    ${p.imgs ? `<div class="strip3">${p.imgs.map(i => `<img src="assets/${i}.jpg" alt="">`).join('')}</div>` : ''}
+    ${p.board ? `<div class="board">${p.board.map(([n, v], i) => `<div><span>${i + 1}. ${n}</span><b class="num">${v} avg</b></div>`).join('')}</div><button class="pill-btn dark" data-toast="You've joined. Steps count from Sunday">Join the challenge</button>` : ''}
+    <div class="acts"><button class="${liked ? 'on' : ''}" data-plike="${p.id}">${ic('heart')}<span class="num">${p.likes + (liked ? 1 : 0)}</span></button>
+      <button data-popen="${p.id}">${ic('chat')}<span class="num">${p.cmts.length}</span> ${p.cat === 'questions' ? 'Answers' : 'Comments'}</button></div>
+    ${open ? `<div class="cmts">${p.cmts.map(([w, t]) => `<div class="cmt">${avatarP(w).replace('class="av"', 'class="av"').replace('class="kd-av"', 'class="kd-av" style="width:28px;height:28px"')}<span><b>${PEOPLE[w][0]}</b>${t}</span></div>`).join('')}
+      <div class="reply"><input id="rp-${p.id}" placeholder="${p.cat === 'questions' ? 'Add your answer' : 'Write a comment'}" aria-label="Reply"><button class="addbtn" style="color:var(--mint);background:rgba(126,213,151,.1);box-shadow:inset 0 0 0 1px rgba(126,213,151,.45)" data-preply="${p.id}" aria-label="Send">${ic('send')}</button></div></div>` : ''}
+  </article>`;
+}
 function vCommunity() {
-  const r = (k, icon, n) => `<button class="react ${S.liked[k] ? 'on' : ''}" data-like="${k}">${ic(icon)}<span class="num">${n + (S.liked[k] ? 1 : 0)}</span></button>`;
-  return `<div class="page fade">
-    <div class="greet" style="padding-top:6px"><div class="eyebrow">Week 43 · Monday 19 October</div><h1>Community</h1></div>
-    <article class="drop">
-      <div class="by"><img src="assets/kd-mark.png" alt=""><span><b>Kyle</b><small>Tip of the week</small></span></div>
-      <h2>Front-load your protein</h2>
-      <p>Aim for 30g at breakfast. It keeps you full until lunch and makes your daily target far easier to hit.</p>
-      <div class="reacts">${r('t1', 'heart', 14)}${r('t2', 'flame', 9)}</div>
-    </article>
-    <div class="sec-head"><h2>3 high-protein meals</h2><span class="label-dot" style="color:var(--amber)">New</span></div>
-    <div class="meal3 group" style="--inset:116px">${MEALS3.map(([img, n, p, k], i) => `<div class="m3"><img src="assets/${img}.jpg" alt=""><span><b>${n}</b><span class="macros num"><span>${p}</span><span>${k}</span></span></span>
-      <button class="add ${S.saved[i] ? 'on' : ''}" data-save="${i}" aria-label="Save to Fuel">${ic(S.saved[i] ? 'check' : 'plus')}</button></div>`).join('')}</div>
-    <div class="sec-head"><h2>From Kyle</h2></div>
-    <div class="group" style="--inset:74px"><button class="ann" data-toast="You're in. Steps count from Sunday"><span class="li" style="background:rgba(255,180,94,.14);color:var(--amber)">${ic('flame')}</span><span class="t"><b>November challenge: 10k steps a day</b><small>12 clients in · tap to join</small></span><span class="chev">${ic('right')}</span></button>
-    <div class="ann"><span class="li" style="background:rgba(110,198,255,.14);color:var(--sky)">${ic('megaphone')}</span><span class="t"><b>Studio closed Monday 3 November</b><small>Online sessions as normal</small></span></div></div>
-    <div class="sec-head"><h2>Past drops</h2></div>
-    <div class="group" style="--inset:74px">${[['Week 42', 'Sleep: the free recovery tool'], ['Week 41', 'How to warm up in 5 minutes']].map(([w, t]) => `<button class="ann" data-toast="${t}"><span class="li" style="background:var(--s3);color:var(--fg2)">${ic('community')}</span><span class="t"><b>${t}</b><small>${w} · tip + 3 meals</small></span><span class="chev">${ic('right')}</span></button>`).join('')}</div>
+  const c = S.comm;
+  if (!c.posts) c.posts = seedPosts();
+  const head = `<div class="greet" style="padding-top:6px"><div class="eyebrow">KDPT group · 35 members</div><h1>Community</h1></div>
+    <div class="seg" style="grid-template-columns:1fr 1fr" role="tablist">${[['feed', 'Feed'], ['library', 'Library']].map(([k, l]) => `<button role="tab" class="${c.tab === k ? 'on' : ''}" data-ctab="${k}">${l}</button>`).join('')}</div>`;
+  if (c.tab === 'feed') return `<div class="page fade">${head}
+    <div class="comp">${avatarP('sarah')}<input id="newpost" placeholder="Share something with the group" aria-label="New post"><button data-toast="Photo picker opens here" aria-label="Add photo" style="color:var(--fg2)">${ic('camera')}</button><button class="postbtn" data-newpost>Post</button></div>
+    ${c.posts.map(postHTML).join('')}
+  </div>`;
+  if (!c.cat) return `<div class="page fade">${head}
+    <div class="cats">${CATS.map(([k, l, i, col, sub], n) => `<button class="cat ${n === 4 ? 'wide' : ''}" data-cat="${k}"><span class="li" style="color:${col}">${ic(i)}</span><span><b>${l}</b><small>${LIB[k].length} · ${sub}</small></span></button>`).join('')}</div>
+  </div>`;
+  const [k, l, i, col] = CATS.find(x => x[0] === c.cat);
+  const rows = c.cat === 'meals'
+    ? LIB.meals.map(([img, n, w]) => { const f = FOODS.find(x => x.img === img); return `<div class="food"><img src="assets/${img}.jpg" alt=""><span class="t"><b>${n}</b><small class="num">${w}${f ? ` · ${f.kcal} kcal · ${f.P}g protein` : ''}</small></span>${f ? `<button class="addbtn" data-libfood="${f.id}" aria-label="Add to Fuel">${ic('plus')}</button>` : ''}</div>`; }).join('')
+    : LIB[c.cat].map(r => `<button class="optrow" data-toast="${r[1]}"><span class="li" style="color:${col}">${ic(i)}</span><span class="t"><b>${r[1]}</b><small>${r[0]}${r[2] ? ' · ' + r[2] : ''}</small></span><span class="chev">${ic('right')}</span></button>`).join('');
+  return `<div class="page fade">${head}
+    <button class="switchto" style="color:var(--fg2)" data-cat="">${ic('back').replace('class="ic"', 'class="ic" style="width:16px;height:16px"')} All categories</button>
+    <div style="display:flex;gap:12px;align-items:center"><span class="li" style="color:${col}">${ic(i)}</span><h2 style="font-size:22px;font-weight:800">${l}</h2></div>
+    <div class="group" style="--inset:${c.cat === 'meals' ? 66 : 68}px">${rows}</div>
   </div>`;
 }
 
@@ -1223,7 +1481,7 @@ function vCheckin() {
     <div><div class="eyebrow" style="margin-bottom:10px">In your own words</div>
       <textarea class="words" id="ciwords" placeholder="What's been going on? Work, family, how training felt…">${c.words}</textarea></div>`;
   if (c.step === 2) body = `
-    ${WEEK.map(([k, l, icon, col, lo, hi]) => `<div class="cimetric"><div class="lab"><b style="display:flex;align-items:center;gap:10px">${ic(icon)}${l}</b><small>${lo} → ${hi}</small></div>
+    ${WEEK.map(([k, l, icon, col, lo, hi]) => `<div class="cimetric"><div class="lab"><b style="display:flex;align-items:center;gap:10px"><span class="li" style="color:${col};width:32px!important;height:32px!important;border-radius:9px!important">${ic(icon)}</span>${l}</b><small>${lo} → ${hi}</small></div>
       <div class="scale5">${[1, 2, 3, 4, 5].map(v => `<button class="num ${v < c[k] ? 'lit' : ''}" style="--c:${col}" aria-pressed="${c[k] === v}" data-cim="${k}" data-v="${v}">${v}</button>`).join('')}</div></div>`).join('')}
     <div><div class="eyebrow" style="margin-bottom:10px">Any aches or niggles?</div><div class="daychips">${['None', 'Knee', 'Back', 'Shoulder', 'Hip', 'Other'].map(a => `<button aria-pressed="${c.aches === a}" data-ache="${a}">${a}</button>`).join('')}</div></div>`;
   if (c.step === 3) body = `
@@ -1253,15 +1511,21 @@ const NOV = [['TUE', 3, '7:00'], ['SAT', 7, '9:00'], ['TUE', 10, '7:00'], ['SAT'
 // ---------------------------------------------------------------------------
 function sheetHTML() {
   if (S.sheet === 'notifset') return `<div><h3>Notifications</h3><div class="sub">Choose what reaches your phone</div></div>${toggleList()}<button class="pill-btn white" data-close>Done</button>`;
+  if (S.sheet === 'addfood') return addFoodHTML();
   if (S.sheet === 'book') {
-    if (!S.book.sel) S.book.sel = NOV.map(() => true);
-    const n = S.book.sel.filter(Boolean).length;
-    if (S.book.done) return `<div class="sent"><span class="ok" style="background:var(--sky);color:#03121f">${ic('check', 'ic', 2.6)}</span><h3>${n} sessions booked</h3><p>Added to your calendar. Free to change up to 24 hours before.</p></div><button class="pill-btn white" data-close>Done</button>`;
-    return `<div><h3>Book November</h3><div class="sub">Your regular slots are held. Tap a date to drop it.</div></div>
-      <div><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span class="eyebrow">Sessions</span><span class="num" style="font:700 14px var(--display)">${n} of 8</span></div><div class="allow">${NOV.map((_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div></div>
-      <div class="dates">${NOV.map(([d, day, t], i) => `<button class="dt" aria-pressed="${S.book.sel[i]}" data-bk="${i}"><small>${d}</small><b class="num">${day}</b><span class="num">${t}</span></button>`).join('')}</div>
-      <button class="pill-btn dark" data-toast="Open slots for November appear here">${ic('plus')} Pick other times</button>
-      <button class="pill-btn mint" data-bookok ${n ? '' : 'disabled style="opacity:.5"'}>Confirm ${n} sessions</button>`;
+    const bk = S.book, reqs = Object.keys(bk.req).length;
+    if (bk.pick !== null) {
+      const [d, day, t] = NOV[bk.pick];
+      const alts = d === 'TUE' ? [['WED', day + 1, '7:00'], ['THU', day + 2, '18:30'], ['TUE', day, '12:00']] : [['FRI', day - 1, '18:00'], ['SAT', day, '10:30'], ['MON', day + 2, '7:00']];
+      return `<div><h3>Ask to move ${d.charAt(0) + d.slice(1).toLowerCase()} ${day} Nov</h3><div class="sub">These are times Kyle has free that week. He'll approve or suggest another.</div></div>
+        <div class="group">${alts.map(([dd, nn, tt]) => `<button class="optrow" data-alttime="${dd.charAt(0) + dd.slice(1).toLowerCase()} ${nn} Nov · ${tt}"><span class="datebox sm"><small>${dd}</small><b class="num">${nn}</b></span><span class="t"><b class="num">${tt}</b><small>Studio</small></span><span class="chev">${ic('right')}</span></button>`).join('')}</div>
+        <button class="pill-btn dark" data-keeptime>Keep ${t} on the ${day}th</button>`;
+    }
+    if (bk.done) return `<div class="sent"><span class="ok" style="background:var(--sky);color:#03121f">${ic('check')}</span><h3>Sessions confirmed</h3><p>${8 - reqs} sessions are in your calendar.${reqs ? ` Kyle will reply to your ${reqs} change request${reqs > 1 ? 's' : ''}.` : ''}</p></div><button class="pill-btn white" data-close>Done</button>`;
+    return `<div><h3>Your November sessions</h3><div class="sub">Kyle has scheduled these. Confirm them, or ask to move one.</div></div>
+      <div class="group">${NOV.map(([d, day, t], i) => `<div class="optrow"><span class="datebox sm"><small>${d}</small><b class="num">${day}</b></span><span class="t"><b class="num">${t} · Studio</b><small>${bk.req[i] ? `<span style="color:var(--amber)">Asked for ${bk.req[i]}</span>` : 'PT with Kyle · 60 min'}</small></span><button class="add" style="color:var(--sky)" data-move="${i}">${bk.req[i] ? 'Change' : 'Move'}</button></div>`).join('')}</div>
+      <p class="foot">Free to change up to 24 hours before. Later cancellations count as used.</p>
+      <button class="pill-btn mint" data-bookok>Confirm${reqs ? ` ${8 - reqs} · request ${reqs} change${reqs > 1 ? 's' : ''}` : ' all 8'}</button>`;
   }
   if (S.sheet === 'pay') {
     if (S.paid) return `<div class="sent"><span class="ok" style="background:var(--amber);color:#2a1600">${ic('check', 'ic', 2.6)}</span><h3>Paid · thank you</h3><p>Receipt sent to your email. ${S.autopay ? 'December will be taken automatically.' : ''}</p></div><button class="pill-btn white" data-close>Done</button>`;
@@ -1414,7 +1678,7 @@ document.addEventListener('click', e => {
   if (d.toast) return toast(d.toast);
   if (d.onb) {
     const o = S.onb;
-    if (d.onb === 'finish') { go('home'); setTimeout(() => showPush('November sessions are open', 'Your Tue & Sat slots are held until Friday. Tap to confirm.', 'book'), 1400); return; }
+    if (d.onb === 'finish') { go('home'); setTimeout(() => showPush('Your November sessions are scheduled', 'Kyle has set 8 sessions on your usual days. Tap to confirm.', 'book'), 1400); return; }
     o.step = Math.max(0, Math.min(5, o.step + (d.onb === 'back' ? -1 : 1))); return render(false);
   }
   if (d.goal) { S.onb.goal = d.goal; return render(true); }
@@ -1422,10 +1686,36 @@ document.addEventListener('click', e => {
   if (d.freq) { S.onb.freq = d.freq; return render(true); }
   if (d.cday) { S.onb.day = d.cday; return render(true); }
   if (d.notif) { S.notifs[d.notif] = !S.notifs[d.notif]; return render(true); }
-  if (d.like) { S.liked[d.like] = !S.liked[d.like]; return render(true); }
-  if (d.save) { S.saved[d.save] = !S.saved[d.save]; if (S.saved[d.save]) toast('Saved to your Fuel recipes'); return render(true); }
-  if (d.bk) { S.book.sel[+d.bk] = !S.book.sel[+d.bk]; return render(true); }
   if (d.bookok !== undefined) { S.book.done = true; return render(true); }
+  if (d.move) { S.book.pick = +d.move; return render(true); }
+  if (d.alttime) { S.book.req[S.book.pick] = d.alttime; S.book.pick = null; return render(true); }
+  if (d.keeptime !== undefined) { delete S.book.req[S.book.pick]; S.book.pick = null; return render(true); }
+  if (d.fday) { S.fuelDay = +d.fday; return render(true); }
+  if (d.addfood) { S.add = { slot: d.addfood, tab: 'search', q: '' }; S.sheet = 'addfood'; return render(true); }
+  if (d.ftab) { S.add.tab = d.ftab; return render(true); }
+  if (d.pickfood) { S.log[S.add.slot].push(d.pickfood); toast(`Added to ${S.add.slot}`); S.sheet = null; return render(true); }
+  if (d.quickadd !== undefined) {
+    const v = id => parseFloat(($(id) || {}).value) || 0;
+    const f = { id: 'q' + Date.now(), n: 'Quick add', p: 'Entered by you', kcal: v('qk'), P: v('qp'), C: v('qc'), F: v('qf') };
+    FOODS.push(f); S.log[S.add.slot].push(f.id); S.sheet = null; toast(`Added to ${S.add.slot}`); return render(true);
+  }
+  if (d.water !== undefined) { S.water = Math.min(10, S.water + 1); return render(true); }
+  if (d.lift) { S.lift = d.lift; return render(true); }
+  if (d.guide) { S.guide[d.guide] = !S.guide[d.guide]; return render(true); }
+  if (d.showweight !== undefined) { S.showWeight = !S.showWeight; return render(true); }
+  if (d.ctab) { S.comm.tab = d.ctab; S.comm.cat = null; return render(true); }
+  if (d.cat !== undefined) { S.comm.cat = d.cat || null; return render(true); }
+  if (d.plike) { S.comm.liked[d.plike] = !S.comm.liked[d.plike]; return render(true); }
+  if (d.popen) { S.comm.open[d.popen] = !S.comm.open[d.popen]; return render(true); }
+  if (d.preply) {
+    const el = $('rp-' + d.preply), v = el && el.value.trim(); if (!v) return;
+    S.comm.posts.find(x => x.id === d.preply).cmts.push(['sarah', v.replace(/</g, '&lt;')]); return render(true);
+  }
+  if (d.newpost !== undefined) {
+    const el = $('newpost'), v = el && el.value.trim(); if (!v) return;
+    S.comm.posts.splice(1, 0, { id: 'n' + Date.now(), by: 'sarah', when: 'Now', body: v.replace(/</g, '&lt;'), likes: 0, cmts: [] }); return render(true);
+  }
+  if (d.libfood) { S.log.Dinner.push(d.libfood); toast('Added to today\'s dinner in Fuel'); return; }
   if (d.autopay !== undefined) { S.autopay = !S.autopay; return render(true); }
   if (d.payok !== undefined) { S.paid = true; return render(true); }
   if (d.checkin !== undefined) { S.ci = newCheckin(); return go('checkin'); }
@@ -1476,6 +1766,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('input', e => {
   const i = e.target;
+  if (i.id === 'fq') { S.add.q = i.value; const q = i.value.toLowerCase(); $('fres').innerHTML = foodResults(FOODS.filter(f => f.n.toLowerCase().includes(q))); return; }
   if (i.id === 'moodr') { const m = MOODS[+i.value]; S.ci.mood = +i.value; $('mind').style.setProperty('--c', m[1]); $('mindword').textContent = m[0]; return; }
   if (i.id === 'sev') { S.pain.sev = +i.value; $('sevnum').textContent = i.value; return; }
   if (!i.dataset.set) return;
@@ -1488,5 +1779,5 @@ if (['home', 'train', 'workout', 'fuel', 'progress', 'chat', 'community', 'notif
 else if (h === 'checkin') { S.ci = newCheckin(); S.view = 'checkin'; }
 else if (h !== 'checkin') S.view = 'onboard';
 render(false);
-if (S.view === 'home') setTimeout(() => showPush('November sessions are open', 'Your Tue & Sat slots are held until Friday. Tap to confirm.', 'book'), 2500);
+if (S.view === 'home') setTimeout(() => showPush('Your November sessions are scheduled', 'Kyle has set 8 sessions on your usual days. Tap to confirm.', 'book'), 2500);
 </script>
