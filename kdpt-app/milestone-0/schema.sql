@@ -549,7 +549,9 @@ create index on food_log_items (client_id, logged_on);
 
 -- ---------------------------------------------------------------------------
 -- 8. Scheduling
--- Coach publishes availability; clients self-book within their allowance.
+-- availability_rules are the coach's working hours (no Saturdays or Sundays,
+-- Wednesday until 13:00). Clients with changing schedules send windows in
+-- client_availability; the coach places sessions inside them and confirms.
 -- ---------------------------------------------------------------------------
 
 create table availability_rules (
@@ -577,6 +579,23 @@ create table availability_exceptions (
   kind          text not null check (kind in ('blocked', 'extra')),
   reason        text
 );
+
+-- A client's rough availability for a month, e.g. 'Tue from 16:30'.
+create table client_availability (
+  id            uuid primary key default gen_random_uuid(),
+  org_id        uuid not null references organisations (id),
+  client_id     uuid not null references profiles (id) on delete cascade,
+  month         date not null check (extract(day from month) = 1),
+  weekday       smallint check (weekday between 1 and 7),   -- recurring window
+  on_date       date,                                       -- or a single date
+  from_time     time not null,
+  to_time       time not null,
+  note          text,
+  created_at    timestamptz not null default now(),
+  check (from_time < to_time),
+  check ((weekday is null) <> (on_date is null))
+);
+create index on client_availability (org_id, month);
 
 -- A client's regular slot, used to pre-book on the 20th.
 create table standing_slots (
@@ -927,7 +946,7 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'workout_sessions', 'set_logs', 'substitutions', 'meals', 'food_log_items',
+    'workout_sessions', 'set_logs', 'substitutions', 'meals', 'food_log_items', 'client_availability',
     'body_measurements', 'check_ins'
   ] loop
     execute format($p$

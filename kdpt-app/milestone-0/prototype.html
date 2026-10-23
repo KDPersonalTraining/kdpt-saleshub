@@ -784,6 +784,11 @@ svg { display: block; }
 .datebox.sm { width: 46px; height: 48px; border-radius: 12px; }
 .datebox.sm b { font-size: 18px; }
 .datebox.sm small { font-size: 9px; }
+.avrow { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 12px 14px; min-height: 58px; }
+.avrow b { font: 700 15px var(--display); }
+.avrow .t { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--fg3); }
+.avrow select { height: 36px; border-radius: 10px; background: var(--s3); border: 0; color: var(--fg); padding: 0 10px; font: 600 14px var(--display); }
+.avrow.off { opacity: .45; }
 .quote { border-left: 2px solid var(--violet); padding: 2px 0 2px 10px; margin-bottom: 6px; font-size: 13px; opacity: .85; }
 </style>
 
@@ -943,7 +948,7 @@ function fitToTime(minutes) {
 // ---------------------------------------------------------------------------
 const S = { onb: { step: 0, goal: 'strength', days: 3, freq: 'weekly', day: 'Sun' },
   notifs: { workout: true, booking: true, session: true, payment: true, drop: true, checkin: true },
-  book: { req: {}, pick: null, done: false }, paid: false, autopay: true, ci: null,
+  book: { req: {}, pick: null, done: false }, avail: { days: { Tue: [16.5, 20], Thu: [14, 20] }, note: '', sent: false }, paid: false, autopay: true, ci: null,
   liked: {}, saved: {}, read: false, ai: [], handed: false,
   view: 'home', duration: 60, idx: 0, logs: {}, swaps: {}, why: false, sheet: null,
   pain: { area: null, sev: 3, act: null, sent: false }, rest: null, progTab: 0, chat: [],
@@ -967,7 +972,7 @@ function setsFor(ex, n) {
 // ---------------------------------------------------------------------------
 const vHome = () => {
   const p = plan();
-  const days = [['M', 'done', ic('check')], ['T', 'pt', 'PT'], ['W', 'now', '21'], ['T', '', '22'], ['F', '', '23'], ['S', 'pt', 'PT'], ['S', '', '25']];
+  const days = [['M', 'pt', 'PT'], ['T', 'done', ic('check')], ['W', 'now', '21'], ['T', 'pt', 'PT'], ['F', '', '23'], ['S', '', '24'], ['S', '', '25']];
   return `<div class="page fade">
     <div class="topbar"><img src="assets/kd-mark.png" alt="KD Personal Training"><div class="right">
       <button class="ib" data-go="notifs" aria-label="Notifications">${ic('bell')}${S.read ? '' : '<span class="badge">3</span>'}</button>
@@ -1002,8 +1007,8 @@ const vHome = () => {
     </div>
 
     <button class="card session" data-toast="Session details and directions">
-      <span class="datebox"><small>SAT</small><b>24</b></span>
-      <span class="t"><b>PT with Kyle</b><span>${ic('clock')} 9:00 &nbsp; ${ic('pin')} Studio</span></span>
+      <span class="datebox"><small>THU</small><b>22</b></span>
+      <span class="t"><b>PT with Kyle</b><span>${ic('clock')} 7:00 &nbsp; ${ic('pin')} Studio</span></span>
       <span class="chev">${ic('right')}</span>
     </button>
 
@@ -1369,9 +1374,9 @@ function vOnboard() {
 
 const NOTES = [
   { id: 'pay', icon: 'card', c: 'var(--amber)', bg: 'rgba(255,180,94,.14)', t: 'November payment due Sunday', b: '£260.00 · 8 PT sessions', when: '9:00', cta: ['Pay now', 'pay'], unread: true, group: 'Today' },
-  { id: 'book', icon: 'cal', c: 'var(--sky)', bg: 'rgba(110,198,255,.14)', t: 'Your November sessions are ready to review', b: 'Kyle has proposed 8 sessions on your usual Tue & Sat. Send them back and he\'ll confirm each one.', when: '8:00', cta: ['Review sessions', 'book'], unread: true, group: 'Today' },
+  { id: 'book', icon: 'cal', c: 'var(--sky)', bg: 'rgba(110,198,255,.14)', t: 'Your November sessions are ready to review', b: 'Kyle has proposed 8 sessions on your usual Mon & Thu. Send them back and he\'ll confirm each one.', when: '8:00', cta: ['Review sessions', 'book'], unread: true, group: 'Today' },
   { id: 'drop', icon: 'community', c: 'var(--violet)', bg: 'rgba(169,155,255,.14)', t: 'Wednesday tip and 3 new meals', b: 'Front-load your protein, plus 3 high-protein recipes.', when: 'Mon', cta: ['Open', 'go:community'], unread: true, group: 'Earlier' },
-  { id: 'sess', icon: 'clock', c: 'var(--sky)', bg: 'rgba(110,198,255,.14)', t: 'PT with Kyle on Saturday', b: '9:00 at the Studio. Free to change until Friday 9:00.', when: 'Mon', group: 'Earlier' },
+  { id: 'sess', icon: 'clock', c: 'var(--sky)', bg: 'rgba(110,198,255,.14)', t: 'PT with Kyle on Thursday', b: '7:00 at the Studio. Free to change until Wednesday 7:00.', when: 'Mon', group: 'Earlier' },
   { id: 'ci', icon: 'clip', c: 'var(--violet)', bg: 'rgba(169,155,255,.14)', t: 'Check-in done', b: 'Momentum updated. Kyle replied to your note.', when: 'Sun', group: 'Earlier' }
 ];
 function vNotifs() {
@@ -1503,8 +1508,27 @@ function vCheckin() {
     <div class="onb-step"><div><div class="eyebrow" style="color:var(--violet)">${freqInfo().label} check-in</div><h1 style="margin-top:6px">${titles[c.step]}</h1></div>${body}</div></div>`;
 }
 
-// Sarah's regular slots for November: Tuesdays 7:00 and Saturdays 9:00.
-const NOV = [['TUE', 3, '7:00'], ['SAT', 7, '9:00'], ['TUE', 10, '7:00'], ['SAT', 14, '9:00'], ['TUE', 17, '7:00'], ['SAT', 21, '9:00'], ['TUE', 24, '7:00'], ['SAT', 28, '9:00']];
+// Sarah's regular slots for November: Mondays and Thursdays at 7:00.
+const NOV = [['MON', 2, '7:00'], ['THU', 5, '7:00'], ['MON', 9, '7:00'], ['THU', 12, '7:00'], ['MON', 16, '7:00'], ['THU', 19, '7:00'], ['MON', 23, '7:00'], ['THU', 26, '7:00']];
+
+// Kyle's working hours: the gym opens at 6:30, Wednesday is a half day, no
+// weekends. Clients can only offer times inside these.
+const HOURS = { Mon: [6.5, 20], Tue: [6.5, 20], Wed: [6.5, 13], Thu: [6.5, 20], Fri: [6.5, 20], Sat: null, Sun: null };
+const hm = h => `${Math.floor(h)}:${h % 1 ? '30' : '00'}`;
+function availHTML() {
+  const a = S.avail;
+  if (a.sent) return `<div class="sent"><span class="ok" style="background:var(--sky);color:#03121f">${ic('check')}</span><h3>Sent to Kyle</h3><p>Kyle will fit your sessions into these times and confirm them. You'll get the exact days and times in a notification.</p></div><button class="pill-btn white" data-close>Done</button>`;
+  const steps = (lo, hi) => { const o = []; for (let h = lo; h <= hi; h += 0.5) o.push(h); return o; };
+  return `<div><h3>When can you train in November?</h3><div class="sub">Tick the days that work and give a rough window. Kyle places your 8 sessions and confirms them.</div></div>
+    <div class="group" style="--inset:14px">${Object.entries(HOURS).map(([d, hrs]) => { const w = a.days[d]; return !hrs
+      ? `<div class="avrow off"><b>${d}</b><span class="t">Kyle doesn't work ${d === 'Sat' ? 'Saturdays' : 'Sundays'}</span></div>`
+      : `<div class="avrow"><b>${d}</b><span class="t">${w ? `<select id="avf-${d}" data-avk="${d}" data-ix="0" aria-label="${d} from">${steps(hrs[0], hrs[1] - 1).map(h => `<option value="${h}" ${h === w[0] ? 'selected' : ''}>${hm(h)}</option>`).join('')}</select> to
+          <select id="avt-${d}" data-avk="${d}" data-ix="1" aria-label="${d} until">${steps(hrs[0] + 1, hrs[1]).map(h => `<option value="${h}" ${h === w[1] ? 'selected' : ''}>${hm(h)}</option>`).join('')}</select>`
+        : `<small>Kyle's hours ${hm(hrs[0])}–${hm(hrs[1])}</small>`}</span>
+        <button class="sw" role="switch" aria-checked="${!!w}" data-avday="${d}" aria-label="${d}"></button></div>`; }).join('')}</div>
+    <label class="search" style="height:auto;padding:12px 14px"><input id="avnote" placeholder="Anything else? e.g. not the week of the 16th" value="${a.note || ''}" aria-label="Note for Kyle"></label>
+    <button class="pill-btn mint" data-availsend>Send to Kyle</button>`;
+}
 
 // ---------------------------------------------------------------------------
 // Sheets
@@ -1512,17 +1536,19 @@ const NOV = [['TUE', 3, '7:00'], ['SAT', 7, '9:00'], ['TUE', 10, '7:00'], ['SAT'
 function sheetHTML() {
   if (S.sheet === 'notifset') return `<div><h3>Notifications</h3><div class="sub">Choose what reaches your phone</div></div>${toggleList()}<button class="pill-btn white" data-close>Done</button>`;
   if (S.sheet === 'addfood') return addFoodHTML();
+  if (S.sheet === 'avail') return availHTML();
   if (S.sheet === 'book') {
     const bk = S.book, reqs = Object.keys(bk.req).length;
     if (bk.pick !== null) {
       const [d, day, t] = NOV[bk.pick];
-      const alts = d === 'TUE' ? [['WED', day + 1, '7:00'], ['THU', day + 2, '18:30'], ['TUE', day, '12:00']] : [['FRI', day - 1, '18:00'], ['SAT', day, '10:30'], ['MON', day + 2, '7:00']];
+      const alts = d === 'MON' ? [['MON', day, '17:30'], ['TUE', day + 1, '18:00'], ['WED', day + 2, '9:00']] : [['THU', day, '18:00'], ['FRI', day + 1, '7:00'], ['WED', day - 1, '9:00']];
       return `<div><h3>Ask to move ${d.charAt(0) + d.slice(1).toLowerCase()} ${day} Nov</h3><div class="sub">These are times Kyle has free that week. He'll approve or suggest another.</div></div>
         <div class="group">${alts.map(([dd, nn, tt]) => `<button class="optrow" data-alttime="${dd.charAt(0) + dd.slice(1).toLowerCase()} ${nn} Nov · ${tt}"><span class="datebox sm"><small>${dd}</small><b class="num">${nn}</b></span><span class="t"><b class="num">${tt}</b><small>Studio</small></span><span class="chev">${ic('right')}</span></button>`).join('')}</div>
         <button class="pill-btn dark" data-keeptime>Keep ${t} on the ${day}th</button>`;
     }
     if (bk.done) return `<div class="sent"><span class="ok" style="background:var(--sky);color:#03121f">${ic('check')}</span><h3>Sent to Kyle</h3><p>Your sessions show as pending until Kyle confirms them${reqs ? `, including your ${reqs} change request${reqs > 1 ? 's' : ''}` : ''}. You'll get a notification as soon as he does.</p></div><button class="pill-btn white" data-close>Done</button>`;
     return `<div><h3>Your November sessions</h3><div class="sub">Kyle has proposed these. Check them, ask to move any that don't work, then send them back. Nothing is booked until Kyle confirms.</div></div>
+      <button class="optrow" style="background:var(--s2);border-radius:14px" data-sheet="avail"><span class="li" style="color:var(--sky)">${ic('clock')}</span><span class="t"><b>My times change each month</b><small>Send Kyle your availability instead</small></span><span class="chev">${ic('right')}</span></button>
       <div class="group">${NOV.map(([d, day, t], i) => `<div class="optrow"><span class="datebox sm"><small>${d}</small><b class="num">${day}</b></span><span class="t"><b class="num">${t} · Studio</b><small>${bk.req[i] ? `<span style="color:var(--amber)">Asked for ${bk.req[i]}</span>` : 'PT with Kyle · 60 min'}</small></span><button class="add" style="color:var(--sky)" data-move="${i}">${bk.req[i] ? 'Change' : 'Move'}</button></div>`).join('')}</div>
       <p class="foot">Free to change up to 24 hours before. Later cancellations count as used.</p>
       <button class="pill-btn mint" data-bookok>Send to Kyle${reqs ? ` · ${reqs} change${reqs > 1 ? 's' : ''}` : ''}</button>`;
@@ -1688,6 +1714,8 @@ document.addEventListener('click', e => {
   if (d.notif) { S.notifs[d.notif] = !S.notifs[d.notif]; return render(true); }
   if (d.bookok !== undefined) { S.book.done = true; return render(true); }
   if (d.move) { S.book.pick = +d.move; return render(true); }
+  if (d.avday) { const k = d.avday, a = S.avail.days; a[k] = a[k] ? null : HOURS[k].slice(); return render(true); }
+  if (d.availsend !== undefined) { S.avail.note = ($('avnote') || {}).value || ''; S.avail.sent = true; return render(true); }
   if (d.alttime) { S.book.req[S.book.pick] = d.alttime; S.book.pick = null; return render(true); }
   if (d.keeptime !== undefined) { delete S.book.req[S.book.pick]; S.book.pick = null; return render(true); }
   if (d.fday) { S.fuelDay = +d.fday; return render(true); }
@@ -1766,6 +1794,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('input', e => {
   const i = e.target;
+  if (i.dataset.avk) { S.avail.days[i.dataset.avk][+i.dataset.ix] = +i.value; return; }
   if (i.id === 'fq') { S.add.q = i.value; const q = i.value.toLowerCase(); $('fres').innerHTML = foodResults(FOODS.filter(f => f.n.toLowerCase().includes(q))); return; }
   if (i.id === 'moodr') { const m = MOODS[+i.value]; S.ci.mood = +i.value; $('mind').style.setProperty('--c', m[1]); $('mindword').textContent = m[0]; return; }
   if (i.id === 'sev') { S.pain.sev = +i.value; $('sevnum').textContent = i.value; return; }

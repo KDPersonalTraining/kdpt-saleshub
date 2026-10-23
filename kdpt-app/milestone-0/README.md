@@ -143,6 +143,14 @@ Momentum is a word, not a score out of 100, as the blueprint recommended.
   discount (% or £ off, for one month, 3 months or until stopped) or their own
   monthly price. Rises give 30 days' notice. Each change is stored in
   `price_adjustments`, so there's a full history.
+- **Working hours:** Monday, Tuesday, Thursday and Friday 6:30–20:00
+  (finish time assumed), Wednesday 6:30–13:00, no Saturdays or Sundays. You
+  can change them in Schedule → Edit hours. Clients can't offer times outside
+  them, and the calendar shades everything else.
+- **Two kinds of client:** regular clients get their usual slots proposed
+  automatically. Clients whose times change send rough windows ("Tue from
+  16:30, Thu from 14:00"). KAI drafts exact times that keep your day free of
+  gaps, and you adjust and confirm. Windows are stored in `client_availability`.
 - **Bookings need your approval:** whether you propose a session and the client
   accepts it, or the client enters one, it stays pending (`held`) until you
   confirm it in Schedule → Waiting for your approval. The client sees
