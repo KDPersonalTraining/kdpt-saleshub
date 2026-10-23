@@ -139,6 +139,14 @@ Momentum is a word, not a score out of 100, as the blueprint recommended.
   choose. Clients get at least 30 days' notice. Each client's own price is
   stored on their subscription, so older prices stay put until you move them.
   The older prices shown for Tom and Ellie are sample data.
+- **Per-client control:** every client row in Payments has **Adjust**, for a
+  discount (% or £ off, for one month, 3 months or until stopped) or their own
+  monthly price. Rises give 30 days' notice. Each change is stored in
+  `price_adjustments`, so there's a full history.
+- **Bookings need your approval:** whether you propose a session and the client
+  accepts it, or the client enters one, it stays pending (`held`) until you
+  confirm it in Schedule → Waiting for your approval. The client sees
+  "pending" until then and gets a notification when you confirm.
 
 ### Kyle and KAI (21 Oct)
 

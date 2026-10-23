@@ -600,6 +600,8 @@ create table booking_allowances (
   unique (client_id, month)
 );
 
+-- 'held' = entered by a client or proposed by the coach and accepted, but not
+-- yet approved. Only the coach moves a booking to 'confirmed'.
 create type booking_status as enum ('held', 'confirmed', 'cancelled', 'late_cancelled', 'no_show', 'completed');
 
 create table bookings (
@@ -624,6 +626,21 @@ create index on bookings (client_id, starts_at);
 
 -- Postgres itself refuses a double-booking for the coach.
 create extension if not exists btree_gist;
+-- Discounts and individual price changes, set by the coach in Payments and
+-- pushed to Stripe. Kept as rows so there is a history of every change.
+create table price_adjustments (
+  id            uuid primary key default gen_random_uuid(),
+  org_id        uuid not null references organisations (id),
+  client_id     uuid not null references profiles (id) on delete cascade,
+  kind          text not null check (kind in ('discount_percent', 'discount_amount', 'price_change')),
+  value         int not null check (value > 0),        -- percent, or pence
+  starts_on     date not null,
+  ends_on       date,                                  -- null = until stopped
+  reason        text,                                  -- coach-only note
+  created_by    uuid not null references profiles (id),
+  created_at    timestamptz not null default now()
+);
+
 -- Clients don't move bookings themselves (organisations.settings.booking_mode
 -- = 'coach_schedules', the default); they ask, and the coach decides.
 create type change_request_status as enum ('pending', 'approved', 'declined', 'countered');
@@ -1037,6 +1054,12 @@ create policy staff_org on booking_change_requests for all
   with check (app.is_staff() and org_id = app.my_org());
 
 -- calendar_busy is staff-only; calendar_connections has no policy at all.
+-- Price adjustments: clients see their own (they appear on the payment screen); staff manage.
+create policy client_read on price_adjustments for select using (client_id = auth.uid());
+create policy staff_org on price_adjustments for all
+  using (app.is_staff() and org_id = app.my_org())
+  with check (app.is_staff() and org_id = app.my_org());
+
 create policy staff_org on calendar_busy for all
   using (app.is_staff() and org_id = app.my_org())
   with check (app.is_staff() and org_id = app.my_org());

@@ -1369,7 +1369,7 @@ function vOnboard() {
 
 const NOTES = [
   { id: 'pay', icon: 'card', c: 'var(--amber)', bg: 'rgba(255,180,94,.14)', t: 'November payment due Sunday', b: '£260.00 · 8 PT sessions', when: '9:00', cta: ['Pay now', 'pay'], unread: true, group: 'Today' },
-  { id: 'book', icon: 'cal', c: 'var(--sky)', bg: 'rgba(110,198,255,.14)', t: 'Your November sessions are scheduled', b: 'Kyle has set 8 sessions on your usual Tue & Sat. Confirm or ask to move one.', when: '8:00', cta: ['Review sessions', 'book'], unread: true, group: 'Today' },
+  { id: 'book', icon: 'cal', c: 'var(--sky)', bg: 'rgba(110,198,255,.14)', t: 'Your November sessions are ready to review', b: 'Kyle has proposed 8 sessions on your usual Tue & Sat. Send them back and he\'ll confirm each one.', when: '8:00', cta: ['Review sessions', 'book'], unread: true, group: 'Today' },
   { id: 'drop', icon: 'community', c: 'var(--violet)', bg: 'rgba(169,155,255,.14)', t: 'Wednesday tip and 3 new meals', b: 'Front-load your protein, plus 3 high-protein recipes.', when: 'Mon', cta: ['Open', 'go:community'], unread: true, group: 'Earlier' },
   { id: 'sess', icon: 'clock', c: 'var(--sky)', bg: 'rgba(110,198,255,.14)', t: 'PT with Kyle on Saturday', b: '9:00 at the Studio. Free to change until Friday 9:00.', when: 'Mon', group: 'Earlier' },
   { id: 'ci', icon: 'clip', c: 'var(--violet)', bg: 'rgba(169,155,255,.14)', t: 'Check-in done', b: 'Momentum updated. Kyle replied to your note.', when: 'Sun', group: 'Earlier' }
@@ -1521,11 +1521,11 @@ function sheetHTML() {
         <div class="group">${alts.map(([dd, nn, tt]) => `<button class="optrow" data-alttime="${dd.charAt(0) + dd.slice(1).toLowerCase()} ${nn} Nov · ${tt}"><span class="datebox sm"><small>${dd}</small><b class="num">${nn}</b></span><span class="t"><b class="num">${tt}</b><small>Studio</small></span><span class="chev">${ic('right')}</span></button>`).join('')}</div>
         <button class="pill-btn dark" data-keeptime>Keep ${t} on the ${day}th</button>`;
     }
-    if (bk.done) return `<div class="sent"><span class="ok" style="background:var(--sky);color:#03121f">${ic('check')}</span><h3>Sessions confirmed</h3><p>${8 - reqs} sessions are in your calendar.${reqs ? ` Kyle will reply to your ${reqs} change request${reqs > 1 ? 's' : ''}.` : ''}</p></div><button class="pill-btn white" data-close>Done</button>`;
-    return `<div><h3>Your November sessions</h3><div class="sub">Kyle has scheduled these. Confirm them, or ask to move one.</div></div>
+    if (bk.done) return `<div class="sent"><span class="ok" style="background:var(--sky);color:#03121f">${ic('check')}</span><h3>Sent to Kyle</h3><p>Your sessions show as pending until Kyle confirms them${reqs ? `, including your ${reqs} change request${reqs > 1 ? 's' : ''}` : ''}. You'll get a notification as soon as he does.</p></div><button class="pill-btn white" data-close>Done</button>`;
+    return `<div><h3>Your November sessions</h3><div class="sub">Kyle has proposed these. Check them, ask to move any that don't work, then send them back. Nothing is booked until Kyle confirms.</div></div>
       <div class="group">${NOV.map(([d, day, t], i) => `<div class="optrow"><span class="datebox sm"><small>${d}</small><b class="num">${day}</b></span><span class="t"><b class="num">${t} · Studio</b><small>${bk.req[i] ? `<span style="color:var(--amber)">Asked for ${bk.req[i]}</span>` : 'PT with Kyle · 60 min'}</small></span><button class="add" style="color:var(--sky)" data-move="${i}">${bk.req[i] ? 'Change' : 'Move'}</button></div>`).join('')}</div>
       <p class="foot">Free to change up to 24 hours before. Later cancellations count as used.</p>
-      <button class="pill-btn mint" data-bookok>Confirm${reqs ? ` ${8 - reqs} · request ${reqs} change${reqs > 1 ? 's' : ''}` : ' all 8'}</button>`;
+      <button class="pill-btn mint" data-bookok>Send to Kyle${reqs ? ` · ${reqs} change${reqs > 1 ? 's' : ''}` : ''}</button>`;
   }
   if (S.sheet === 'pay') {
     if (S.paid) return `<div class="sent"><span class="ok" style="background:var(--amber);color:#2a1600">${ic('check', 'ic', 2.6)}</span><h3>Paid · thank you</h3><p>Receipt sent to your email. ${S.autopay ? 'December will be taken automatically.' : ''}</p></div><button class="pill-btn white" data-close>Done</button>`;
@@ -1678,7 +1678,7 @@ document.addEventListener('click', e => {
   if (d.toast) return toast(d.toast);
   if (d.onb) {
     const o = S.onb;
-    if (d.onb === 'finish') { go('home'); setTimeout(() => showPush('Your November sessions are scheduled', 'Kyle has set 8 sessions on your usual days. Tap to confirm.', 'book'), 1400); return; }
+    if (d.onb === 'finish') { go('home'); setTimeout(() => showPush('Your November sessions are ready', 'Kyle has proposed 8 sessions on your usual days. Tap to review.', 'book'), 1400); return; }
     o.step = Math.max(0, Math.min(5, o.step + (d.onb === 'back' ? -1 : 1))); return render(false);
   }
   if (d.goal) { S.onb.goal = d.goal; return render(true); }
@@ -1779,5 +1779,5 @@ if (['home', 'train', 'workout', 'fuel', 'progress', 'chat', 'community', 'notif
 else if (h === 'checkin') { S.ci = newCheckin(); S.view = 'checkin'; }
 else if (h !== 'checkin') S.view = 'onboard';
 render(false);
-if (S.view === 'home') setTimeout(() => showPush('Your November sessions are scheduled', 'Kyle has set 8 sessions on your usual days. Tap to confirm.', 'book'), 2500);
+if (S.view === 'home') setTimeout(() => showPush('Your November sessions are ready', 'Kyle has proposed 8 sessions on your usual days. Tap to review.', 'book'), 2500);
 </script>

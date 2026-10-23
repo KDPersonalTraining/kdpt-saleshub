@@ -54,6 +54,7 @@ svg { display: block; }
 .side .me { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 14px; background: var(--s2); }
 .side .me b { display: block; font-size: 13px; }
 .side .me small { color: var(--fg3); font-size: 12px; }
+.main .fade > * { min-width: 0; }
 .main { min-width: 0; padding-block: 28px 60px; padding-left: max(36px, env(safe-area-inset-left, 0px)); padding-right: max(36px, env(safe-area-inset-right, 0px)); }
 .wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 24px; }
 @media (max-width: 900px) {
@@ -337,6 +338,8 @@ textarea.fb { width: 100%; min-height: 120px; resize: vertical; background: var(
 .cirow .mets div { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .cirow .need small { display: block; color: var(--fg3); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-family: var(--display); font-weight: 600; margin-bottom: 4px; }
 .cirow .need b { font-weight: 600; font-size: 13px; }
+.grid2.wide { grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr); }
+@media (max-width: 1100px) { .grid2.wide { grid-template-columns: minmax(0, 1fr); } }
 .targets.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 900px) { .targets.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .ntable { overflow-x: auto; }
@@ -369,6 +372,7 @@ textarea.fb { width: 100%; min-height: 120px; resize: vertical; background: var(
 .ev2.gym { background: rgba(110,198,255,.16); box-shadow: inset 3px 0 0 var(--sky); }
 .ev2.online { background: rgba(169,155,255,.16); box-shadow: inset 3px 0 0 var(--violet); }
 .ev2.busy { background: repeating-linear-gradient(135deg, rgba(255,255,255,.06) 0 6px, rgba(255,255,255,.02) 6px 12px); color: var(--fg3); box-shadow: inset 0 0 0 1px var(--hair); }
+.ev2.pending { background: rgba(255,180,94,.08); border: 1.5px dashed var(--amber); color: var(--fg); }
 .ev2.block { background: repeating-linear-gradient(135deg, rgba(255,107,94,.16) 0 6px, rgba(255,107,94,.05) 6px 12px); color: var(--coral); box-shadow: inset 0 0 0 1px rgba(255,107,94,.35); }
 .req { padding: 14px 18px; border-top: 1px solid var(--hair); display: grid; gap: 8px; }
 .req:first-child { border-top: 0; }
@@ -480,6 +484,7 @@ const P = {
   trash: '<path opacity=".45" d="M6 7.5h12l-.9 12a2 2 0 0 1-2 1.8H8.9a2 2 0 0 1-2-1.8z"/><path d="M9.5 3.5h5a1 1 0 0 1 1 1V6H20a1 1 0 0 1 0 2H4a1 1 0 0 1 0-2h4.5V4.5a1 1 0 0 1 1-1z"/>',
   search: '<circle cx="10.5" cy="10.5" r="6.5" opacity=".3"/>' + st('M10.5 4a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM20 20l-4.6-4.6')
 };
+P.payments = P.card;
 const ic = (n, cls = 'ic') => `<svg class="${cls}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${P[n]}</svg>`;
 const tint = c => ({ mint: ['rgba(126,213,151,.14)', 'var(--mint)'], amber: ['rgba(255,180,94,.14)', 'var(--amber)'], violet: ['rgba(169,155,255,.14)', 'var(--violet)'],
   sky: ['rgba(110,198,255,.14)', 'var(--sky)'], coral: ['rgba(255,107,94,.14)', 'var(--coral)'], grey: ['var(--s3)', 'var(--fg2)'] })[c];
@@ -561,7 +566,7 @@ const S = {
   prog: clone(START), saved: clone(START), filter: 'All', q: '', libFilter: 'All',
   done: {}, approved: {}, editing: null, modal: null,
   nut: { kcal: 2100, protein: 140, carbs: 210, fat: 70, show: true, reacted: { 0: true }, fbSent: false },
-  bmode: 'coach', reqDone: {}, blocks: [], hidden: {}, pchange: {}, pscope: 'new', reminded: {},
+  bmode: 'coach', reqDone: {}, approvedB: {}, blocks: [], hidden: {}, pchange: {}, pscope: 'new', reminded: {}, adj: {}, akind: 'discount',
   rules: { payRemind: true, sessRemind: true, drop: true, prog: true, alert: true, release: true, remind: true, aiAnswer: true, aiDraft: true },
   conv: 'priya', sent: [],
   drop: { q: 'What\'s your go-to meal when you\'re short on time?', title: 'Plan your protein for the week', body: 'Batch-cook two protein sources on Sunday (chicken thighs and turkey mince work well). It turns most meals into a 10-minute job.', meals: [3, 0, 2], scheduled: false }
@@ -795,7 +800,7 @@ const EVENTS = [
   [1, 6.5, 1, 'studio', 'Mark & Jen', 'Studio · duo'], [1, 17.5, 1, 'online', 'Ray P', 'Online'],
   [2, 7, 1, 'studio', 'Sarah M', 'Studio'], [2, 9.5, 1, 'studio', 'Mark & Jen', 'Studio · duo'], [2, 12.25, 0.75, 'online', 'Ellie B', 'Online call'], [2, 14, 1, 'busy', 'Busy', 'Google Calendar'], [2, 17.75, 1, 'gym', 'Tom R', 'Gym'],
   [3, 6, 14, 'block', 'Day off', 'Blocked by you · weekly'],
-  [4, 6.5, 1, 'studio', 'Mark & Jen', 'Studio · duo'], [4, 12, 2, 'busy', 'Busy', 'Google Calendar'],
+  [4, 6.5, 1, 'studio', 'Mark & Jen', 'Studio · duo'], [4, 12, 2, 'busy', 'Busy', 'Google Calendar'], [4, 17, 1, 'pending', 'Priya S', 'Waiting for you'],
   [5, 9, 1, 'studio', 'Sarah M', 'Studio'], [5, 10.5, 1, 'online', 'Priya S', 'Online'],
   [6, 6, 14, 'block', 'Day off', 'Blocked by you · weekly']
 ];
@@ -803,21 +808,27 @@ const REQS = [
   { id: 'r1', c: 'sarah', from: 'Sat 7 Nov · 9:00', to: 'Fri 6 Nov · 18:00', note: 'Away Saturday morning' },
   { id: 'r2', c: 'tom', from: 'Tue 3 Nov · 17:45', to: 'Wed 4 Nov · 17:45', note: 'Late meeting at work' }
 ];
+// Bookings clients have sent back. They stay pending (status 'held') until approved.
+const APPROVE = [
+  { id: 'b1', c: 'sarah', what: 'Accepted 7 of 8 November sessions (Tue 7:00, Sat 9:00). One change request below.', okBtn: 'Confirm 7', ok: '7 confirmed · added to both calendars', review: true },
+  { id: 'b2', c: 'priya', what: 'Booked Fri 23 Oct · 17:00 · online (extra session from her allowance)', okBtn: 'Confirm', ok: 'Confirmed · added to both calendars' },
+  { id: 'b3', c: 'ellie', what: 'Accepted all 4 November sessions (Wed 12:15 online)', okBtn: 'Confirm 4', ok: '4 confirmed · added to both calendars', review: true }
+];
 const hhmm = h => `${Math.floor(h)}:${String(Math.round(h % 1 * 60)).padStart(2, '0')}`;
 
 function vSchedule() {
   const evs = EVENTS.concat(S.blocks.map(b => [b.day, b.from, b.to - b.from, 'block', b.reason || 'Blocked', 'Blocked by you' + (b.weekly ? ' · weekly' : '')]));
   const H = (CAL_END - CAL_START) * HOUR;
-  return `<div class="head"><div><h1>Schedule</h1><p>${S.bmode === 'coach' ? 'You set every session. Clients confirm, or ask to move one.' : 'Clients pick from your open times, within their monthly allowance.'}</p></div>
+  return `<div class="head"><div><h1>Schedule</h1><p>${S.bmode === 'coach' ? 'You propose every session. Clients reply, and nothing is booked until you confirm it.' : 'Clients pick from your open times, within their monthly allowance.'}</p></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="tag t-mint">${ic('check', 'sm')}Google Calendar synced 2 min ago</span>
       <button class="btn white" data-blockopen>${ic('close', 'sm')}Block time</button><button class="btn mint" data-toast="November drafted from everyone's regular slots. Review, then send on the 20th">${ic('schedule', 'sm')}Schedule November</button></div></div>
   <div class="card srules">
     <div><span class="eyebrow">Who sets sessions</span><span class="modes">${[['coach', 'You schedule'], ['self', 'Clients pick']].map(([k, l]) => `<button class="${S.bmode === k ? 'on' : ''}" data-bmode="${k}">${l}</button>`).join('')}</span>
       <small>${S.bmode === 'coach' ? 'You place each client into their regular slot. They can only request changes.' : 'Clients choose open slots themselves. You still approve changes inside 24 hours.'}</small></div>
-    <div><span class="eyebrow">Monthly cycle</span><b>Sessions go out on the 20th</b><small>Clients confirm by the 25th. Anything unconfirmed stays booked.</small></div>
+    <div><span class="eyebrow">Monthly cycle</span><b>Proposed on the 20th, confirmed by you</b><small>Clients reply by the 25th. Nothing is booked until you confirm it, whoever entered it.</small></div>
     <div><span class="eyebrow">Busy time</span><b>Google Calendar blocks your diary</b><small>Anything in your Google Calendar can't be booked. Time you block here is added to it too.</small></div>
   </div>
-  <div class="grid2" style="grid-template-columns:minmax(0,2.2fr) minmax(0,1fr)">
+  <div class="grid2 wide">
     <section class="card calwrap">
       <div class="cal">
         <div style="border-bottom:1px solid var(--hair)"></div>
@@ -826,9 +837,13 @@ function vSchedule() {
         ${DAYS.map((_, di) => `<div class="col" style="height:${H}px">${evs.filter(e => e[0] === di).map(([, st, len, k, t, sub]) =>
           `<button class="ev2 ${k}" style="top:${(st - CAL_START) * HOUR + 1}px;height:${len * HOUR - 3}px" data-toast="${t} · ${hhmm(st)}–${hhmm(st + len)}"><b>${len >= 0.75 ? `${hhmm(st)} ` : ''}${t}</b>${len >= 1 ? sub : ''}</button>`).join('')}</div>`).join('')}
       </div>
-      <div class="chips" style="padding:12px 16px;border-top:1px solid var(--hair)"><span class="tag t-mint">Studio</span><span class="tag t-sky">Gym</span><span class="tag t-violet">Online</span><span class="tag t-grey">Busy in Google</span><span class="tag t-coral">Blocked by you</span></div>
+      <div class="chips" style="padding:12px 16px;border-top:1px solid var(--hair)"><span class="tag t-mint">Studio</span><span class="tag t-sky">Gym</span><span class="tag t-violet">Online</span><span class="tag t-grey">Busy in Google</span><span class="tag t-coral">Blocked by you</span><span class="tag t-amber">Waiting for you</span></div>
     </section>
     <section style="display:grid;gap:20px;align-content:start">
+      <div><div class="sec"><h2>Waiting for your approval</h2><span class="muted">${APPROVE.filter(a => !S.approvedB[a.id]).length} to review</span></div>
+        <div class="card">${APPROVE.map(a => { const c = byId(a.c); return `<div class="req"><div class="who">${avatar(c, 'width:30px;height:30px;font-size:11px')}<b>${c.name}</b></div>
+          <div class="mv">${a.what}</div>
+          ${S.approvedB[a.id] ? `<span class="tag t-mint">${ic('check', 'sm')}${S.approvedB[a.id]}</span>` : `<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn mint" data-bappr="${a.id}" data-l="${a.ok}">${a.okBtn}</button>${a.review ? `<button class="btn ghost" data-toast="Opens each date to confirm or move individually">Review dates</button>` : ''}<button class="btn line" data-bappr="${a.id}" data-l="Declined · ${c.name.split(' ')[0]} notified">Decline</button></div>`}</div>`; }).join('')}</div></div>
       <div><div class="sec"><h2>Change requests</h2><span class="muted">${REQS.filter(r => !S.reqDone[r.id]).length} waiting</span></div>
         <div class="card">${REQS.map(r => { const c = byId(r.c); return `<div class="req"><div class="who">${avatar(c, 'width:30px;height:30px;font-size:11px')}<b>${c.name}</b></div>
           <div class="mv"><s>${r.from}</s> → <b style="color:var(--fg)">${r.to}</b><br>“${r.note}”</div>
@@ -930,7 +945,7 @@ function vPayments() {
   const tot = st => BILLING.filter(b => !st || b[3] === st).reduce((a, b) => a + b[2], 0);
   const k = (n, label, icon, c) => `<div class="card kpi">${tileHTML(icon, c)}<span><b class="num">${n}</b><small>${label}</small></span></div>`;
   const status = { paid: ['mint', 'Paid'], due: ['grey', 'Due 1 Nov'], overdue: ['coral', 'Overdue 5 days'] };
-  return `<div class="head"><div><h1>Payments</h1><p>Cards are charged through Stripe on the 1st. Reminders go out 3 days before, and you're told about anything overdue.</p></div></div>
+  return `<div class="head"><div><h1>Payments</h1><p>Cards are charged through Stripe on the 1st. Every price, rise and discount is set here, and nothing changes for a client unless you change it.</p></div></div>
   <div class="kpis">${k(gbp(tot()), 'Expected for November', 'card', 'grey')}${k(gbp(tot('paid')), 'Paid', 'check', 'mint')}${k(gbp(tot('due')), 'Due on the 1st', 'clock', 'sky')}${k(gbp(tot('overdue')), 'Overdue', 'pain', 'coral')}</div>
   <div><div class="sec"><h2>Packages</h2><span class="muted">Changing a price never surprises anyone: you choose who it applies to</span></div>
     <div class="pkgs">${PACKAGES.map(p => { const on = BILLING.filter(b => b[1] === p.id), legacy = on.filter(b => b[2] !== p.price).length, ch = S.pchange[p.id]; return `
@@ -945,11 +960,39 @@ function vPayments() {
       ${BILLING.map(([id, pk, price, st, card]) => { const c = byId(id), p = pkgById(pk), ch = S.pchange[pk]; const [col, lab] = status[st]; return `<div class="br">
         <span class="nm">${avatar(c, 'width:32px;height:32px;font-size:11px')}<b style="font-weight:600">${c.name}</b></span>
         <span>${p.name}</span>
-        <span class="num"><b>${gbp(price)}</b>${price !== p.price ? `<small style="color:var(--amber)">Older price · current ${gbp(p.price)}</small>` : ''}${ch && ch.scope === 'all' && ch.price !== price ? `<small style="color:var(--amber)">→ ${gbp(ch.price)} from ${ch.from}</small>` : ''}</span>
+        <span class="num"><b>${gbp(price)}</b>${price !== p.price ? `<small style="color:var(--amber)">Older price · current ${gbp(p.price)}</small>` : ''}${ch && ch.scope === 'all' && ch.price !== price ? `<small style="color:var(--amber)">→ ${gbp(ch.price)} from ${ch.from}</small>` : ''}${adjNote(id, price)}</span>
         <span><span class="tag t-${col}">${lab}</span></span>
         <span style="color:var(--fg2)">${card}</span>
-        <span>${st === 'overdue' ? (S.reminded[id] ? `<span class="tag t-mint">${ic('check', 'sm')}Reminder sent</span>` : `<button class="btn ghost" data-remind="${id}">Send reminder</button>`) : ''}</span></div>`; }).join('')}
+        <span style="display:flex;gap:6px;flex-wrap:wrap">${st === 'overdue' ? (S.reminded[id] ? `<span class="tag t-mint">${ic('check', 'sm')}Reminder sent</span>` : `<button class="btn ghost" data-remind="${id}">Remind</button>`) : ''}<button class="btn line" data-adjust="${id}">Adjust</button></span></div>`; }).join('')}
     </div></div>`;
+}
+// One client's own price: a discount, or a different monthly price.
+function adjNote(id, price) {
+  const a = S.adj[id]; if (!a) return '';
+  if (a.kind === 'discount') {
+    const off = a.unit === '%' ? Math.round(price * a.value / 100) : a.value;
+    return `<small style="color:var(--mint)">${a.unit === '%' ? a.value + '%' : gbp(a.value)} off · ${a.len} → ${gbp(price - off)}${a.reason ? ' · ' + a.reason : ''}</small>`;
+  }
+  return `<small style="color:var(--amber)">→ ${gbp(a.value)} from ${a.from}${a.value > price ? ' · notice sent' : ''}</small>`;
+}
+function adjustModal() {
+  const c = byId(S.modal.client), row = BILLING.find(b => b[0] === S.modal.client), k = S.akind;
+  return `<div class="scrim" data-scrim><div class="modal" role="dialog" aria-modal="true">
+    <div class="sec" style="margin:0"><h2>Adjust · ${c.name}</h2><button class="iconbtn" data-closemodal aria-label="Close">${ic('close')}</button></div>
+    <span style="color:var(--fg3)">${pkgById(row[1]).name} · pays ${gbp(row[2])} a month. Only ${c.name.split(' ')[0]} is affected.</span>
+    <div class="scope">
+      <button class="${k === 'discount' ? 'on' : ''}" data-akind="discount"><b>Discount</b><small>Money or percentage off, for a set time or until you stop it.</small></button>
+      <button class="${k === 'price' ? 'on' : ''}" data-akind="price"><b>Change their monthly price</b><small>A rise or a drop just for this client. Rises give 30 days' notice.</small></button>
+    </div>
+    ${k === 'discount' ? `<div class="fields">
+      <label>Amount<input id="aval" inputmode="numeric" value="10"></label>
+      <label>Type<select id="aunit"><option value="%">% off</option><option value="£">£ off</option></select></label>
+      <label>For<select id="alen"><option>November only</option><option>3 months</option><option>Until I stop it</option></select></label>
+      <label>Reason (only you see this)<input id="areason" placeholder="e.g. Loyalty, referral"></label></div>`
+    : `<div class="fields"><label>New monthly price (£)<input id="aval" inputmode="numeric" value="${row[2]}"></label>
+      <label>From<select id="afrom"><option>1 December</option><option>1 January</option><option>1 February</option></select></label></div>`}
+    <button class="btn mint" data-asave style="justify-self:start">${ic('check', 'sm')}Save</button>
+  </div></div>`;
 }
 function priceModal() {
   const p = pkgById(S.modal.pkg);
@@ -983,7 +1026,7 @@ function vAutomation() {
 // ---------------------------------------------------------------------------
 // Render
 // ---------------------------------------------------------------------------
-const NAV = [['today', 'Today', 6, 'coral'], ['clients', 'Clients'], ['programmes', 'Programmes'], ['schedule', 'Schedule'], ['messages', 'Messages', 3, 'mint'], ['payments', 'Payments', 1, 'coral'], ['community', 'Community'], ['library', 'Library'], ['automation', 'Automation']];
+const NAV = [['today', 'Today', 6, 'coral'], ['clients', 'Clients'], ['programmes', 'Programmes'], ['schedule', 'Schedule', 3, 'amber'], ['messages', 'Messages', 3, 'mint'], ['payments', 'Payments', 1, 'coral'], ['community', 'Community'], ['library', 'Library'], ['automation', 'Automation']];
 const $ = id => document.getElementById(id);
 
 function render(keep) {
@@ -996,7 +1039,7 @@ function render(keep) {
   $('main').innerHTML = `<div class="fade" style="display:grid;gap:24px">${v === 'today' ? vToday() : v === 'clients' ? vClients() : v === 'client' ? vClient() : v === 'programmes' ? vProgrammes()
     : v === 'schedule' ? vSchedule() : v === 'messages' ? vMessages() : v === 'library' ? vLibrary() : v === 'community' ? vCommunity() : v === 'payments' ? vPayments() : vAutomation()}</div>`;
   if (!keep) $('main').firstElementChild.classList.add('fade'); else $('main').firstElementChild.classList.remove('fade');
-  $('layer').innerHTML = !S.modal ? '' : S.modal.mode === 'block' ? blockModal() : S.modal.mode === 'price' ? priceModal() : modalHTML();
+  $('layer').innerHTML = !S.modal ? '' : S.modal.mode === 'block' ? blockModal() : S.modal.mode === 'price' ? priceModal() : S.modal.mode === 'adjust' ? adjustModal() : modalHTML();
   window.scrollTo(0, keep ? y : 0);
 }
 function modalHTML() {
@@ -1068,6 +1111,17 @@ document.addEventListener('click', e => {
     S.modal = null; toast(S.pscope === 'new' ? 'Saved · new clients see the new price' : 'Saved · clients notified with 30 days\' notice'); return render(true);
   }
   if (d.remind) { S.reminded[d.remind] = true; toast('Reminder sent with a payment link'); return render(true); }
+  if (d.bappr) { S.approvedB[d.bappr] = d.l; return render(true); }
+  if (d.adjust) { S.modal = { mode: 'adjust', client: d.adjust }; S.akind = 'discount'; return render(true); }
+  if (d.akind) { S.akind = d.akind; return render(true); }
+  if (d.asave !== undefined) {
+    const value = parseFloat($('aval').value);
+    if (!(value > 0)) { toast('Enter an amount'); return; }
+    S.adj[S.modal.client] = S.akind === 'discount'
+      ? { kind: 'discount', value, unit: $('aunit').value, len: $('alen').value, reason: $('areason').value.trim() }
+      : { kind: 'price', value, from: $('afrom').value };
+    S.modal = null; toast('Saved · Stripe updated for this client'); return render(true);
+  }
   if (d.meal) { const m = S.drop.meals, i = +d.meal; let n = m[i]; do { n = (n + 1) % RECIPES.length; } while (m.includes(n)); m[i] = n; S.drop.scheduled = false; return render(true); }
   if (d.sched !== undefined) { S.drop.title = $('tipT').value; S.drop.body = $('tipB').value; S.drop.q = $('qT').value; S.drop.scheduled = true; toast('Scheduled · question Monday, tip and meals Wednesday'); return render(true); }
   if (d.tipai !== undefined) { $('tipT').value = 'Walk after your biggest meal'; $('tipB').value = 'A 10-minute walk after dinner helps digestion, adds 1,000+ steps and counts towards the November challenge.'; return; }
