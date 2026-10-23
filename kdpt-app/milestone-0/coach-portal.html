@@ -384,6 +384,23 @@ textarea.fb { width: 100%; min-height: 120px; resize: vertical; background: var(
 .mod:first-child { border-top: 0; }
 .mod p { margin: 2px 0 0; color: var(--fg2); font-size: 13px; }
 .mod.hidden p { text-decoration: line-through; color: var(--fg3); }
+.pkgs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1100px) { .pkgs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.pkg { padding: 18px; display: grid; gap: 10px; align-content: start; }
+.pkg .price { font: 800 30px var(--display); letter-spacing: -.02em; }
+.pkg .price small { font-size: 13px; color: var(--fg3); font-weight: 600; margin-left: 4px; }
+.pkg .note { font-size: 12px; color: var(--fg2); }
+.pkg .tag { white-space: normal; height: auto; line-height: 1.4; align-items: flex-start; }
+.btable { overflow-x: auto; }
+.br { display: grid; grid-template-columns: minmax(190px, 1.4fr) minmax(130px, 1fr) minmax(140px, 1fr) 140px minmax(150px, 1fr) 140px; gap: 14px; align-items: center; padding: 12px 18px; border-top: 1px solid var(--hair); min-width: 940px; font-size: 14px; }
+.br.th { border-top: 0; color: var(--fg3); font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; }
+.br .nm { display: flex; gap: 10px; align-items: center; }
+.br small { display: block; color: var(--fg3); font-size: 12px; }
+.scope { display: grid; gap: 8px; }
+.scope button { text-align: left; padding: 12px 14px; border-radius: 10px; background: var(--s1); border: 1px solid var(--hair); display: grid; gap: 2px; }
+.scope button.on { border-color: var(--mint); background: rgba(126,213,151,.06); }
+.scope b { font-weight: 600; }
+.scope small { color: var(--fg3); font-size: 12px; }
 .sysnote { display: flex; gap: 8px; align-items: center; justify-content: center; color: var(--fg3); font-size: 12px; margin: 6px 0; }
 </style>
 
@@ -473,17 +490,17 @@ const tileHTML = (name, c, size = '') => `<span class="tile solid" style="color:
 // ---------------------------------------------------------------------------
 const CLIENTS = [
   { id: 'sarah', name: 'Sarah Mitchell', ini: 'SM', hue: 145, type: 'Hybrid', pkg: '8 PT / month', prog: 'Strength Block 1 · wk 6', adh: 92, last: 'Today', status: ['coral', 'Pain reported'] },
-  { id: 'tom', name: 'Tom Reid', ini: 'TR', hue: 30, type: 'In-person', pkg: '12 PT / month', prog: 'Hypertrophy · wk 3', adh: 48, last: '9 days ago', status: ['amber', 'Missed workouts'] },
+  { id: 'tom', name: 'Tom Reid', ini: 'TR', hue: 30, type: 'In-person', pkg: '8 PT / month', prog: 'Hypertrophy · wk 3', adh: 48, last: '9 days ago', status: ['amber', 'Missed workouts'] },
   { id: 'priya', name: 'Priya Shah', ini: 'PS', hue: 260, type: 'Online', pkg: 'Online coaching', prog: '10k + Strength · wk 9', adh: 88, last: 'Yesterday', status: ['amber', 'Awaiting reply'] },
   { id: 'dave', name: 'Dave Collins', ini: 'DC', hue: 200, type: 'Online', pkg: 'Online coaching', prog: 'Fat Loss Phase 2 · wk 4', adh: 79, last: 'Today', status: ['grey', 'Meals to review'] },
   { id: 'ellie', name: 'Ellie Brooks', ini: 'EB', hue: 330, type: 'Hybrid', pkg: '4 PT / month', prog: 'Return to Training · wk 2', adh: 70, last: '2 days ago', status: ['violet', 'Low sleep'] },
   { id: 'mark', name: 'Mark Hughes', ini: 'MH', hue: 100, type: 'In-person', pkg: '8 PT / month (duo)', prog: 'Strength Block 2 · wk 1', adh: 95, last: 'Today', status: ['mint', 'On track'] },
   { id: 'jen', name: 'Jen Hughes', ini: 'JH', hue: 50, type: 'In-person', pkg: '8 PT / month (duo)', prog: 'Strength Block 2 · wk 1', adh: 93, last: 'Today', status: ['mint', 'On track'] },
-  { id: 'ray', name: 'Ray Patel', ini: 'RP', hue: 180, type: 'Programme only', pkg: 'Personal programme', prog: 'Full Body 3x · wk 5', adh: 84, last: 'Yesterday', status: ['mint', 'On track'] }
+  { id: 'ray', name: 'Ray Patel', ini: 'RP', hue: 180, type: 'Online', pkg: 'Online coaching', prog: 'Full Body 3x · wk 5', adh: 84, last: 'Yesterday', status: ['mint', 'On track'] }
 ];
 // Chosen by each client at onboarding.
 const CHECKIN = { sarah: 'Weekly · Sun', tom: 'Monthly', priya: 'Weekly · Mon', dave: 'Weekly · Sun', ellie: 'Every 2 weeks · Sun', mark: 'Monthly', jen: 'Monthly', ray: 'Every 2 weeks · Fri' };
-const PAY = { sarah: ['mint', 'Paid · Nov'], tom: ['grey', 'Due 1 Nov'], priya: ['mint', 'Paid · Nov'], dave: ['coral', 'Overdue 3 days'], ellie: ['grey', 'Due 1 Nov'], mark: ['mint', 'Paid · Nov'], jen: ['mint', 'Paid · Nov'], ray: ['grey', 'One-off · paid'] };
+const PAY = { sarah: ['mint', 'Paid · Nov'], tom: ['grey', 'Due 1 Nov'], priya: ['mint', 'Paid · Nov'], dave: ['coral', 'Overdue 5 days'], ellie: ['grey', 'Due 1 Nov'], mark: ['mint', 'Paid · Nov'], jen: ['mint', 'Paid · Nov'], ray: ['mint', 'Paid · Nov'] };
 const avatar = (c, extra = '') => `<span class="av" style="background:hsl(${c.hue} 30% 18%);color:hsl(${c.hue} 70% 72%);${extra}">${c.ini}</span>`;
 const byId = id => CLIENTS.find(c => c.id === id);
 
@@ -544,7 +561,7 @@ const S = {
   prog: clone(START), saved: clone(START), filter: 'All', q: '', libFilter: 'All',
   done: {}, approved: {}, editing: null, modal: null,
   nut: { kcal: 2100, protein: 140, carbs: 210, fat: 70, show: true, reacted: { 0: true }, fbSent: false },
-  bmode: 'coach', reqDone: {}, blocks: [], hidden: {},
+  bmode: 'coach', reqDone: {}, blocks: [], hidden: {}, pchange: {}, pscope: 'new', reminded: {},
   rules: { payRemind: true, sessRemind: true, drop: true, prog: true, alert: true, release: true, remind: true, aiAnswer: true, aiDraft: true },
   conv: 'priya', sent: [],
   drop: { q: 'What\'s your go-to meal when you\'re short on time?', title: 'Plan your protein for the week', body: 'Batch-cook two protein sources on Sunday (chicken thighs and turkey mince work well). It turns most meals into a 10-minute job.', meals: [3, 0, 2], scheduled: false }
@@ -617,7 +634,7 @@ function vClients() {
   return `
   <div class="head"><div><h1>Clients</h1><p>${CLIENTS.length} active</p></div><button class="btn mint" data-toast="Invite link copied">${ic('plus', 'sm')}Invite client</button></div>
   <div class="toolbar">
-    <div class="chips">${['All', 'In-person', 'Hybrid', 'Online', 'Programme only'].map(x => `<button class="chipbtn ${f === x ? 'on' : ''}" data-filter="${x}">${x}</button>`).join('')}</div>
+    <div class="chips">${['All', 'In-person', 'Hybrid', 'Online'].map(x => `<button class="chipbtn ${f === x ? 'on' : ''}" data-filter="${x}">${x}</button>`).join('')}</div>
     <label class="search">${ic('search', 'sm')}<input id="q" placeholder="Search clients" value="${S.q}" aria-label="Search clients"></label>
   </div>
   <div class="card ctable">
@@ -894,6 +911,60 @@ function vCommunity() {
   </div>`;
 }
 
+// Monthly packages. Each client's own price is stored on their subscription,
+// so a package price change only reaches existing clients when you choose.
+const PACKAGES = [
+  { id: 'pt2', name: '2 PT sessions', sub: 'a month · in person', price: 90 },
+  { id: 'pt4', name: '4 PT sessions', sub: 'a month · in person', price: 150 },
+  { id: 'pt8', name: '8 PT sessions', sub: 'a month · in person', price: 260 },
+  { id: 'online', name: 'Online coaching', sub: 'a month', price: 120 }
+];
+// Sample billing: client, package, what they pay now, status, card.
+const BILLING = [['sarah', 'pt8', 260, 'paid', 'Automatic'], ['tom', 'pt8', 240, 'due', 'Automatic'], ['priya', 'online', 120, 'paid', 'Automatic'],
+  ['dave', 'online', 120, 'overdue', 'Card declined 18 Oct'], ['ellie', 'pt4', 140, 'due', 'Pays when reminded'], ['mark', 'pt8', 260, 'paid', 'Automatic'],
+  ['jen', 'pt8', 260, 'paid', 'Automatic'], ['ray', 'online', 120, 'paid', 'Automatic']];
+const pkgById = id => PACKAGES.find(p => p.id === id);
+const gbp = n => '£' + n.toLocaleString('en-GB');
+
+function vPayments() {
+  const tot = st => BILLING.filter(b => !st || b[3] === st).reduce((a, b) => a + b[2], 0);
+  const k = (n, label, icon, c) => `<div class="card kpi">${tileHTML(icon, c)}<span><b class="num">${n}</b><small>${label}</small></span></div>`;
+  const status = { paid: ['mint', 'Paid'], due: ['grey', 'Due 1 Nov'], overdue: ['coral', 'Overdue 5 days'] };
+  return `<div class="head"><div><h1>Payments</h1><p>Cards are charged through Stripe on the 1st. Reminders go out 3 days before, and you're told about anything overdue.</p></div></div>
+  <div class="kpis">${k(gbp(tot()), 'Expected for November', 'card', 'grey')}${k(gbp(tot('paid')), 'Paid', 'check', 'mint')}${k(gbp(tot('due')), 'Due on the 1st', 'clock', 'sky')}${k(gbp(tot('overdue')), 'Overdue', 'pain', 'coral')}</div>
+  <div><div class="sec"><h2>Packages</h2><span class="muted">Changing a price never surprises anyone: you choose who it applies to</span></div>
+    <div class="pkgs">${PACKAGES.map(p => { const on = BILLING.filter(b => b[1] === p.id), legacy = on.filter(b => b[2] !== p.price).length, ch = S.pchange[p.id]; return `
+      <div class="card pkg"><span class="eyebrow">${p.sub}</span><b style="font-weight:600">${p.name}</b>
+        <span class="price num">${gbp(ch && ch.scope === 'new' ? ch.price : p.price)}<small>/ month</small></span>
+        <span class="note">${on.length} client${on.length === 1 ? '' : 's'}${legacy ? ` · <span style="color:var(--amber)">${legacy} on an older price</span>` : ''}</span>
+        ${ch ? `<span class="tag t-${ch.scope === 'new' ? 'mint' : 'amber'}">${ch.scope === 'new' ? `New clients only · existing stay on ${gbp(p.price)}` : `Everyone to ${gbp(ch.price)} from ${ch.from} · ${on.length} notified`}</span>` : ''}
+        <button class="btn line" style="justify-self:start" data-pedit="${p.id}">Change price</button></div>`; }).join('')}</div></div>
+  <div><div class="sec"><h2>November</h2><span class="muted">Each client keeps the price they signed up at until you move them</span></div>
+    <div class="card btable">
+      <div class="br th"><span>Client</span><span>Package</span><span>They pay</span><span>Status</span><span>Card</span><span></span></div>
+      ${BILLING.map(([id, pk, price, st, card]) => { const c = byId(id), p = pkgById(pk), ch = S.pchange[pk]; const [col, lab] = status[st]; return `<div class="br">
+        <span class="nm">${avatar(c, 'width:32px;height:32px;font-size:11px')}<b style="font-weight:600">${c.name}</b></span>
+        <span>${p.name}</span>
+        <span class="num"><b>${gbp(price)}</b>${price !== p.price ? `<small style="color:var(--amber)">Older price · current ${gbp(p.price)}</small>` : ''}${ch && ch.scope === 'all' && ch.price !== price ? `<small style="color:var(--amber)">→ ${gbp(ch.price)} from ${ch.from}</small>` : ''}</span>
+        <span><span class="tag t-${col}">${lab}</span></span>
+        <span style="color:var(--fg2)">${card}</span>
+        <span>${st === 'overdue' ? (S.reminded[id] ? `<span class="tag t-mint">${ic('check', 'sm')}Reminder sent</span>` : `<button class="btn ghost" data-remind="${id}">Send reminder</button>`) : ''}</span></div>`; }).join('')}
+    </div></div>`;
+}
+function priceModal() {
+  const p = pkgById(S.modal.pkg);
+  return `<div class="scrim" data-scrim><div class="modal" role="dialog" aria-modal="true">
+    <div class="sec" style="margin:0"><h2>Change price · ${p.name}</h2><button class="iconbtn" data-closemodal aria-label="Close">${ic('close')}</button></div>
+    <div class="fields"><label class="full">New monthly price (£)<input id="pnew" inputmode="numeric" value="${p.price}"></label></div>
+    <div class="scope">
+      <button class="${S.pscope === 'new' ? 'on' : ''}" data-pscope="new"><b>New clients only</b><small>Everyone already on ${p.name} keeps paying what they pay now.</small></button>
+      <button class="${S.pscope === 'all' ? 'on' : ''}" data-pscope="all"><b>Everyone on this package</b><small>From the date below. Clients get a notification and email today, giving at least 30 days' notice.</small></button>
+    </div>
+    ${S.pscope === 'all' ? `<div class="fields"><label class="full">Starts<select id="pfrom"><option>1 December 2026</option><option selected>1 January 2027</option><option>1 February 2027</option></select></label></div>` : ''}
+    <button class="btn mint" data-psave style="justify-self:start">${ic('check', 'sm')}Save price</button>
+  </div></div>`;
+}
+
 function vAutomation() {
   const R = [['prog', 'arrowup', 'mint', 'Progression', 'Add one load jump when every working set hits the top of the range', 'Auto'],
     ['alert', 'pain', 'coral', 'Missed-workout alert', 'Flag a client when their gap is twice their usual', 'Auto'],
@@ -912,7 +983,7 @@ function vAutomation() {
 // ---------------------------------------------------------------------------
 // Render
 // ---------------------------------------------------------------------------
-const NAV = [['today', 'Today', 6, 'coral'], ['clients', 'Clients'], ['programmes', 'Programmes'], ['schedule', 'Schedule'], ['messages', 'Messages', 3, 'mint'], ['community', 'Community'], ['library', 'Library'], ['automation', 'Automation']];
+const NAV = [['today', 'Today', 6, 'coral'], ['clients', 'Clients'], ['programmes', 'Programmes'], ['schedule', 'Schedule'], ['messages', 'Messages', 3, 'mint'], ['payments', 'Payments', 1, 'coral'], ['community', 'Community'], ['library', 'Library'], ['automation', 'Automation']];
 const $ = id => document.getElementById(id);
 
 function render(keep) {
@@ -923,9 +994,9 @@ function render(keep) {
     <div class="me"><img src="assets/kd-mark.png" alt="" style="width:34px;height:34px;border-radius:50%;background:#000;object-fit:contain;padding:8px 5px;border:1px solid var(--hair)"><span><b>Kyle</b><small>Head coach</small></span></div>`;
   const v = S.view;
   $('main').innerHTML = `<div class="fade" style="display:grid;gap:24px">${v === 'today' ? vToday() : v === 'clients' ? vClients() : v === 'client' ? vClient() : v === 'programmes' ? vProgrammes()
-    : v === 'schedule' ? vSchedule() : v === 'messages' ? vMessages() : v === 'library' ? vLibrary() : v === 'community' ? vCommunity() : vAutomation()}</div>`;
+    : v === 'schedule' ? vSchedule() : v === 'messages' ? vMessages() : v === 'library' ? vLibrary() : v === 'community' ? vCommunity() : v === 'payments' ? vPayments() : vAutomation()}</div>`;
   if (!keep) $('main').firstElementChild.classList.add('fade'); else $('main').firstElementChild.classList.remove('fade');
-  $('layer').innerHTML = !S.modal ? '' : S.modal.mode === 'block' ? blockModal() : modalHTML();
+  $('layer').innerHTML = !S.modal ? '' : S.modal.mode === 'block' ? blockModal() : S.modal.mode === 'price' ? priceModal() : modalHTML();
   window.scrollTo(0, keep ? y : 0);
 }
 function modalHTML() {
@@ -988,6 +1059,15 @@ document.addEventListener('click', e => {
     S.modal = null; toast('Blocked · added to your Google Calendar'); return render(true);
   }
   if (d.hide) { S.hidden[d.hide] = !S.hidden[d.hide]; return render(true); }
+  if (d.pedit) { S.modal = { mode: 'price', pkg: d.pedit }; S.pscope = 'new'; return render(true); }
+  if (d.pscope) { S.pscope = d.pscope; return render(true); }
+  if (d.psave !== undefined) {
+    const price = parseInt($('pnew').value, 10);
+    if (!(price > 0)) { toast('Enter a price in pounds'); return; }
+    S.pchange[S.modal.pkg] = { price, scope: S.pscope, from: S.pscope === 'all' ? $('pfrom').value.replace(/ 20\d\d$/, '') : null };
+    S.modal = null; toast(S.pscope === 'new' ? 'Saved · new clients see the new price' : 'Saved · clients notified with 30 days\' notice'); return render(true);
+  }
+  if (d.remind) { S.reminded[d.remind] = true; toast('Reminder sent with a payment link'); return render(true); }
   if (d.meal) { const m = S.drop.meals, i = +d.meal; let n = m[i]; do { n = (n + 1) % RECIPES.length; } while (m.includes(n)); m[i] = n; S.drop.scheduled = false; return render(true); }
   if (d.sched !== undefined) { S.drop.title = $('tipT').value; S.drop.body = $('tipB').value; S.drop.q = $('qT').value; S.drop.scheduled = true; toast('Scheduled · question Monday, tip and meals Wednesday'); return render(true); }
   if (d.tipai !== undefined) { $('tipT').value = 'Walk after your biggest meal'; $('tipB').value = 'A 10-minute walk after dinner helps digestion, adds 1,000+ steps and counts towards the November challenge.'; return; }

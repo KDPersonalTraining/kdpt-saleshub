@@ -86,7 +86,7 @@ select distinct on (client_id, kind) client_id, kind, granted, document_version,
 from consents
 order by client_id, kind, recorded_at desc;
 
-create type coaching_type as enum ('in_person', 'online', 'hybrid', 'programme_only');
+create type coaching_type as enum ('in_person', 'online', 'hybrid');
 
 create table packages (
   id            uuid primary key default gen_random_uuid(),
@@ -94,6 +94,8 @@ create table packages (
   name          text not null,              -- '8 PT sessions / month'
   coaching_type coaching_type not null,
   sessions_per_month int not null default 0,
+  -- The price for anyone joining now. Existing clients pay subscriptions.price_pence.
+  -- Launch prices: 2 PT £90, 4 PT £150, 8 PT £260, online coaching £120.
   price_pence   int not null check (price_pence >= 0),
   stripe_price_id text,
   active        boolean not null default true
@@ -677,6 +679,13 @@ create table subscriptions (
   client_id     uuid not null references profiles (id) on delete cascade,
   package_id    uuid not null references packages (id),
   stripe_subscription_id text unique,
+  -- What this client pays. Set from the package when they join and only
+  -- changed deliberately, so a package price rise doesn't reach existing
+  -- clients unless the coach applies it to them.
+  price_pence   int not null check (price_pence >= 0),
+  next_price_pence int check (next_price_pence >= 0),
+  next_price_from date,                    -- at least 30 days after notice is sent
+  price_notice_sent_at timestamptz,
   status        text not null,             -- mirrors Stripe: active, past_due, canceled
   current_period_end timestamptz,
   updated_at    timestamptz not null default now()

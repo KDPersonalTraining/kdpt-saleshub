@@ -127,8 +127,18 @@ Momentum is a word, not a score out of 100, as the blueprint recommended.
   or drops dates. The 24-hour change window is a placeholder until you
   confirm your cancellation policy.
 - **Payments**: the reminder opens a Stripe-style payment sheet with an
-  optional monthly auto-pay. It uses the £120 Online Coaching price from the
-  sales site, because PT session prices aren't published there.
+  optional monthly auto-pay.
+
+### Prices and cancellation (23 Oct)
+
+- **Cancellation:** 24 hours. Later cancellations count as a used session.
+- **Packages:** 2 PT sessions £90, 4 PT £150, 8 PT £260 a month, and online
+  coaching £120 a month. Programme-only isn't part of the app.
+- **Price changes:** the portal's Payments page lets you change a package
+  price for **new clients only**, or for **everyone on it** from a date you
+  choose. Clients get at least 30 days' notice. Each client's own price is
+  stored on their subscription, so older prices stay put until you move them.
+  The older prices shown for Tom and Ellie are sample data.
 
 ### Kyle and KAI (21 Oct)
 
