@@ -50,6 +50,20 @@ const GLOBAL_CSS = `
     button { min-height: 44px; }
     input, select, textarea { font-size: 16px !important; }
   }
+
+  /* Photo layouts */
+  .kd-split { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 64px; align-items: center; }
+  .kd-photo { position: relative; border-radius: 24px; overflow: hidden; aspect-ratio: 3 / 4; max-width: 100%; background: #0D0D0D; }
+  .kd-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .kd-photo::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+                     background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.45) 100%); }
+  .kd-cap { position: absolute; z-index: 1; left: 16px; bottom: 16px; font-family: 'Poppins', sans-serif;
+            font-size: 12px; font-weight: 500; color: #FFFFFF; background: rgba(0,0,0,0.7);
+            padding: 6px 12px; border-radius: 999px; }
+  @media (max-width: 860px) {
+    .kd-split { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+    .kd-photo { aspect-ratio: 4 / 5; max-height: 560px; }
+  }
 `;
 
 function useGlobalStyles() {
@@ -250,6 +264,17 @@ function FadeIn({ children, delay = 0, style = {} }) {
       ...style
     }}>
       {children}
+    </div>
+  );
+}
+
+// Photo with optional caption
+function Photo({ src, alt, caption, position = "center", eager = false, style = {} }) {
+  return (
+    <div className="kd-photo" style={style}>
+      <img src={src} alt={alt} loading={eager ? "eager" : "lazy"} decoding="async"
+           style={{ objectPosition: position }} />
+      {caption && <span className="kd-cap">{caption}</span>}
     </div>
   );
 }
@@ -1249,21 +1274,31 @@ function PriceCard({ label, price, period, features, ctaLabel, href }) {
 }
 
 // ─── Sales page hero ──────────────────────────────────────────────────────────
-function SalesHero({ eyebrow, title, sub, ctaLabel, onCta, ghostLabel, onGhost }) {
+function SalesHero({ eyebrow, title, sub, ctaLabel, onCta, ghostLabel, onGhost, image, imageAlt = "", imagePos, caption }) {
+  const copy = (
+    <FadeIn>
+      <Eyebrow>{eyebrow}</Eyebrow>
+      <H1 style={{ fontSize: "clamp(36px, 6vw, 60px)", maxWidth: 700, marginBottom: 20 }}>
+        {title}
+      </H1>
+      <Body style={{ fontSize: 17, maxWidth: 560, marginBottom: 32 }}>{sub}</Body>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+        <BtnPrimary onClick={onCta}>{ctaLabel}</BtnPrimary>
+        {ghostLabel && <BtnGhost onClick={onGhost}>{ghostLabel}</BtnGhost>}
+      </div>
+    </FadeIn>
+  );
   return (
-    <section style={{ padding: "88px 0 72px" }}>
+    <section style={{ padding: image ? "64px 0 72px" : "88px 0 72px" }}>
       <Wrap>
-        <FadeIn>
-          <Eyebrow>{eyebrow}</Eyebrow>
-          <H1 style={{ fontSize: "clamp(36px, 6vw, 60px)", maxWidth: 700, marginBottom: 20 }}>
-            {title}
-          </H1>
-          <Body style={{ fontSize: 17, maxWidth: 560, marginBottom: 32 }}>{sub}</Body>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-            <BtnPrimary onClick={onCta}>{ctaLabel}</BtnPrimary>
-            {ghostLabel && <BtnGhost onClick={onGhost}>{ghostLabel}</BtnGhost>}
+        {image ? (
+          <div className="kd-split">
+            {copy}
+            <FadeIn delay={150}>
+              <Photo src={image} alt={imageAlt} position={imagePos} caption={caption} eager />
+            </FadeIn>
           </div>
-        </FadeIn>
+        ) : copy}
       </Wrap>
     </section>
   );
@@ -1312,11 +1347,13 @@ function Home({ go, openQuiz }) {
   return (
     <>
       {/* ── 1. HERO ─────────────────────────────────────────────────────── */}
-      <Section style={{ padding: "96px 0 72px" }}>
+      <Section style={{ padding: "64px 0 72px" }}>
         <Wrap>
+          <div className="kd-split">
+          <div>
           <FadeIn>
             <Eyebrow>KD Personal Training</Eyebrow>
-            <H1 style={{ fontSize: "clamp(40px, 7vw, 80px)", maxWidth: 780, marginBottom: 24 }}>
+            <H1 style={{ fontSize: "clamp(40px, 5.6vw, 68px)", maxWidth: 780, marginBottom: 24 }}>
               Coaching, built<br />around <span style={{ color: C.green }}>you.</span>
             </H1>
           </FadeIn>
@@ -1335,6 +1372,12 @@ function Home({ go, openQuiz }) {
               <BtnGhost onClick={openQuiz}>Help me choose</BtnGhost>
             </div>
           </FadeIn>
+          </div>
+          <FadeIn delay={150}>
+            <Photo src="/images/site/kyle-portrait.jpg" alt="Kyle Denny, personal trainer, in the gym"
+                   position="62% 20%" eager />
+          </FadeIn>
+          </div>
         </Wrap>
       </Section>
 
@@ -1440,8 +1483,14 @@ function Home({ go, openQuiz }) {
       {/* ── 3. WHY KDPT ─────────────────────────────────────────────────── */}
       <Section bg={C.alt} style={{ padding: "80px 0" }}>
         <Wrap>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 60, alignItems: "start" }}>
-            {/* Left, Kyle's copy */}
+          <div className="kd-split" style={{ gridTemplateColumns: undefined, alignItems: "start" }}>
+            {/* Left, photo */}
+            <FadeIn>
+              <Photo src="/images/site/kyle-studio.jpg" alt="Kyle Denny smiling in the training studio"
+                     position="50% 30%" style={{ aspectRatio: "4 / 5" }} />
+            </FadeIn>
+            <div>
+            {/* Kyle's copy */}
             <FadeIn>
               <Eyebrow>Why KDPT?</Eyebrow>
               <H2 style={{ fontSize: "clamp(24px, 3.5vw, 34px)", marginBottom: 28 }}>
@@ -1464,8 +1513,8 @@ function Home({ go, openQuiz }) {
               </div>
             </FadeIn>
 
-            {/* Right, four pillars */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+            {/* Four pillars */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 0, marginTop: 36 }}>
               {[
                 { t: "Personalised programming", d: "Your plan is built from scratch around your goals, schedule and equipment." },
                 { t: "Nutrition guidance", d: "Practical, sustainable guidance, not a macro sheet that ignores your lifestyle." },
@@ -1483,6 +1532,7 @@ function Home({ go, openQuiz }) {
                   </div>
                 </FadeIn>
               ))}
+            </div>
             </div>
           </div>
         </Wrap>
@@ -1676,7 +1726,8 @@ function OnlinePage({ openQuiz, go }) {
       <SalesHero eyebrow="Online Coaching" title="Coaching that works around your life."
         sub="Ongoing remote coaching with weekly check-ins, nutrition support and a programme that adapts as you progress. Train wherever works for you."
         ctaLabel="Start Online Coaching" onCta={() => document.getElementById("oc-pricing")?.scrollIntoView({ behavior: "smooth" })}
-        ghostLabel="Help me choose" onGhost={openQuiz} />
+        ghostLabel="Help me choose" onGhost={openQuiz}
+        image="/images/site/kyle-portrait.jpg" imageAlt="Kyle Denny, online coach" imagePos="62% 20%" />
 
       {/* 2. What's included */}
       <Section style={{ padding: "0 0 72px" }}>
@@ -2031,7 +2082,8 @@ function PTPage({ openQuiz, go }) {
       <SalesHero eyebrow="Personal Training" title="In-person coaching in Northampton."
         sub="1:1 personal training sessions with technique-focused, fully tailored coaching. Starting with a free, no-pressure consultation."
         ctaLabel="Book Free Consultation" onCta={() => document.getElementById("pt-book")?.scrollIntoView({ behavior: "smooth" })}
-        ghostLabel="Help me choose" onGhost={openQuiz} />
+        ghostLabel="Help me choose" onGhost={openQuiz}
+        image="/images/site/pt-coaching.jpg" imageAlt="Kyle coaching a client through kettlebell swings" imagePos="45% 40%" caption="1-2-1 at Trilogy Active" />
 
       {/* 2. What's included / how sessions work */}
       <Section style={{ padding: "0 0 72px" }}>
