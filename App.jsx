@@ -1486,8 +1486,8 @@ function Home({ go, openQuiz }) {
           <div className="kd-split" style={{ gridTemplateColumns: undefined, alignItems: "start" }}>
             {/* Left, photo */}
             <FadeIn>
-              <Photo src="/images/site/kyle-studio.jpg" alt="Kyle Denny smiling in the training studio"
-                     position="50% 30%" style={{ aspectRatio: "4 / 5" }} />
+              <Photo src="/images/site/pt-coaching.jpg" alt="Kyle coaching a client through kettlebell swings"
+                     position="45% 40%" caption="1-2-1 at Trilogy Active" style={{ aspectRatio: "4 / 5" }} />
             </FadeIn>
             <div>
             {/* Kyle's copy */}
