@@ -814,7 +814,7 @@ const EVENTS = [
 ];
 // Working hours. The gym opens at 6:30; Wednesday is a half day; no weekends.
 const DAYNAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const DEFAULT_HOURS = { Mon: [6.5, 20], Tue: [6.5, 20], Wed: [6.5, 13], Thu: [6.5, 20], Fri: [6.5, 20], Sat: null, Sun: null };
+const DEFAULT_HOURS = { Mon: [6.5, 19.5], Tue: [6.5, 19.5], Wed: [6.5, 13], Thu: [6.5, 19.5], Fri: [6.5, 19.5], Sat: null, Sun: null };
 // Clients whose times change month to month send windows; KAI drafts exact times.
 const AVAIL = [
   { id: 'v1', c: 'tom', windows: 'Mon after 17:30 · Thu after 17:00', n: 8, draft: 'Mondays 18:00 and Thursdays 17:45, your last slots of the day, so no gaps' },
@@ -940,8 +940,9 @@ function vLibrary() {
 const RECIPES = [['pasta', 'Creamy Cajun Chicken Pasta', 45], ['potato-bowl', 'Big Mac Loaded Potato Bowl', 42], ['wrap', 'High-Protein Breakfast Wrap', 41], ['turkey-pasta', 'Turkey & Pasta Tomato Bowl', 40], ['breakfast', 'Eggs, Veg & Sourdough', 32]];
 function vCommunity() {
   const d = S.drop;
-  return `<div class="head"><div><h1>Community</h1><p>Your tip and 3 meals go out every Wednesday at 07:00, the question of the week every Monday. Clients can post, like and comment, and you can hide anything.</p></div>
-    <button class="btn line" data-toast="Post an announcement now">${ic('megaphone', 'sm')}Announcement</button></div>
+  return `<div class="head"><div><h1>Community</h1><p>Your tip and 3 meals go out every Wednesday at 07:00, the question of the week every Monday. Clients like and comment; only you post for now.</p></div>
+    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><span class="switch"><button role="switch" aria-checked="${!!S.clientsPost}" data-clientspost aria-label="Let clients post"></button><span class="muted">Let clients post</span></span>
+    <button class="btn line" data-toast="Post an announcement now">${ic('megaphone', 'sm')}Announcement</button></div></div>
   <div class="grid2">
     <section class="card pad" style="display:grid;gap:16px;align-content:start">
       <div class="sec" style="margin:0"><h2>Week 44 · Wednesday 28 October</h2>${d.scheduled ? `<span class="tag t-mint">${ic('check', 'sm')}Scheduled</span>` : `<span class="tag t-grey">Draft</span>`}</div>
@@ -954,7 +955,7 @@ function vCommunity() {
     </section>
     <section style="display:grid;gap:20px;align-content:start">
       <div><div class="sec"><h2>Latest in the group</h2><span class="muted">Hide anything that shouldn't be there</span></div>
-        <div class="card">${[['m1', 'priya', '10k done this morning! 52:40, a new PB 🎉', '2 h · post'], ['m2', 'mark', 'Training with Jen. No skipping when someone\'s waiting for you 😂', 'Mon · answer'], ['m3', 'tom', 'Made the Big Mac bowl twice already', 'Thu · comment']].map(([id, c, t, w]) =>
+        <div class="card">${[['m1', 'priya', 'Thank you! Legs held up so much better this time', '2 h · comment'], ['m2', 'mark', 'Training with Jen. No skipping when someone\'s waiting for you 😂', 'Mon · answer'], ['m3', 'tom', 'Made the Big Mac bowl twice already', 'Thu · comment']].map(([id, c, t, w]) =>
           `<div class="mod ${S.hidden[id] ? 'hidden' : ''}">${avatar(byId(c), 'width:30px;height:30px;font-size:11px')}<span><b>${byId(c).name.split(' ')[0]}</b> <small style="color:var(--fg3)">${w}</small><p>${t}</p></span>
            <span style="display:flex;gap:2px"><button class="iconbtn" data-toast="Liked" aria-label="Like">${ic('heart', 'sm')}</button><button class="iconbtn" data-hide="${id}" aria-label="${S.hidden[id] ? 'Show' : 'Hide'}">${ic(S.hidden[id] ? 'open' : 'close', 'sm')}</button></span></div>`).join('')}</div></div>
       <div><div class="sec"><h2>Last week</h2><span class="muted">Week 43</span></div>
@@ -973,17 +974,20 @@ const PACKAGES = [
   { id: 'pt2', name: '2 PT sessions', sub: 'a month · in person', price: 90 },
   { id: 'pt4', name: '4 PT sessions', sub: 'a month · in person', price: 150 },
   { id: 'pt8', name: '8 PT sessions', sub: 'a month · in person', price: 260 },
-  { id: 'online', name: 'Online coaching', sub: 'a month', price: 120 }
+  { id: 'online', name: 'Online coaching', sub: 'a month', price: 120 },
+  // One price for the pair. Either one person pays, or it's split 50/50.
+  { id: 'duo8', name: '8 PT sessions · duo', sub: 'a month · for two', price: null, duo: true }
 ];
+const PARTNER = { mark: 'Jen', jen: 'Mark' };
 // Sample billing: client, package, what they pay now, status, card.
 const BILLING = [['sarah', 'pt8', 260, 'paid', 'Automatic'], ['tom', 'pt8', 240, 'due', 'Automatic'], ['priya', 'online', 120, 'paid', 'Automatic'],
-  ['dave', 'online', 120, 'overdue', 'Card declined 18 Oct'], ['ellie', 'pt4', 140, 'due', 'Pays when reminded'], ['mark', 'pt8', 260, 'paid', 'Automatic'],
-  ['jen', 'pt8', 260, 'paid', 'Automatic'], ['ray', 'online', 120, 'paid', 'Automatic']];
+  ['dave', 'online', 120, 'overdue', 'Card declined 18 Oct'], ['ellie', 'pt4', 140, 'due', 'Pays when reminded'], ['mark', 'duo8', null, 'paid', 'Automatic'],
+  ['jen', 'duo8', null, 'paid', 'Automatic'], ['ray', 'online', 120, 'paid', 'Automatic']];
 const pkgById = id => PACKAGES.find(p => p.id === id);
 const gbp = n => '£' + n.toLocaleString('en-GB');
 
 function vPayments() {
-  const tot = st => BILLING.filter(b => !st || b[3] === st).reduce((a, b) => a + b[2], 0);
+  const tot = st => BILLING.filter(b => !st || b[3] === st).reduce((a, b) => a + (b[2] || 0), 0);
   const k = (n, label, icon, c) => `<div class="card kpi">${tileHTML(icon, c)}<span><b class="num">${n}</b><small>${label}</small></span></div>`;
   const status = { paid: ['mint', 'Paid'], due: ['grey', 'Due 1 Nov'], overdue: ['coral', 'Overdue 5 days'] };
   return `<div class="head"><div><h1>Payments</h1><p>Cards are charged through Stripe on the 1st. Every price, rise and discount is set here, and nothing changes for a client unless you change it.</p></div></div>
@@ -991,17 +995,17 @@ function vPayments() {
   <div><div class="sec"><h2>Packages</h2><span class="muted">Changing a price never surprises anyone: you choose who it applies to</span></div>
     <div class="pkgs">${PACKAGES.map(p => { const on = BILLING.filter(b => b[1] === p.id), legacy = on.filter(b => b[2] !== p.price).length, ch = S.pchange[p.id]; return `
       <div class="card pkg"><span class="eyebrow">${p.sub}</span><b style="font-weight:600">${p.name}</b>
-        <span class="price num">${gbp(ch && ch.scope === 'new' ? ch.price : p.price)}<small>/ month</small></span>
+        <span class="price num">${(ch && ch.scope === 'new' ? ch.price : p.price) == null ? 'Not set' : gbp(ch && ch.scope === 'new' ? ch.price : p.price)}<small>${p.duo ? '/ month for both' : '/ month'}</small></span>
         <span class="note">${on.length} client${on.length === 1 ? '' : 's'}${legacy ? ` · <span style="color:var(--amber)">${legacy} on an older price</span>` : ''}</span>
         ${ch ? `<span class="tag t-${ch.scope === 'new' ? 'mint' : 'amber'}">${ch.scope === 'new' ? `New clients only · existing stay on ${gbp(p.price)}` : `Everyone to ${gbp(ch.price)} from ${ch.from} · ${on.length} notified`}</span>` : ''}
-        <button class="btn line" style="justify-self:start" data-pedit="${p.id}">Change price</button></div>`; }).join('')}</div></div>
+        <button class="btn line" style="justify-self:start" data-pedit="${p.id}">${p.price == null && !ch ? 'Set price' : 'Change price'}</button></div>`; }).join('')}</div></div>
   <div><div class="sec"><h2>November</h2><span class="muted">Each client keeps the price they signed up at until you move them</span></div>
     <div class="card btable">
       <div class="br th"><span>Client</span><span>Package</span><span>They pay</span><span>Status</span><span>Card</span><span></span></div>
       ${BILLING.map(([id, pk, price, st, card]) => { const c = byId(id), p = pkgById(pk), ch = S.pchange[pk]; const [col, lab] = status[st]; return `<div class="br">
         <span class="nm">${avatar(c, 'width:32px;height:32px;font-size:11px')}<b style="font-weight:600">${c.name}</b></span>
         <span>${p.name}</span>
-        <span class="num"><b>${gbp(price)}</b>${price !== p.price ? `<small style="color:var(--amber)">Older price · current ${gbp(p.price)}</small>` : ''}${ch && ch.scope === 'all' && ch.price !== price ? `<small style="color:var(--amber)">→ ${gbp(ch.price)} from ${ch.from}</small>` : ''}${adjNote(id, price)}</span>
+        <span class="num">${p.duo ? `<b>${S.pchange[pk] ? gbp(S.pchange[pk].price / 2) + ' each' : 'Price not set'}</b><small>Shared with ${PARTNER[id]} · split 50/50</small>` : `<b>${gbp(price)}</b>`}${p.duo ? '' : price !== p.price ? `<small style="color:var(--amber)">Older price · current ${gbp(p.price)}</small>` : ''}${ch && ch.scope === 'all' && ch.price !== price ? `<small style="color:var(--amber)">→ ${gbp(ch.price)} from ${ch.from}</small>` : ''}${adjNote(id, price)}</span>
         <span><span class="tag t-${col}">${lab}</span></span>
         <span style="color:var(--fg2)">${card}</span>
         <span style="display:flex;gap:6px;flex-wrap:wrap">${st === 'overdue' ? (S.reminded[id] ? `<span class="tag t-mint">${ic('check', 'sm')}Reminder sent</span>` : `<button class="btn ghost" data-remind="${id}">Remind</button>`) : ''}<button class="btn line" data-adjust="${id}">Adjust</button></span></div>`; }).join('')}
@@ -1009,7 +1013,7 @@ function vPayments() {
 }
 // One client's own price: a discount, or a different monthly price.
 function adjNote(id, price) {
-  const a = S.adj[id]; if (!a) return '';
+  const a = S.adj[id]; if (!a || price == null) return '';
   if (a.kind === 'discount') {
     const off = a.unit === '%' ? Math.round(price * a.value / 100) : a.value;
     return `<small style="color:var(--mint)">${a.unit === '%' ? a.value + '%' : gbp(a.value)} off · ${a.len} → ${gbp(price - off)}${a.reason ? ' · ' + a.reason : ''}</small>`;
@@ -1020,7 +1024,7 @@ function adjustModal() {
   const c = byId(S.modal.client), row = BILLING.find(b => b[0] === S.modal.client), k = S.akind;
   return `<div class="scrim" data-scrim><div class="modal" role="dialog" aria-modal="true">
     <div class="sec" style="margin:0"><h2>Adjust · ${c.name}</h2><button class="iconbtn" data-closemodal aria-label="Close">${ic('close')}</button></div>
-    <span style="color:var(--fg3)">${pkgById(row[1]).name} · pays ${gbp(row[2])} a month. Only ${c.name.split(' ')[0]} is affected.</span>
+    <span style="color:var(--fg3)">${pkgById(row[1]).name} · pays ${row[2] == null ? 'a share of the duo price' : gbp(row[2]) + ' a month'}. Only ${c.name.split(' ')[0]} is affected.</span>
     <div class="scope">
       <button class="${k === 'discount' ? 'on' : ''}" data-akind="discount"><b>Discount</b><small>Money or percentage off, for a set time or until you stop it.</small></button>
       <button class="${k === 'price' ? 'on' : ''}" data-akind="price"><b>Change their monthly price</b><small>A rise or a drop just for this client. Rises give 30 days' notice.</small></button>
@@ -1030,7 +1034,7 @@ function adjustModal() {
       <label>Type<select id="aunit"><option value="%">% off</option><option value="£">£ off</option></select></label>
       <label>For<select id="alen"><option>November only</option><option>3 months</option><option>Until I stop it</option></select></label>
       <label>Reason (only you see this)<input id="areason" placeholder="e.g. Loyalty, referral"></label></div>`
-    : `<div class="fields"><label>New monthly price (£)<input id="aval" inputmode="numeric" value="${row[2]}"></label>
+    : `<div class="fields"><label>New monthly price (£)<input id="aval" inputmode="numeric" value="${row[2] ?? ''}"></label>
       <label>From<select id="afrom"><option>1 December</option><option>1 January</option><option>1 February</option></select></label></div>`}
     <button class="btn mint" data-asave style="justify-self:start">${ic('check', 'sm')}Save</button>
   </div></div>`;
@@ -1039,7 +1043,7 @@ function priceModal() {
   const p = pkgById(S.modal.pkg);
   return `<div class="scrim" data-scrim><div class="modal" role="dialog" aria-modal="true">
     <div class="sec" style="margin:0"><h2>Change price · ${p.name}</h2><button class="iconbtn" data-closemodal aria-label="Close">${ic('close')}</button></div>
-    <div class="fields"><label class="full">New monthly price (£)<input id="pnew" inputmode="numeric" value="${p.price}"></label></div>
+    <div class="fields"><label class="full">${p.duo ? 'Monthly price for both (£)' : 'New monthly price (£)'}<input id="pnew" inputmode="numeric" value="${p.price ?? ''}" placeholder="e.g. 360"></label></div>
     <div class="scope">
       <button class="${S.pscope === 'new' ? 'on' : ''}" data-pscope="new"><b>New clients only</b><small>Everyone already on ${p.name} keeps paying what they pay now.</small></button>
       <button class="${S.pscope === 'all' ? 'on' : ''}" data-pscope="all"><b>Everyone on this package</b><small>From the date below. Clients get a notification and email today, giving at least 30 days' notice.</small></button>
@@ -1143,6 +1147,7 @@ document.addEventListener('click', e => {
     S.modal = null; toast('Blocked · added to your Google Calendar'); return render(true);
   }
   if (d.hide) { S.hidden[d.hide] = !S.hidden[d.hide]; return render(true); }
+  if (d.clientspost !== undefined) { S.clientsPost = !S.clientsPost; toast(S.clientsPost ? 'Clients can now post to the group' : 'Only you can post'); return render(true); }
   if (d.pedit) { S.modal = { mode: 'price', pkg: d.pedit }; S.pscope = 'new'; return render(true); }
   if (d.pscope) { S.pscope = d.pscope; return render(true); }
   if (d.psave !== undefined) {
@@ -1154,7 +1159,7 @@ document.addEventListener('click', e => {
   if (d.remind) { S.reminded[d.remind] = true; toast('Reminder sent with a payment link'); return render(true); }
   if (d.bappr) { S.approvedB[d.bappr] = d.l; return render(true); }
   if (d.hoursopen !== undefined) { S.modal = { mode: 'hours' }; return render(true); }
-  if (d.hday) { S.hours[d.hday] = S.hours[d.hday] ? null : [6.5, 20]; return render(true); }
+  if (d.hday) { S.hours[d.hday] = S.hours[d.hday] ? null : [6.5, 19.5]; return render(true); }
   if (d.draft !== undefined) { S.drafted = true; return render(true); }
   if (d.availok) { S.availDone[d.availok] = true; toast('Booked · added to both calendars'); return render(true); }
   if (d.adjust) { S.modal = { mode: 'adjust', client: d.adjust }; S.akind = 'discount'; return render(true); }

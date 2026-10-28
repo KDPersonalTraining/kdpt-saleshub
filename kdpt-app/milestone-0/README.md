@@ -139,12 +139,14 @@ Momentum is a word, not a score out of 100, as the blueprint recommended.
   choose. Clients get at least 30 days' notice. Each client's own price is
   stored on their subscription, so older prices stay put until you move them.
   The older prices shown for Tom and Ellie are sample data.
+- **Duos:** one price for the pair, paid by one person or split 50/50
+  (`packages.max_clients`, `subscriptions.share_percent`). Duo price not set yet.
 - **Per-client control:** every client row in Payments has **Adjust**, for a
   discount (% or £ off, for one month, 3 months or until stopped) or their own
   monthly price. Rises give 30 days' notice. Each change is stored in
   `price_adjustments`, so there's a full history.
-- **Working hours:** Monday, Tuesday, Thursday and Friday 6:30–20:00
-  (finish time assumed), Wednesday 6:30–13:00, no Saturdays or Sundays. You
+- **Working hours:** Monday, Tuesday, Thursday and Friday 6:30–19:30,
+  Wednesday 6:30–13:00, no Saturdays or Sundays. You
   can change them in Schedule → Edit hours. Clients can't offer times outside
   them, and the calendar shades everything else.
 - **Two kinds of client:** regular clients get their usual slots proposed
@@ -203,7 +205,8 @@ In the portal, everything the AI writes is labelled "KAI draft".
     question of the week is pinned.
   - **Library:** sorted into Meals, Weekly tips (Wednesdays), Question of the
     week (Mondays), Announcements, and Challenges & more.
-  - Coaches can hide anything. Clients can only create `client_post` entries
+  - At launch clients like and comment only; posting is coach-only until you
+    switch on "Let clients post". Coaches can hide anything. Clients can only create `client_post` entries
     and delete their own.
 - **Icons** sit in a bordered tile tinted with their own colour.
 

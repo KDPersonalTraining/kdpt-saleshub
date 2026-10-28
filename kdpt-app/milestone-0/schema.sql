@@ -94,6 +94,8 @@ create table packages (
   name          text not null,              -- '8 PT sessions / month'
   coaching_type coaching_type not null,
   sessions_per_month int not null default 0,
+  -- 2 = a duo: one price for the pair, paid by one person or split.
+  max_clients   smallint not null default 1 check (max_clients between 1 and 2),
   -- The price for anyone joining now. Existing clients pay subscriptions.price_pence.
   -- Launch prices: 2 PT £90, 4 PT £150, 8 PT £260, online coaching £120.
   price_pence   int not null check (price_pence >= 0),
@@ -719,6 +721,7 @@ create table subscriptions (
   -- changed deliberately, so a package price rise doesn't reach existing
   -- clients unless the coach applies it to them.
   price_pence   int not null check (price_pence >= 0),
+  share_percent smallint not null default 100 check (share_percent between 1 and 100),  -- 50 each on a split duo
   next_price_pence int check (next_price_pence >= 0),
   next_price_from date,                    -- at least 30 days after notice is sent
   price_notice_sent_at timestamptz,
@@ -784,7 +787,8 @@ create table posts (
   id            uuid primary key default gen_random_uuid(),
   org_id        uuid not null references organisations (id),
   author_id     uuid not null references profiles (id),
-  -- client_post is the only kind a client can create.
+  -- client_post is the only kind a client can create, and only once the coach
+  -- turns on organisations.settings.clients_can_post (off at launch).
   kind          text not null check (kind in ('announcement', 'weekly_drop', 'tip', 'recipe', 'question', 'poll', 'challenge', 'client_post')),
   title         text,
   body          text not null,
@@ -931,6 +935,11 @@ language sql stable security definer set search_path = public as $$
     false)
 $$;
 
+create or replace function app.clients_can_post() returns boolean
+language sql stable security definer set search_path = public as $$
+  select coalesce((select (settings->>'clients_can_post')::boolean from organisations where id = app.my_org()), false)
+$$;
+
 -- Enable RLS everywhere. A table without a policy is closed by default.
 do $$
 declare t text;
@@ -1036,13 +1045,14 @@ begin
 end $$;
 
 -- The group feed. Clients see published, unhidden posts (and their own), can
--- write client_post entries and delete their own; coaches moderate everything.
+-- comment, and (only if the coach allows it) write client_post entries and
+-- delete their own; coaches moderate everything.
 drop policy org_read on posts;
 create policy org_read on posts for select
   using (org_id = app.my_org()
          and (app.is_staff() or (publish_at <= now() and (hidden_at is null or author_id = auth.uid()))));
 create policy client_post on posts for insert
-  with check (author_id = auth.uid() and kind = 'client_post' and org_id = app.my_org()
+  with check (author_id = auth.uid() and kind = 'client_post' and org_id = app.my_org() and app.clients_can_post()
               and hidden_at is null and not pinned);
 create policy own_delete on posts for delete using (author_id = auth.uid());
 

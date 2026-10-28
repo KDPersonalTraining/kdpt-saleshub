@@ -948,7 +948,7 @@ function fitToTime(minutes) {
 // ---------------------------------------------------------------------------
 const S = { onb: { step: 0, goal: 'strength', days: 3, freq: 'weekly', day: 'Sun' },
   notifs: { workout: true, booking: true, session: true, payment: true, drop: true, checkin: true },
-  book: { req: {}, pick: null, done: false }, avail: { days: { Tue: [16.5, 20], Thu: [14, 20] }, note: '', sent: false }, paid: false, autopay: true, ci: null,
+  book: { req: {}, pick: null, done: false }, avail: { days: { Tue: [16.5, 19.5], Thu: [14, 19.5] }, note: '', sent: false }, paid: false, autopay: true, ci: null,
   liked: {}, saved: {}, read: false, ai: [], handed: false,
   view: 'home', duration: 60, idx: 0, logs: {}, swaps: {}, why: false, sheet: null,
   pain: { area: null, sev: 3, act: null, sent: false }, rest: null, progTab: 0, chat: [],
@@ -1408,7 +1408,7 @@ function seedPosts() {
   return [
     { id: 'q1', by: 'kyle', when: 'Mon', cat: 'questions', pinned: true, title: 'Question of the week', body: 'What\'s one thing that has made training easier for you this month?', likes: 8,
       cmts: [['priya', 'Laying my gym kit out the night before!'], ['mark', 'Training with Jen. No skipping when someone\'s waiting for you 😂'], ['ellie', 'Shorter 30 minute sessions on busy days']] },
-    { id: 'p1', by: 'priya', when: '2 h', body: '10k done this morning! 52:40, a new PB 🎉 Legs held up so much better thanks to the strength work.', likes: 21, cmts: [['kyle', 'Massive, Priya! That\'s 3 minutes faster than June.']] },
+    { id: 'p1', by: 'kyle', when: '2 h', title: 'Shout-out to Priya 🎉', body: '10k this morning in 52:40, a new PB and 3 minutes faster than June. The strength work is paying off.', likes: 21, cmts: [['priya', 'Thank you! Legs held up so much better this time'], ['sarah', 'Amazing, well done!']] },
     { id: 't1', by: 'kyle', when: 'Wed', cat: 'tips', title: 'Front-load your protein', body: 'Aim for 30g at breakfast. It keeps you full until lunch and makes your daily target far easier to hit.', likes: 14, cmts: [] },
     { id: 'm1', by: 'kyle', when: 'Wed', cat: 'meals', title: 'This week\'s 3 high-protein meals', body: 'All under 550 kcal with 40g+ protein. Tap one in the Library to add it to Fuel.', imgs: ['pasta', 'potato-bowl', 'wrap'], likes: 17, cmts: [['tom', 'Made the Big Mac bowl twice already']] },
     { id: 'c1', by: 'kyle', when: 'Sun', cat: 'other', title: 'November challenge: 10k steps a day', body: 'Leaderboard updates every evening from your phone\'s step count.', board: [['Mark', '14,210'], ['Sarah', '12,880'], ['Tom', '11,040']], likes: 12, cmts: [] }
@@ -1434,7 +1434,7 @@ function vCommunity() {
   const head = `<div class="greet" style="padding-top:6px"><div class="eyebrow">KDPT group · 35 members</div><h1>Community</h1></div>
     <div class="seg" style="grid-template-columns:1fr 1fr" role="tablist">${[['feed', 'Feed'], ['library', 'Library']].map(([k, l]) => `<button role="tab" class="${c.tab === k ? 'on' : ''}" data-ctab="${k}">${l}</button>`).join('')}</div>`;
   if (c.tab === 'feed') return `<div class="page fade">${head}
-    <div class="comp">${avatarP('sarah')}<input id="newpost" placeholder="Share something with the group" aria-label="New post"><button data-toast="Photo picker opens here" aria-label="Add photo" style="color:var(--fg2)">${ic('camera')}</button><button class="postbtn" data-newpost>Post</button></div>
+    <div class="explain">${ic('info')}<span>Like and comment on anything here. New posts come from Kyle for now.</span></div>
     ${c.posts.map(postHTML).join('')}
   </div>`;
   if (!c.cat) return `<div class="page fade">${head}
@@ -1513,7 +1513,7 @@ const NOV = [['MON', 2, '7:00'], ['THU', 5, '7:00'], ['MON', 9, '7:00'], ['THU',
 
 // Kyle's working hours: the gym opens at 6:30, Wednesday is a half day, no
 // weekends. Clients can only offer times inside these.
-const HOURS = { Mon: [6.5, 20], Tue: [6.5, 20], Wed: [6.5, 13], Thu: [6.5, 20], Fri: [6.5, 20], Sat: null, Sun: null };
+const HOURS = { Mon: [6.5, 19.5], Tue: [6.5, 19.5], Wed: [6.5, 13], Thu: [6.5, 19.5], Fri: [6.5, 19.5], Sat: null, Sun: null };
 const hm = h => `${Math.floor(h)}:${h % 1 ? '30' : '00'}`;
 function availHTML() {
   const a = S.avail;

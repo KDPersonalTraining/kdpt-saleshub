@@ -57,6 +57,9 @@ insert into workouts (id, org_id, programme_id, name, day_order) values
 insert into workout_exercises (id, org_id, workout_id, exercise_id, position, working_sets, rep_min, rep_max) values
   ('00000000-0000-0000-0000-0000000000d1', '00000000-0000-0000-0000-00000000000a',
    '00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-0000000000e1', 1, 3, 10, 12);
+insert into posts (id, org_id, author_id, kind, title, body) values
+  ('50000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a',
+   '00000000-0000-0000-0000-000000000001', 'tip', 'Front-load your protein', 'Aim for 30g at breakfast.');
 insert into coach_notes (org_id, client_id, author_id, body) values
   ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002',
    '00000000-0000-0000-0000-000000000001', 'Private: knee history, keep depth comfortable.');
@@ -136,10 +139,13 @@ select pg_temp.expect('Sam cannot promote self', (select count(*) from profiles 
 insert into food_log_items (id, org_id, client_id, logged_on, slot, name, kcal, protein_g, carbs_g, fat_g) values
   ('40000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a',
    '00000000-0000-0000-0000-000000000002', current_date, 'breakfast', 'Greek yoghurt 0%', 100, 17, 6, 0);
-insert into posts (id, org_id, author_id, kind, body) values
-  ('50000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a',
-   '00000000-0000-0000-0000-000000000002', 'client_post', '10k done!');
-select pg_temp.expect('Sam sees own post', (select count(*) from posts), 1);
+select pg_temp.expect('Sam sees Kyle''s group post', (select count(*) from posts), 1);
+do $$ begin
+  insert into posts (org_id, author_id, kind, body) values
+    ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', 'client_post', '10k done!');
+  raise exception 'FAIL Sam posted while client posting is off';
+exception when insufficient_privilege then raise notice 'ok   Sam cannot post while posting is off';
+end $$;
 do $$ begin
   insert into posts (org_id, author_id, kind, body) values
     ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', 'announcement', 'Studio closed');
@@ -155,12 +161,12 @@ select pg_temp.expect('Jo cannot see Sam''s pain',     (select count(*) from pai
 select pg_temp.expect('Jo cannot see Sam''s plan',     (select count(*) from programmes), 0);
 select pg_temp.expect('Jo cannot see Sam''s profile',  (select count(*) from profiles where full_name = 'Sam'), 0);
 select pg_temp.expect('Jo cannot see Sam''s food log', (select count(*) from food_log_items), 0);
-select pg_temp.expect('Jo sees Sam''s group post',     (select count(*) from posts), 1);
+select pg_temp.expect('Jo sees Kyle''s group post',    (select count(*) from posts), 1);
 insert into post_comments (org_id, post_id, author_id, body) values
   ('00000000-0000-0000-0000-00000000000a', '50000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000003', 'Amazing!');
 select pg_temp.expect('Jo can comment', (select count(*) from post_comments), 1);
 delete from posts where id = '50000000-0000-0000-0000-000000000001';
-select pg_temp.expect('Jo cannot delete Sam''s post', (select count(*) from posts), 1);
+select pg_temp.expect('Jo cannot delete Kyle''s post', (select count(*) from posts), 1);
 
 -- Kyle (coach) ----------------------------------------------------------------
 select pg_temp.as_user('00000000-0000-0000-0000-000000000001');
