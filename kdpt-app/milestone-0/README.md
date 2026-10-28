@@ -129,6 +129,30 @@ Momentum is a word, not a score out of 100, as the blueprint recommended.
 - **Payments**: the reminder opens a Stripe-style payment sheet with an
   optional monthly auto-pay.
 
+### Launch-readiness screens (28 Oct)
+
+- **Onboarding is now 10 steps:**
+  1. Welcome from Kyle's invite.
+  2. Sign-in with an emailed 6-digit code, no passwords.
+  3. Health questions (PAR-Q style), plus injuries. Any "yes" tells the client
+     Kyle will go through it before their first session.
+  4. Consent: terms and 24-hour cancellation, and health data are required;
+     progress photos, KAI and emails are optional.
+  5. Goal.
+  6. Training days.
+  7. Check-ins.
+  8. Notifications.
+  9. Add to home screen, with iPhone and Android steps.
+  10. Done.
+- **Session detail** (tap the PT card on Home) shows time, place, workout and
+  sessions left, with add to calendar, ask to move, and cancel. Inside 24
+  hours, cancelling warns that it counts as used and suggests messaging Kyle.
+- **Profile** (tap your initials) shows package and payment, sessions left,
+  check-ins, text size, notifications, consents, health questions, download
+  my data and delete my account (UK GDPR rights), and log out. The deletion
+  wording about keeping payment records for 6 years needs checking alongside
+  the privacy notice.
+
 ### Prices and cancellation (23 Oct)
 
 - **Cancellation:** 24 hours. Later cancellations count as a used session.

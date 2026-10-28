@@ -789,6 +789,22 @@ svg { display: block; }
 .avrow .t { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--fg3); }
 .avrow select { height: 36px; border-radius: 10px; background: var(--s3); border: 0; color: var(--fg); padding: 0 10px; font: 600 14px var(--display); }
 .avrow.off { opacity: .45; }
+.code6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.code6 input { height: 58px; border-radius: 14px; background: var(--s2); border: 1.5px solid var(--hair); color: var(--fg); text-align: center; font: 800 24px var(--display); width: 100%; }
+.code6 input:focus { outline: none; border-color: var(--mint); }
+.yn { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 14px; font-size: 14px; }
+.ynb { display: flex; gap: 4px; }
+.ynb button { height: 34px; padding: 0 12px; border-radius: 9px; background: var(--s3); font-size: 13px; font-weight: 600; color: var(--fg2); }
+.ynb button[aria-pressed="true"]:first-child { background: var(--amber); color: #2a1600; }
+.ynb button[aria-pressed="true"]:last-child { background: var(--mint); color: var(--mint-ink); }
+.cons { display: flex; align-items: center; gap: 12px; padding: 14px; }
+.cons .t { flex: 1; min-width: 0; }
+.cons b { font-weight: 600; font-size: 15px; display: block; }
+.cons b small { font-size: 11px; font-weight: 600; margin-left: 4px; }
+.cons small { color: var(--fg3); font-size: 12px; }
+.tsize { display: flex; gap: 4px; }
+.tsize button { width: 40px; height: 36px; border-radius: 9px; background: var(--s3); font-family: var(--display); font-weight: 700; color: var(--fg2); }
+.tsize button[aria-pressed="true"] { background: var(--fg); color: #000; }
 .quote { border-left: 2px solid var(--violet); padding: 2px 0 2px 10px; margin-bottom: 6px; font-size: 13px; opacity: .85; }
 </style>
 
@@ -946,7 +962,8 @@ function fitToTime(minutes) {
 // ---------------------------------------------------------------------------
 // State
 // ---------------------------------------------------------------------------
-const S = { onb: { step: 0, goal: 'strength', days: 3, freq: 'weekly', day: 'Sun' },
+const S = { onb: { step: 0, goal: 'strength', days: 3, freq: 'weekly', day: 'Sun', parq: [], injuries: '', consent: { terms: true, health: true, kai: true }, os: 'ios' },
+  scale: 1, session: { cancelled: false, step: 'view' }, sessionsLeft: 6, consentSet: null, delAsk: false,
   notifs: { workout: true, booking: true, session: true, payment: true, drop: true, checkin: true },
   book: { req: {}, pick: null, done: false }, avail: { days: { Tue: [16.5, 19.5], Thu: [14, 19.5] }, note: '', sent: false }, paid: false, autopay: true, ci: null,
   liked: {}, saved: {}, read: false, ai: [], handed: false,
@@ -977,7 +994,7 @@ const vHome = () => {
     <div class="topbar"><img src="assets/kd-mark.png" alt="KD Personal Training"><div class="right">
       <button class="ib" data-go="notifs" aria-label="Notifications">${ic('bell')}${S.read ? '' : '<span class="badge">3</span>'}</button>
       <button class="kd-av" data-go="chat" aria-label="Messages from Kyle"><img src="assets/kd-mark.png" alt=""><span class="dot"></span></button>
-      <button class="avatar" data-toast="Profile and settings">SM</button></div></div>
+      <button class="avatar" data-go="profile" aria-label="Profile and settings">SM</button></div></div>
     <div class="greet"><div class="eyebrow">Wednesday 21 October</div><h1>Morning, Sarah</h1></div>
 
     <button class="card mom" data-sheet="momentum" aria-label="Momentum: strong. See the breakdown">
@@ -1006,7 +1023,7 @@ const vHome = () => {
       <button class="act" data-go="coachai"><i style="background:none"><span class="orb" style="width:60px;height:60px;box-shadow:none">${ic('spark')}</span></i>Ask KAI</button>
     </div>
 
-    <button class="card session" data-toast="Session details and directions">
+    <button class="card session" data-session>
       <span class="datebox"><small>THU</small><b>22</b></span>
       <span class="t"><b>PT with Kyle</b><span>${ic('clock')} 7:00 &nbsp; ${ic('pin')} Studio</span></span>
       <span class="chev">${ic('right')}</span>
@@ -1350,27 +1367,54 @@ function vOnboard() {
   if (o.step === 0) return `<div class="onb">
     <div class="onb-photo"><img src="assets/coaching.jpg" alt=""></div>
     <div class="onb-body"><img class="onb-mark" src="assets/kd-mark.png" alt="KD Personal Training">
-      <h1>Welcome, Sarah</h1><p class="lead">Kyle has set up your coaching. Two minutes and you're in.</p>
+      <span class="eyebrow" style="color:var(--mint)">Invited by Kyle</span>
+      <h1>Welcome, Sarah</h1><p class="lead">Kyle has set up your coaching. A few quick questions and you're in.</p>
       <button class="pill-btn mint" data-onb="next">Let's go ${ic('right')}</button></div></div>`;
-  if (o.step === 5) return `<div class="onb-done fade">
+  if (o.step === 9) return `<div class="onb-done fade">
     <svg viewBox="0 0 150 150" width="150" height="150">${MOM.map((m, i) => `<g transform="translate(${i * 17} ${i * 17})">${ring(150 - 34 * i, 13, 0.08, m.col, m.tr)}</g>`).join('')}</svg>
     <div><h1>You're all set</h1><p class="lead" style="margin-top:8px">Your rings fill up as you train, eat well and check in.</p></div>
     <div class="summary"><span class="chip">${ic(GOALS.find(g => g[0] === o.goal)[1])} ${GOALS.find(g => g[0] === o.goal)[3]}</span><span class="chip">${ic('train')} ${o.days} days a week</span><span class="chip">${ic('clip')} ${freqInfo().label}${o.freq === 'monthly' ? '' : ' · ' + o.day}</span></div>
     <button class="pill-btn white" style="width:100%" data-onb="finish">Open my app</button></div>`;
-  const titles = ['', 'What matters most to you?', 'How many days a week can you train?', 'How often should we check in?', 'What should we tell you about?'];
+  const titles = ['', 'Check your email', 'A few health questions', 'Your privacy', 'What matters most to you?', 'How many days a week can you train?', 'How often should we check in?', 'What should we tell you about?', 'Put KDPT on your home screen'];
   let body = '';
-  if (o.step === 1) body = `<div class="goal-grid">${GOALS.map(([k, i, c, l]) => `<button class="goal" aria-pressed="${o.goal === k}" data-goal="${k}"><span class="gi" style="background:color-mix(in srgb, ${c} 16%, transparent);color:${c}">${ic(i)}</span>${l}</button>`).join('')}</div>`;
-  if (o.step === 2) body = `<div class="days-pick">${[2, 3, 4, 5, 6].map(n => `<button class="num" aria-pressed="${o.days === n}" data-days="${n}">${n}</button>`).join('')}</div>
+  if (o.step === 1) body = `<p class="lead" style="margin-top:-10px">We've sent a 6-digit code to <b style="color:var(--fg)">sarah.m@email.com</b>, the address Kyle invited. No password to remember.</p>
+    <div class="code6">${[0, 1, 2, 3, 4, 5].map(i => `<input id="code${i}" inputmode="numeric" maxlength="1" aria-label="Digit ${i + 1}" value="${'482915'[i]}">`).join('')}</div>
+    <button class="switchto" style="color:var(--fg2)" data-toast="New code sent">Send a new code</button>`;
+  if (o.step === 2) body = `<p class="lead" style="margin-top:-10px">So Kyle can keep your training safe. Only Kyle sees your answers.</p>
+    <div class="group" style="--inset:14px">${PARQ.map((q, i) => `<div class="yn"><span>${q}</span><span class="ynb"><button aria-pressed="${o.parq[i] === true}" data-parq="${i}" data-v="1">Yes</button><button aria-pressed="${o.parq[i] === false}" data-parq="${i}" data-v="0">No</button></span></div>`).join('')}</div>
+    ${o.parq.some(x => x) ? `<div class="explain" style="border:1px solid rgba(255,180,94,.3)">${ic('info')}<span>Thanks for telling us. Kyle will talk this through with you before your first session, and may ask you to check with your GP.</span></div>` : ''}
+    <div><div class="eyebrow" style="margin-bottom:10px">Injuries or anything else Kyle should know?</div><textarea class="words" id="onbinj" placeholder="e.g. Left knee gets sore on deep squats">${o.injuries}</textarea></div>`;
+  if (o.step === 3) body = `<p class="lead" style="margin-top:-10px">Your data stays between you and Kyle. You can change these any time in Settings.</p>
+    <div class="group" style="--inset:14px">${CONSENTS.map(([k, t, d, req]) => `<div class="cons"><span class="t"><b>${t}${req ? ' <small style="color:var(--coral)">Required</small>' : ''}</b><small>${d}</small></span><button class="sw" role="switch" aria-checked="${!!o.consent[k]}" data-consent="${k}" aria-label="${t}"></button></div>`).join('')}</div>
+    <button class="switchto" style="color:var(--fg2)" data-toast="Opens the privacy notice and terms">Read the privacy notice and terms</button>`;
+  if (o.step === 8) body = `<p class="lead" style="margin-top:-10px">It opens full screen like any other app, and lets Kyle send you notifications.</p>
+    <div class="seg" style="grid-template-columns:1fr 1fr">${[['ios', 'iPhone'], ['android', 'Android']].map(([k, l]) => `<button class="${o.os === k ? 'on' : ''}" data-os="${k}">${l}</button>`).join('')}</div>
+    <div class="group" style="--inset:68px">${(o.os === 'ios'
+      ? [['share', 'Tap the Share button', 'At the bottom of Safari'], ['plus', 'Choose "Add to Home Screen"', 'Scroll down the list if you can\'t see it'], ['home', 'Open KDPT from your home screen', 'Then turn on notifications when asked']]
+      : [['more', 'Tap the menu (⋮) in Chrome', 'Top right of the screen'], ['plus', 'Choose "Install app"', 'Or "Add to Home screen"'], ['home', 'Open KDPT from your home screen', 'Then allow notifications when asked']])
+      .map(([i, t, d], n) => `<div class="optrow"><span class="li" style="color:var(--mint)">${i === 'share' ? SHARE_ICON : i === 'more' ? '<b style="font:800 18px var(--display)">⋮</b>' : ic(i)}</span><span class="t"><b>${n + 1}. ${t}</b><small>${d}</small></span></div>`).join('')}</div>`;
+  if (o.step === 4) body = `<div class="goal-grid">${GOALS.map(([k, i, c, l]) => `<button class="goal" aria-pressed="${o.goal === k}" data-goal="${k}"><span class="gi" style="background:color-mix(in srgb, ${c} 16%, transparent);color:${c}">${ic(i)}</span>${l}</button>`).join('')}</div>`;
+  if (o.step === 5) body = `<div class="days-pick">${[2, 3, 4, 5, 6].map(n => `<button class="num" aria-pressed="${o.days === n}" data-days="${n}">${n}</button>`).join('')}</div>
     <p class="lead" style="color:var(--fg3);font-size:14px">Kyle builds your programme around this. You can change it any time.</p>`;
-  if (o.step === 3) body = `<p class="lead" style="margin-top:-10px">Two minutes: sleep, energy, stress and weight. The more often you check in, the more accurate your Momentum.</p>
+  if (o.step === 6) body = `<p class="lead" style="margin-top:-10px">Two minutes: sleep, energy, stress and weight. The more often you check in, the more accurate your Momentum.</p>
     <div class="freq">${FREQ.map(([k, l, n, a, sub]) => `<button class="fopt" aria-pressed="${o.freq === k}" data-freq="${k}"><span class="t"><b>${l}</b><small>${sub}</small></span><span class="acc">${accBars(n)}</span></button>`).join('')}</div>
     ${o.freq === 'monthly' ? '' : `<div><div class="eyebrow" style="margin-bottom:10px">Which day?</div><div class="daychips">${['Fri', 'Sat', 'Sun', 'Mon'].map(d => `<button aria-pressed="${o.day === d}" data-cday="${d}">${d}</button>`).join('')}</div></div>`}
     <div class="preview">${rings(56, 6)}<span><b>Momentum accuracy: ${freqInfo().acc}</b><small>${o.freq === 'weekly' ? 'Kyle can adjust your plan week by week' : o.freq === 'fortnightly' ? 'Trends show up within a month' : 'Best if you also log meals and workouts'}</small></span></div>`;
-  if (o.step === 4) body = toggleList();
+  if (o.step === 7) body = toggleList();
   return `<div class="onb fade">
-    <div class="onb-top"><button class="round" style="background:var(--s2)" data-onb="back" aria-label="Back">${ic('back')}</button><div class="onb-prog">${[1, 2, 3, 4].map(i => `<i class="${i <= o.step ? 'on' : ''}"></i>`).join('')}</div></div>
+    <div class="onb-top"><button class="round" style="background:var(--s2)" data-onb="back" aria-label="Back">${ic('back')}</button><div class="onb-prog" style="grid-template-columns:repeat(8,1fr)">${[1, 2, 3, 4, 5, 6, 7, 8].map(i => `<i class="${i <= o.step ? 'on' : ''}"></i>`).join('')}</div></div>
     <div class="onb-step"><h1>${titles[o.step]}</h1>${body}</div></div>`;
 }
+// Standard pre-exercise health questions (PAR-Q style).
+const PARQ = ['Has a doctor ever said you have a heart condition?', 'Do you get chest pain when you\'re active, or at rest?', 'Do you ever lose balance from dizziness, or pass out?',
+  'Do you have a bone, joint or soft-tissue problem that exercise could make worse?', 'Are you taking medication for blood pressure or a heart condition?',
+  'Are you pregnant or have you given birth in the last 6 months?', 'Is there any other reason you shouldn\'t exercise?'];
+const CONSENTS = [['terms', 'Terms and 24-hour cancellation policy', 'Cancel at least 24 hours before a session, or it counts as used.', true],
+  ['health', 'Kyle can store my health information', 'Your answers, injuries, pain reports and check-ins. Only Kyle sees them.', true],
+  ['photos', 'Progress photos', 'Private to you and Kyle. You can delete them any time.', false],
+  ['kai', 'KAI can use my plan to answer questions', 'Your programme and logs, never your photos.', false],
+  ['email', 'Tips and news by email', 'About twice a month.', false]];
+const SHARE_ICON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5"/><path d="M8 10H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-2"/></svg>';
 
 const NOTES = [
   { id: 'pay', icon: 'card', c: 'var(--amber)', bg: 'rgba(255,180,94,.14)', t: 'November payment due Sunday', b: '£260.00 · 8 PT sessions', when: '9:00', cta: ['Pay now', 'pay'], unread: true, group: 'Today' },
@@ -1508,6 +1552,37 @@ function vCheckin() {
     <div class="onb-step"><div><div class="eyebrow" style="color:var(--violet)">${freqInfo().label} check-in</div><h1 style="margin-top:6px">${titles[c.step]}</h1></div>${body}</div></div>`;
 }
 
+function vProfile() {
+  const c = S.onb.consent;
+  const row = (icon, col, t, d, extra = '', attrs = '') => `<${attrs ? 'button' : 'div'} class="optrow" ${attrs}><span class="li" style="color:${col}">${ic(icon)}</span><span class="t"><b>${t}</b>${d ? `<small>${d}</small>` : ''}</span>${extra || (attrs ? `<span class="chev">${ic('right')}</span>` : '')}</${attrs ? 'button' : 'div'}>`;
+  return `<div class="page fade">
+    <div class="ntop"><button class="ib" data-go="home" aria-label="Back">${ic('back')}</button><h1>You</h1></div>
+    <div style="display:flex;gap:14px;align-items:center"><span class="avatar" style="width:64px;height:64px;font-size:20px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#2c3a31,#1a201c);color:var(--mint);font-family:var(--display);font-weight:700">SM</span>
+      <span><b style="font:800 22px var(--display);display:block">Sarah Mitchell</b><small style="color:var(--fg3)">Client since September 2026</small></span></div>
+    <div><div class="eyebrow" style="margin-bottom:10px">Coaching</div><div class="group">
+      ${row('card', 'var(--amber)', '8 PT sessions a month', '£260 · paid automatically on the 1st', '', 'data-sheet="pay"')}
+      ${row('cal', 'var(--sky)', `${S.sessionsLeft} of 8 sessions left in October`, '24-hour cancellation policy', '', 'data-sheet="book"')}
+      ${row('clip', 'var(--violet)', 'Check-ins', `${freqInfo().label}${S.onb.freq === 'monthly' ? '' : ' · ' + S.onb.day}`, '', 'data-toast="Change how often you check in"')}
+    </div></div>
+    <div><div class="eyebrow" style="margin-bottom:10px">App</div><div class="group">
+      <div class="optrow"><span class="li" style="color:var(--fg)">${ic('info')}</span><span class="t"><b>Text size</b></span>
+        <span class="tsize">${[[1, 'A'], [1.12, 'A'], [1.25, 'A']].map(([z, l], i) => `<button aria-pressed="${S.scale === z}" data-textsize="${z}" style="font-size:${13 + i * 4}px" aria-label="Text size ${i + 1}">${l}</button>`).join('')}</span></div>
+      ${row('bell', 'var(--amber)', 'Notifications', 'Choose what reaches your phone', '', 'data-sheet="notifset"')}
+    </div></div>
+    <div><div class="eyebrow" style="margin-bottom:10px">Privacy and data</div><div class="group">
+      ${CONSENTS.filter(x => !x[3]).map(([k, t, d]) => `<div class="cons" style="padding:12px 14px"><span class="t"><b>${t}</b><small>${d}</small></span><button class="sw" role="switch" aria-checked="${!!c[k]}" data-consent="${k}" aria-label="${t}"></button></div>`).join('')}
+      ${row('clip', 'var(--sky)', 'Health questions', 'Update your answers or injuries', '', 'data-toast="Opens your health questions"')}
+      ${row('down', 'var(--sky)', 'Download my data', 'Everything we hold about you, by email', '', 'data-toast="We&#39;ll email you a copy within 24 hours"')}
+      ${row('trash', 'var(--coral)', 'Delete my account', 'Removes your data. Kyle is told.', '', 'data-delask')}
+    </div></div>
+    ${S.delAsk ? `<div class="explain" style="border:1px solid rgba(255,107,94,.35);display:grid;gap:12px">
+      <span><b style="color:var(--fg)">Delete your account?</b><br>Your workouts, check-ins, food logs and photos are deleted within 30 days. Payment records are kept for 6 years because the law requires it. Your subscription is cancelled at the end of the month.</span>
+      <button class="pill-btn" style="background:var(--coral);color:#2a0703" data-toast="Account scheduled for deletion. Kyle has been told">Delete my account</button>
+      <button class="pill-btn dark" data-delask>Keep my account</button></div>` : ''}
+    <button class="pill-btn dark" data-toast="Logged out">Log out</button>
+  </div>`;
+}
+
 // Sarah's regular slots for November: Mondays and Thursdays at 7:00.
 const NOV = [['MON', 2, '7:00'], ['THU', 5, '7:00'], ['MON', 9, '7:00'], ['THU', 12, '7:00'], ['MON', 16, '7:00'], ['THU', 19, '7:00'], ['MON', 23, '7:00'], ['THU', 26, '7:00']];
 
@@ -1537,6 +1612,28 @@ function sheetHTML() {
   if (S.sheet === 'notifset') return `<div><h3>Notifications</h3><div class="sub">Choose what reaches your phone</div></div>${toggleList()}<button class="pill-btn white" data-close>Done</button>`;
   if (S.sheet === 'addfood') return addFoodHTML();
   if (S.sheet === 'avail') return availHTML();
+  if (S.sheet === 'session') {
+    const ss = S.session;
+    if (ss.cancelled) return `<div class="sent"><span class="ok" style="background:var(--coral);color:#2a0703">${ic('close')}</span><h3>Session cancelled</h3>
+      <p>Thursday 7:00 is cancelled and Kyle has been told. Because it was within 24 hours, it counts as used: ${S.sessionsLeft - 1} of 8 left in October.</p></div>
+      <button class="pill-btn dark" data-go="chat">Message Kyle</button><button class="pill-btn white" data-close>Done</button>`;
+    if (ss.step === 'confirm') return `<div><h3>Cancel Thursday 7:00?</h3><div class="sub">It's less than 24 hours away.</div></div>
+      <div class="explain" style="border:1px solid rgba(255,107,94,.35)">${ic('pain')}<span>Cancelling within 24 hours counts as one of your sessions, so you'd have ${S.sessionsLeft - 1} of 8 left in October. If something urgent has come up, message Kyle first.</span></div>
+      <button class="pill-btn dark" data-go="chat">Message Kyle</button>
+      <button class="pill-btn" style="background:var(--coral);color:#2a0703" data-sesscancel="done">Cancel anyway · counts as used</button>
+      <button class="pill-btn white" data-sesscancel="view">Keep my session</button>`;
+    return `<div><span class="eyebrow">PT with Kyle</span><h3 style="margin-top:4px">Thursday 22 October</h3></div>
+      <div class="group" style="--inset:68px">
+        <div class="optrow"><span class="li" style="color:var(--sky)">${ic('clock')}</span><span class="t"><b class="num">7:00 – 8:00</b><small>Confirmed by Kyle</small></span></div>
+        <button class="optrow" data-toast="Opens directions in Maps"><span class="li" style="color:var(--sky)">${ic('pin')}</span><span class="t"><b>The Studio</b><small>Tap for directions</small></span><span class="chev">${ic('right')}</span></button>
+        <div class="optrow"><span class="li" style="color:var(--mint)">${ic('train')}</span><span class="t"><b>Lower Body B</b><small>Bring water and trainers</small></span></div>
+        <div class="optrow"><span class="li" style="color:var(--amber)">${ic('cal')}</span><span class="t"><b class="num">${S.sessionsLeft} of 8 sessions left</b><small>October · this one included</small></span></div>
+      </div>
+      <button class="pill-btn dark" data-toast="Added to your phone's calendar">${ic('cal')} Add to my calendar</button>
+      <button class="pill-btn dark" data-sheet="book">Ask to move it</button>
+      <button class="pill-btn" style="background:none;color:var(--coral);box-shadow:inset 0 0 0 1px rgba(255,107,94,.4)" data-sesscancel="confirm">Cancel session</button>
+      <p class="foot">Free to cancel up to 24 hours before. After that it counts as used.</p>`;
+  }
   if (S.sheet === 'book') {
     const bk = S.book, reqs = Object.keys(bk.req).length;
     if (bk.pick !== null) {
@@ -1635,9 +1732,9 @@ function render(keepScroll) {
   const sc = $('screen'), top = sc.scrollTop;
   const v = S.view;
   $('view').innerHTML = v === 'home' ? vHome() : v === 'train' ? vTrain() : v === 'workout' ? vWorkout() : v === 'finish' ? vFinish()
-    : v === 'fuel' ? vFuel() : v === 'progress' ? vProgress() : v === 'onboard' ? vOnboard() : v === 'notifs' ? vNotifs() : v === 'community' ? vCommunity() : v === 'coachai' ? vAI() : v === 'checkin' ? vCheckin() : vChat();
+    : v === 'fuel' ? vFuel() : v === 'progress' ? vProgress() : v === 'onboard' ? vOnboard() : v === 'notifs' ? vNotifs() : v === 'community' ? vCommunity() : v === 'coachai' ? vAI() : v === 'checkin' ? vCheckin() : v === 'profile' ? vProfile() : vChat();
   const tb = $('tabbar');
-  tb.hidden = ['workout', 'finish', 'onboard', 'chat', 'coachai', 'checkin'].includes(v);
+  tb.hidden = ['workout', 'finish', 'onboard', 'chat', 'coachai', 'checkin', 'profile'].includes(v);
   const active = v === 'workout' ? 'train' : v === 'chat' || v === 'notifs' ? 'home' : v;
   tb.innerHTML = TABS.map(([k, l]) => `<button class="${k === active ? 'on' : ''}" data-go="${k}" aria-label="${l}">${ic(k)}<span>${l}</span>${k === 'community' ? '<i class="pip" style="background:var(--violet)"></i>' : ''}</button>`).join('');
 
@@ -1652,7 +1749,7 @@ function render(keepScroll) {
   if (v === 'chat') layer += chatDock();
   if (v === 'coachai') layer += aiDock();
   if (v === 'checkin' && S.ci.step <= 4) layer += `<div class="dock"><button class="pill-btn ${S.ci.step === 4 ? 'mint' : 'white'}" data-ci="next">${S.ci.step === 4 ? 'Send to your coach' : 'Continue'}</button></div>`;
-  if (v === 'onboard' && S.onb.step >= 1 && S.onb.step <= 4) layer += `<div class="dock"><button class="pill-btn white" data-onb="next">${S.onb.step === 4 ? 'Allow notifications' : 'Continue'}</button></div>`;
+  if (v === 'onboard' && S.onb.step >= 1 && S.onb.step <= 8) layer += `<div class="dock"><button class="pill-btn white" data-onb="next">${['', 'Verify', 'Continue', 'I agree', 'Continue', 'Continue', 'Continue', 'Allow notifications', 'Done, it\'s on my home screen'][S.onb.step]}</button></div>`;
   if (S.rest) layer += restHTML();
   if (S.sheet) layer += `<div class="scrim" data-scrim><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${sheetHTML()}</div></div>`;
   $('layer').innerHTML = layer;
@@ -1705,9 +1802,18 @@ document.addEventListener('click', e => {
   if (d.onb) {
     const o = S.onb;
     if (d.onb === 'finish') { go('home'); setTimeout(() => showPush('Your November sessions are ready', 'Kyle has proposed 8 sessions on your usual days. Tap to review.', 'book'), 1400); return; }
-    o.step = Math.max(0, Math.min(5, o.step + (d.onb === 'back' ? -1 : 1))); return render(false);
+    const inj = $('onbinj'); if (inj) o.injuries = inj.value;
+    if (d.onb === 'next' && o.step === 3 && !(o.consent.terms && o.consent.health)) { toast('The two required items are needed to coach you'); return; }
+    o.step = Math.max(0, Math.min(9, o.step + (d.onb === 'back' ? -1 : 1))); return render(false);
   }
   if (d.goal) { S.onb.goal = d.goal; return render(true); }
+  if (d.parq) { const inj = $('onbinj'); if (inj) S.onb.injuries = inj.value; S.onb.parq[+d.parq] = d.v === '1'; return render(true); }
+  if (d.consent) { S.onb.consent[d.consent] = !S.onb.consent[d.consent]; return render(true); }
+  if (d.os) { S.onb.os = d.os; return render(true); }
+  if (d.textsize) { S.scale = +d.textsize; $('screen').style.zoom = S.scale; return render(true); }
+  if (d.session !== undefined) { S.session = { cancelled: S.session.cancelled, step: 'view' }; S.sheet = 'session'; return render(true); }
+  if (d.sesscancel) { S.session.step = d.sesscancel; if (d.sesscancel === 'done') { S.session.cancelled = true; } return render(true); }
+  if (d.delask !== undefined) { S.delAsk = !S.delAsk; return render(true); }
   if (d.days) { S.onb.days = +d.days; return render(true); }
   if (d.freq) { S.onb.freq = d.freq; return render(true); }
   if (d.cday) { S.onb.day = d.cday; return render(true); }
@@ -1804,7 +1910,7 @@ document.addEventListener('input', e => {
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.sheet) { S.sheet = null; render(true); } });
 
 const h = (location.hash || '').slice(1);
-if (['home', 'train', 'workout', 'fuel', 'progress', 'chat', 'community', 'notifs', 'coachai'].includes(h)) S.view = h;
+if (['home', 'train', 'workout', 'fuel', 'progress', 'chat', 'community', 'notifs', 'coachai', 'profile'].includes(h)) S.view = h;
 else if (h === 'checkin') { S.ci = newCheckin(); S.view = 'checkin'; }
 else if (h !== 'checkin') S.view = 'onboard';
 render(false);
