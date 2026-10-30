@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Icon } from '@/components/icon';
 import { useUI } from '@/components/client/shell';
-import { Chev, Explain, Li } from '@/components/client/ui';
+import { Chev, Li } from '@/components/client/ui';
 import { CATS, COMMUNITY_LIBRARY, FOODS, PEOPLE, POSTS, type Post } from '@/lib/client/sample-data';
 import { setState, useClient } from '@/lib/client/store';
 
@@ -22,7 +22,6 @@ export default function Community() {
       </div>
       {tab === 'feed' ? (
         <>
-          <Explain>Like and comment on anything here. New posts come from Kyle for now.</Explain>
           {POSTS.map(p => <PostCard key={p.id} p={p} />)}
         </>
       ) : !cat ? (

@@ -22,7 +22,7 @@ export default function Kai() {
         <div className="convo-head"><Link className="round" style={{ background: 'var(--s2)', width: 40, height: 40 }} href="/home" aria-label="Back"><Icon name="back" /></Link>
           <span className="orb"><Icon name="spark" /></span><span className="t"><b>KAI</b><small style={{ color: 'var(--violet)' }}>Your AI assistant</small></span>
           <Link className="switchto" style={{ color: 'var(--mint)' }} href="/chat"><span className="kd-av" style={{ width: 30, height: 30, borderWidth: 1 }}><img src="/kd-mark.png" alt="" style={{ width: 18 }} /></span>Coach</Link></div>
-        {!asked.length && <div className="ai-empty"><span className="orb lg"><Icon name="spark" /></span><h2>Ask me anything</h2><p>Training, food or recovery. I answer from your plan, and pass anything I shouldn&apos;t answer to your coach.</p></div>}
+        {!asked.length && <div className="ai-empty"><span className="orb lg"><Icon name="spark" /></span><h2>Ask me anything</h2><p>Training, food or recovery. Anything medical goes to your coach.</p></div>}
         <div className="ai-thread">{asked.map(k => { const x = AI[k]; return (
           <div key={k}><div className="q">{x.q}</div>
             <div className="a"><span className="who"><span className="orb sm"><Icon name="spark" /></span>KAI</span><p>{x.a}</p><span className="src"><Icon name="clip" />{x.src}</span>

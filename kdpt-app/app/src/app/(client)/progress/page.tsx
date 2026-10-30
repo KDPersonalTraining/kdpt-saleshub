@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import { Icon } from '@/components/icon';
 import { useUI } from '@/components/client/shell';
-import { Chev, Empty, Explain, Li, Switch } from '@/components/client/ui';
+import { Chev, Empty, Li, Switch } from '@/components/client/ui';
 import { CONSISTENCY, LIFTS, MEASUREMENTS, RECORDS, WEEKLY_TOTALS, WEIGHT_7DAY } from '@/lib/client/sample-data';
 import { setState, useClient } from '@/lib/client/store';
 import { estimateOneRepMax } from '@/lib/rules';
@@ -24,7 +24,7 @@ function Progress() {
   if (s.preview.fresh) return (
     <div className="page fade">
       <div className="greet" style={{ paddingTop: 6 }}><div className="eyebrow">Your progress</div><h1>Progress</h1></div>
-      <Empty icon="progress" color="var(--mint)" title="Your progress starts here">After your first few workouts you&apos;ll see your lifts climb, your records and how consistent you&apos;ve been.</Empty>
+      <Empty icon="progress" color="var(--mint)" title="Your progress starts here">Your lifts, records and streaks appear after your first workouts.</Empty>
     </div>
   );
   return (
@@ -56,7 +56,7 @@ function Strength({ lift, setLift }: { lift: string; setLift: (l: string) => voi
         })}</div></div>
       <div className="card big-stat"><div className="eyebrow">Total lifted this week</div><div className="delta num" style={{ color: 'var(--sky)', fontSize: 40 }}>{WEEKLY_TOTALS[7][1].toLocaleString('en-GB')} kg</div>
         <div className="vbars">{WEEKLY_TOTALS.map(([d, v]) => <div key={d}><i style={{ height: Math.round(v / 8420 * 70) }} />{d}</div>)}</div>
-        <Explain style={{ marginTop: 12 }}>Every set&apos;s weight × reps, added up. If it climbs week to week you&apos;re doing more work, and that&apos;s what builds strength and muscle.</Explain></div>
+        <div className="lbl" style={{ marginTop: 10 }}>Weight × reps, every set added up.</div></div>
     </>
   );
 }
@@ -81,15 +81,10 @@ function LiftChart({ rows }: { rows: [string, number, number][] }) {
 function Records() {
   return (
     <>
-      <div className="card big-stat"><div className="eyebrow">Records set in October</div><div className="delta num">{RECORDS.length}</div><div className="lbl">Your own personal bests, compared only with you.</div></div>
+      <div className="card big-stat"><div className="eyebrow">Records set in October</div><div className="delta num">{RECORDS.length}</div></div>
       <div className="group">{RECORDS.map(([lift, type, v, d, ch]) => (
         <div className="rec" key={lift + type}><Li icon="trophy" color="var(--amber)" /><span className="t"><b>{lift}</b><small>{type} · {d}</small></span><span className="v num">{v}<small>{ch}</small></span></div>
       ))}</div>
-      <div><div className="eyebrow" style={{ marginBottom: 10 }}>What counts as a record?</div>
-        <div className="group" style={{ '--inset': '14px' } as React.CSSProperties}>{[['Heaviest weight', 'The most you\'ve lifted for your planned reps.'], ['Est. 1-rep max', 'The most you could lift once, worked out from your sets. You never have to test it.'],
-          ['Most reps', 'More reps than ever at the same weight.'], ['Best session total', 'Your biggest total lifted (weight × reps) in one workout.']].map(([t, d]) => (
-          <div className="rec" key={t}><span className="t"><b>{t}</b><small style={{ fontSize: 13 }}>{d}</small></span></div>
-        ))}</div></div>
     </>
   );
 }
@@ -104,8 +99,7 @@ function Body() {
   const [open, setOpen] = useState<Record<string, boolean>>({});
   return (
     <>
-      <Explain>Measurements and photos pick up changes the scales miss. Everything here is optional and private to you and your coach.</Explain>
-      <div><div className="sec-head" style={{ marginBottom: 10 }}><h2>Measurements</h2><button onClick={() => toast('Add today\'s measurements')}>+ Add</button></div>
+            <div><div className="sec-head" style={{ marginBottom: 10 }}><h2>Measurements</h2><button onClick={() => toast('Add today\'s measurements')}>+ Add</button></div>
         <div className="group">{MEASUREMENTS.map(([n, v, ch]) => <div className="rec" key={n}><Li icon="body" color="var(--violet)" /><span className="t"><b>{n}</b><small>Since 1 September</small></span><span className="v num">{v}<small>{ch}</small></span></div>)}</div></div>
       <div><div className="sec-head" style={{ marginBottom: 10 }}><h2>Photos</h2></div>
         <div className="photos3">{['Front', 'Side', 'Back'].map(x => <button key={x} onClick={() => toast('Camera opens · photos stay private')}><Icon name="camera" />{x}</button>)}</div></div>
@@ -140,8 +134,7 @@ function Consistency() {
   const label = (v: string) => (v === 'w' ? 'Workout done' : v === 'pt' ? 'PT session' : v === 'x' ? 'Missed' : 'Rest day');
   return (
     <>
-      <Explain>Each square is one day, each row is one week. It shows what you planned with your coach and what you did.</Explain>
-      <div className="card"><div className="cal8"><span />{['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => <span key={i} className="h">{d}</span>)}
+            <div className="card"><div className="cal8"><span />{['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => <span key={i} className="h">{d}</span>)}
         {CONSISTENCY.map(([wk, days]) => [<span key={wk} className="num">{wk}</span>, ...days.split(',').map((v, i) => <i key={wk + i} className={v} title={label(v)} />)])}</div>
         <div className="legend2"><span><i style={{ background: 'var(--mint)' }} />Workout done</span><span><i style={{ background: 'var(--sky)' }} />PT session</span><span><i style={{ boxShadow: 'inset 0 0 0 1.5px var(--coral)' }} />Missed</span><span><i style={{ background: 'var(--s3)' }} />Rest day</span></div></div>
       <div className="group">{[['train', 'var(--mint)', 'Workouts done', '19 of 20 planned', '95%'], ['cal', 'var(--sky)', 'PT sessions', '9 of 9 attended', '100%'],

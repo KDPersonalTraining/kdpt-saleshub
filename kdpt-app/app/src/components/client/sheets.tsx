@@ -45,7 +45,7 @@ function PaySheet() {
   return (
     <>
       <div><h3>November payment</h3><div className="sub">{fail ? 'Failed on Sunday 1 November' : 'Due Sunday 1 November'}</div></div>
-      {fail && <div className="failbox"><Icon name="pain" /><span><b>Your bank declined this payment.</b> Usually it&apos;s an expired card or a security check. Update your card or try again. Sessions stay booked for 7 days while you sort it.</span></div>}
+      {fail && <div className="failbox"><Icon name="pain" /><span><b>Your bank declined this payment.</b> Update your card or try again. Sessions stay booked for 7 days.</span></div>}
       <div className="paycard"><div className="line"><span>8 PT sessions</span><span className="num">£260.00</span></div><div className="line"><span>1–30 November</span><span /></div><div className="line total"><span>Total</span><span className="num">£260.00</span></div></div>
       <div className="cardrow"><span className="brand">VISA</span><span className="t"><b>•••• 4242</b><small>Expires 08/28</small></span><button onClick={() => toast('Change card in Stripe')} style={{ color: 'var(--fg2)', fontSize: 14 }}>Change</button></div>
       <div className="tg"><span className="li" style={{ background: 'rgba(255,180,94,.14)', color: 'var(--amber)' }}><Icon name="card" /></span><span className="t"><b>Pay automatically each month</b><small>Reminder 3 days before, cancel any time</small></span>
@@ -65,7 +65,7 @@ function BookSheet() {
     const cap = (x: string) => x.charAt(0) + x.slice(1).toLowerCase();
     return (
       <>
-        <div><h3>Ask to move {cap(d)} {day} Nov</h3><div className="sub">These are times Kyle has free that week. He&apos;ll approve or suggest another.</div></div>
+        <div><h3>Ask to move {cap(d)} {day} Nov</h3><div className="sub">Kyle&apos;s free times that week.</div></div>
         <div className="group">{alts.map(([dd, nn, tt]) => (
           <button key={dd + tt} className="optrow" onClick={() => { setState({ book: { ...s.book, req: { ...s.book.req, [pick]: `${cap(dd)} ${nn} Nov · ${tt}` } } }); setPick(null); }}>
             <span className="datebox sm"><small>{dd}</small><b className="num">{nn}</b></span><span className="t"><b className="num">{tt}</b><small>Studio</small></span><Chev /></button>
@@ -74,10 +74,10 @@ function BookSheet() {
       </>
     );
   }
-  if (s.book.done) return <><Sent bg="var(--sky)" ink="#03121f" title="Sent to Kyle">Your sessions show as pending until Kyle confirms them{reqs ? `, including your ${reqs} change request${reqs > 1 ? 's' : ''}` : ''}. You&apos;ll get a notification as soon as he does.</Sent><Done /></>;
+  if (s.book.done) return <><Sent bg="var(--sky)" ink="#03121f" title="Sent to Kyle">You&apos;ll get a notification when Kyle confirms.</Sent><Done /></>;
   return (
     <>
-      <div><h3>Your November sessions</h3><div className="sub">Kyle has proposed these. Check them, ask to move any that don&apos;t work, then send them back. Nothing is booked until Kyle confirms.</div></div>
+      <div><h3>Your November sessions</h3><div className="sub">Move any that don&apos;t work. Nothing&apos;s booked until Kyle confirms.</div></div>
       <button className="optrow" style={{ background: 'var(--s2)', borderRadius: 14 }} onClick={() => openSheet('avail')}><Li icon="clock" color="var(--sky)" /><span className="t"><b>My times change each month</b><small>Send Kyle your availability instead</small></span><Chev /></button>
       <div className="group">{NOV.map(([d, day, t], i) => (
         <div className="optrow" key={i}><span className="datebox sm"><small>{d}</small><b className="num">{day}</b></span>
@@ -92,12 +92,12 @@ function BookSheet() {
 
 function AvailSheet() {
   const s = useClient(), a = s.avail;
-  if (a.sent) return <><Sent bg="var(--sky)" ink="#03121f" title="Sent to Kyle">Kyle will fit your sessions into these times and confirm them. You&apos;ll get the exact days and times in a notification.</Sent><Done /></>;
+  if (a.sent) return <><Sent bg="var(--sky)" ink="#03121f" title="Sent to Kyle">You&apos;ll get a notification with your sessions.</Sent><Done /></>;
   const steps = (lo: number, hi: number) => { const o: number[] = []; for (let h = lo; h <= hi; h += 0.5) o.push(h); return o; };
   const setDay = (d: string, w: [number, number] | null) => setState({ avail: { ...a, days: { ...a.days, [d]: w } } });
   return (
     <>
-      <div><h3>When can you train in November?</h3><div className="sub">Tick the days that work and give a rough window. Kyle places your 8 sessions and confirms them.</div></div>
+      <div><h3>When can you train in November?</h3><div className="sub">Pick your days and rough times. Kyle confirms the exact slots.</div></div>
       <div className="group" style={{ '--inset': '14px' } as React.CSSProperties}>{Object.entries(HOURS).map(([d, hrs]) => {
         const w = a.days[d];
         if (!hrs) return <div className="avrow off" key={d}><b>{d}</b><span className="t">Kyle doesn&apos;t work {d === 'Sat' ? 'Saturdays' : 'Sundays'}</span></div>;
@@ -158,7 +158,7 @@ function MomentumSheet() {
       <div className="mom-big">
         <div className="wrap"><MomentumRings size={184} stroke={14} /><div className="c"><Icon name="bolt" size={30} style={{ color: 'var(--fg)' }} /></div></div>
         <div><b className="word" style={{ font: '800 30px var(--display)', color: 'var(--mint)', letterSpacing: '-.02em' }}>Strong</b><div className="eyebrow" style={{ marginTop: 2 }}>Week 6 of 8</div></div>
-        <p>Your best week of the block so far. One more workout and a protein snack closes the rings.</p>
+        <p>One more workout closes your rings this week.</p>
       </div>
       <div className="contrib group">{MOMENTUM.map(m => (
         <div className="crow" key={m.k}><span className="li" style={{ '--k': m.col } as React.CSSProperties}><Icon name={m.icon} /></span>
@@ -206,7 +206,7 @@ function SwapSheet() {
 function PainSheet() {
   const s = useClient(), p = s.pain, { closeSheet } = useUI();
   const set = (patch: Partial<typeof p>) => setState({ pain: { ...p, ...patch } });
-  if (p.sent) return <><Sent title="Your coach has been told">If the pain is sharp or sudden, stop and get it checked. The app can&apos;t diagnose injuries.</Sent>
+  if (p.sent) return <><Sent title="Your coach has been told">If it&apos;s sharp or sudden, stop and get it checked.</Sent>
     <button className="pill-btn white" onClick={closeSheet}>{p.act === 'swap' ? 'Choose a swap' : 'Done'}</button></>;
   const ready = p.area && p.act;
   return (

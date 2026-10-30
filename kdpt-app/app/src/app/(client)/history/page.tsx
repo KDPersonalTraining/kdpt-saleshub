@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Icon } from '@/components/icon';
-import { Chev, Empty, Explain, SubTop } from '@/components/client/ui';
+import { Chev, Empty, SubTop } from '@/components/client/ui';
 import { HISTORY } from '@/lib/client/sample-data';
 import { useClient } from '@/lib/client/store';
 
@@ -13,7 +13,7 @@ export default function History() {
   if (s.preview.fresh) return (
     <div className="page fade"><SubTop title="History" back="/train" />
       <Empty icon="clock" color="var(--sky)" title="No sessions yet" cta={<Link className="pill-btn mint" href="/workout">Start your first workout</Link>}>
-        Every workout you finish lands here, with every set, so you can see exactly what you lifted last time.</Empty>
+        Finished workouts show up here.</Empty>
     </div>
   );
   const vol = (r: typeof HISTORY[number]) => Math.round(r[3].reduce((t, [, sets]) => t + sets.reduce((a, [w, n]) => a + w * n, 0), 0));
@@ -33,7 +33,6 @@ export default function History() {
           {open === i && <div className="hsets">{r[3].map(([n, sets]) => <div key={n}><b>{n}</b><span className="num">{sets.map(([w, k]) => `${w} × ${k}`).join(' · ')}</span></div>)}</div>}
         </div>
       ))}</div>
-      <Explain>Tap a session to see every set. Your coach sees the same thing.</Explain>
     </div>
   );
 }

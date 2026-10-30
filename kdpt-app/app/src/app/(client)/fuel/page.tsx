@@ -42,7 +42,7 @@ export default function Fuel() {
           <div className="slot-head"><b>{sl}</b><span className="num">{kc ? `${r0(kc)} kcal` : ''}</span><button className="addbtn" onClick={() => openSheet('addfood', sl)} aria-label={`Add food to ${sl}`}><Icon name="plus" /></button></div>
           {list.length ? list.map((f, i) => (
             <div className="food" key={i}>{f.img && <img src={`/assets/${f.img}.jpg`} alt="" />}<span className="t"><b>{f.n}</b><small>{f.p}</small></span><span className="kc num">{r0(f.kcal)}<small>{r0(f.P)}g protein</small></span></div>
-          )) : <div className="empty">Nothing logged yet. Tap + to add food, scan a barcode or pick one of Kyle&apos;s recipes.</div>}
+          )) : <div className="empty">Nothing yet</div>}
         </div>
       ); })}
       <div className="group"><div className="water"><Li icon="drop" color="var(--sky)" />
