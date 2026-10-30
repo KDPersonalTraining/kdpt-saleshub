@@ -1,0 +1,212 @@
+<title>KDPT Launch Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Poppins:wght@400;500;600&display=swap">
+<style id="page-style">
+/* Layout: one column of phases, each a grouped list of tasks with an owner and a
+   due date. Dark-only to match the KDPT app; mint marks progress, amber marks
+   what's due soon, sky marks Claude's tasks. */
+:root {
+  --bg: #000000;
+  --s1: #0e100f;
+  --s2: #161917;
+  --s3: #202421;
+  --hair: rgba(255,255,255,0.08);
+  --fg: #f5f7f6;
+  --fg2: #a7ada9;
+  --fg3: #6c726e;
+  --mint: #7ed597;
+  --mint-ink: #03140a;
+  --amber: #ffb45e;
+  --sky: #6ec6ff;
+  --coral: #ff6b5e;
+  --display: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+  --body: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 var(--body); }
+.wrap { max-width: 860px; margin: 0 auto; padding-block: 40px 80px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 32px; }
+h1, h2 { font-family: var(--display); margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; border-radius: 6px; }
+.num { font-variant-numeric: tabular-nums; }
+.eyebrow { font: 700 11px var(--display); letter-spacing: .16em; text-transform: uppercase; color: var(--fg3); }
+
+header { display: grid; gap: 18px; }
+header h1 { font-size: clamp(30px, 6vw, 44px); font-weight: 800; text-transform: uppercase; }
+.dates { display: flex; flex-wrap: wrap; gap: 10px 28px; }
+.dates div { display: grid; gap: 2px; }
+.dates b { font: 700 17px var(--display); }
+.dates small { color: var(--fg3); font-size: 12px; }
+.overall { display: grid; gap: 10px; padding: 18px; border-radius: 14px; background: var(--s2); }
+.overall .row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.overall b { font: 800 26px var(--display); }
+.overall b span { font-size: 14px; color: var(--fg3); font-weight: 600; }
+.bar { height: 8px; border-radius: 4px; background: var(--s3); overflow: hidden; display: flex; }
+.bar i { display: block; height: 100%; background: var(--mint); transition: width .3s; }
+.split { display: flex; gap: 18px; font-size: 13px; color: var(--fg2); flex-wrap: wrap; }
+.split span::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; background: var(--c); vertical-align: 1px; }
+
+.filters { display: flex; gap: 22px; border-bottom: 1px solid var(--hair); }
+.filters button { padding: 10px 0; color: var(--fg3); font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.filters button[aria-pressed="true"] { color: var(--fg); border-color: var(--fg); }
+
+.phase { display: grid; gap: 12px; }
+.phase-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.phase-head h2 { font-size: 21px; font-weight: 800; }
+.phase-head .when { color: var(--fg2); font-size: 13px; margin-top: 2px; }
+.phase-head .count { font: 700 13px var(--display); color: var(--fg3); }
+.phase-head .count.done { color: var(--mint); }
+.note { color: var(--fg2); font-size: 14px; margin: -4px 0 0; max-width: 64ch; }
+.list { background: var(--s2); border-radius: 14px; overflow: hidden; }
+.task { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 14px; align-items: start; padding: 14px 16px; border-top: 1px solid var(--hair); width: 100%; text-align: left; }
+.task:first-child { border-top: 0; }
+.task:hover { background: rgba(255,255,255,.02); }
+.box { width: 26px; height: 26px; border-radius: 8px; box-shadow: inset 0 0 0 1.5px var(--fg3); display: grid; place-items: center; margin-top: 1px; transition: background .15s; }
+.box svg { width: 16px; height: 16px; opacity: 0; }
+.task.done .box { background: var(--mint); box-shadow: none; }
+.task.done .box svg { opacity: 1; }
+.task .t b { font-weight: 600; display: block; }
+.task.done .t b { color: var(--fg3); text-decoration: line-through; text-decoration-color: rgba(255,255,255,.25); }
+.task .t small { display: block; color: var(--fg3); font-size: 13px; margin-top: 2px; }
+.meta { display: grid; justify-items: end; gap: 4px; font-size: 12px; white-space: nowrap; }
+.who { font: 700 10px var(--display); letter-spacing: .12em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px; }
+.who::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.who.kyle { color: var(--mint); }
+.who.claude { color: var(--sky); }
+.due { color: var(--fg3); }
+.due.soon { color: var(--amber); }
+.due.late { color: var(--coral); }
+.break { padding: 12px 16px; border-radius: 12px; border: 1px dashed var(--hair); color: var(--fg3); font-size: 14px; }
+
+.decisions .row2 { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 14px 16px; border-top: 1px solid var(--hair); align-items: center; }
+.decisions .row2:first-child { border-top: 0; }
+.decisions b { font-weight: 600; }
+.decisions small { display: block; color: var(--fg3); font-size: 13px; }
+.state { font: 700 10px var(--display); letter-spacing: .12em; text-transform: uppercase; display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; }
+.state::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.state.open { color: var(--amber); }
+.state.decided { color: var(--mint); }
+
+.saving { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--fg); color: #000; font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 10px; }
+.foot { color: var(--fg3); font-size: 13px; }
+@media (max-width: 520px) {
+  .task { grid-template-columns: 30px minmax(0, 1fr); }
+  .meta { grid-column: 2; justify-items: start; grid-auto-flow: column; justify-content: start; gap: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap" id="app"></div>
+<div class="saving" id="saving" hidden></div>
+
+<script type="application/json" id="plan-state">{"today":"2026-10-28","phases":[{"id":"p1","name":"Foundations","when":"Now to mid-November","note":"Accounts, legal basics and the screens still to design. Most of Kyle's tasks here are short."},{"id":"p2","name":"Core build","when":"Mid-November to 21 December","note":"Everything the soft launch needs: training, check-ins, messages and bookings."},{"id":"p3","name":"Soft launch","when":"w/c 19 January 2027","note":"3 to 5 friendly clients on the core app. Everfit stays running for everyone else."},{"id":"p4","name":"Complete the app","when":"February 2027","note":"Payments, Fuel and Community, then fixes from the soft launch."},{"id":"p5","name":"Full push","when":"March 2027","note":"Everyone moves across, KAI goes live, and Everfit is cancelled at the end of the month."}],"items":[{"id":"k1","phase":"p1","who":"kyle","t":"Register with the ICO","d":"Data protection fee, needed because the app holds health data. About 10 minutes online.","due":"2026-11-15","done":false},{"id":"k2","phase":"p1","who":"kyle","t":"Ask Everfit for a data export","d":"Clients' workout history and notes, so nothing is lost when they move.","due":"2026-11-15","done":false},{"id":"k3","phase":"p1","who":"kyle","t":"Decide the duo price","d":"One price for the pair, paid by one person or split 50/50.","due":"2026-11-15","done":false},{"id":"k4","phase":"p1","who":"kyle","t":"Choose the app's web address","d":"For example app.kdpersonaltraining.com.","due":"2026-11-15","done":false},{"id":"k5","phase":"p1","who":"kyle","t":"Create Supabase and Vercel accounts","d":"Claude will walk you through both. Use the business email.","due":"2026-11-15","done":false},{"id":"k6","phase":"p1","who":"kyle","t":"Book a filming day","d":"A quiet day at the gym. Start with your 50 to 60 most-used exercises.","due":"2026-11-08","done":false},{"id":"c1","phase":"p1","who":"claude","t":"Draft the privacy notice, DPIA and terms","d":"Including the 24-hour cancellation policy and community rules. For you to get checked.","due":"2026-11-15","done":false},{"id":"c2","phase":"p1","who":"claude","t":"Design the remaining screens","d":"Train history and library, your template editor, exercise library editor, check-in builder, adding a client, and offline and error states.","due":"2026-11-15","done":false},{"id":"c3","phase":"p1","who":"claude","t":"Set up the app and sign-in","d":"Project, database, sign-in by email code, client and coach roles.","due":"2026-11-30","done":false},{"id":"k7","phase":"p2","who":"kyle","t":"Film the first 50 to 60 exercises","d":"Landscape, 3 to 4 clean reps, no talking. Name each file as you go.","due":"2026-11-30","done":false},{"id":"k8","phase":"p2","who":"kyle","t":"Record your welcome video","d":"Plays at the end of onboarding. One to two minutes.","due":"2026-11-30","done":false},{"id":"k9","phase":"p2","who":"kyle","t":"Set up Stripe products","d":"2 PT £90, 4 PT £150, 8 PT £260, online coaching £120, plus the duo once priced.","due":"2026-11-30","done":false},{"id":"k10","phase":"p2","who":"kyle","t":"Build your programme templates in the new builder","d":"Your most-used programmes first.","due":"2026-12-19","done":false},{"id":"k11","phase":"p2","who":"kyle","t":"Bank 8 weeks of Community content","d":"Wednesday tips, 3 high-protein meals a week, Monday questions.","due":"2026-12-19","done":false},{"id":"k12","phase":"p2","who":"kyle","t":"Write up recipes with calories and macros per portion","d":"These become the Meals library and the recipes in Fuel.","due":"2026-12-19","done":false},{"id":"k13","phase":"p2","who":"kyle","t":"Get the privacy notice and terms checked","d":"By a solicitor or a template service you trust.","due":"2026-12-19","done":false},{"id":"k14","phase":"p2","who":"kyle","t":"Pick 3 to 5 soft-launch clients","d":"A mix of ages, in-person and online.","due":"2026-12-19","done":false},{"id":"c4","phase":"p2","who":"claude","t":"Exercise library and programme builder","d":"Videos, cues, swaps and load jumps; templates you copy to clients.","due":"2026-11-30","done":false},{"id":"c5","phase":"p2","who":"claude","t":"Workout logging","d":"Works offline, previous results, rest timer, your overload and shortening rules, swaps and pain reports.","due":"2026-12-07","done":false},{"id":"c6","phase":"p2","who":"claude","t":"Check-ins and messaging","d":"Your 4-step check-in, messages with you, and the coach review screens.","due":"2026-12-14","done":false},{"id":"c7","phase":"p2","who":"claude","t":"Bookings with your approval","d":"Working hours, availability, change requests, Google Calendar sync.","due":"2026-12-21","done":false},{"id":"c8","phase":"p2","who":"claude","t":"Notifications","d":"Push to installed phones and email, with each client's preferences.","due":"2026-12-21","done":false},{"id":"c9","phase":"p3","who":"claude","t":"Import Everfit history for the soft-launch clients","d":"From the export you requested.","due":"2027-01-12","done":false},{"id":"c10","phase":"p3","who":"claude","t":"Test on real iPhones and Android phones","d":"Installing, notifications, logging with no signal.","due":"2027-01-16","done":false},{"id":"k15","phase":"p3","who":"kyle","t":"Onboard the soft-launch clients","d":"Send invite links, sit with anyone who wants help.","due":"2027-01-23","done":false},{"id":"k16","phase":"p3","who":"kyle","t":"Collect feedback after two weeks","d":"What confused them, what they used, what they ignored.","due":"2027-02-06","done":false},{"id":"c11","phase":"p4","who":"claude","t":"Payments and price controls","d":"Stripe billing, reminders, discounts and price changes.","due":"2027-02-13","done":false},{"id":"c12","phase":"p4","who":"claude","t":"Fuel","d":"Food log with calories and macros first, then barcode scanning.","due":"2027-02-20","done":false},{"id":"c13","phase":"p4","who":"claude","t":"Community feed and library","d":"Your posts, likes and comments, and the categorised library.","due":"2027-02-27","done":false},{"id":"c14","phase":"p4","who":"claude","t":"Fixes from the soft launch","d":"Ongoing through February.","due":"2027-02-27","done":false},{"id":"k17","phase":"p4","who":"kyle","t":"Tell everyone else their switch date","d":"With the welcome video and how to install the app.","due":"2027-02-27","done":false},{"id":"c15","phase":"p5","who":"claude","t":"KAI and Momentum","d":"Answers from each client's plan, hand-offs to you, and the Momentum rings.","due":"2027-03-13","done":false},{"id":"k18","phase":"p5","who":"kyle","t":"Move all clients across in waves","d":"About 10 a week, so you can help each group.","due":"2027-03-27","done":false},{"id":"k19","phase":"p5","who":"kyle","t":"Cancel Everfit","d":"Once everyone has logged in and can see their history.","due":"2027-03-31","done":false},{"id":"k20","phase":"p5","who":"kyle","t":"Promote the app to new clients","d":"Update the sales site and socials.","due":"2027-03-31","done":false}],"decisions":[{"t":"Duo price","d":"Shared price for the pair, split 50/50 or paid by one person.","state":"open"},{"t":"Filming date","d":"Nothing filmed yet.","state":"open"},{"t":"Sunday working","d":"Off for now; one switch to turn on.","state":"decided"},{"t":"Finish time on full days","d":"19:30, editable per day.","state":"decided"},{"t":"Clients posting in Community","d":"Like and comment only at launch.","state":"decided"},{"t":"Cancellation policy","d":"24 hours.","state":"decided"}]}</script>
+
+<script id="page-script">
+(function () {
+  const state = JSON.parse(document.getElementById('plan-state').textContent);
+  const PAGE_STYLE = document.getElementById('page-style').textContent;
+  const PAGE_SCRIPT = document.getElementById('page-script').textContent;
+  let filter = 'all';
+  try { filter = sessionStorage.getItem('plan-filter') || 'all'; } catch (e) {}
+  let artifact = null, readOnly = false, timer = null;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const today = new Date(state.today + 'T12:00:00');
+  const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="#03140a" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+
+  function dueLabel(it) {
+    const d = new Date(it.due + 'T12:00:00');
+    const txt = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    if (it.done) return `<span class="due">${txt}</span>`;
+    const days = Math.round((d - today) / 864e5);
+    return `<span class="due ${days < 0 ? 'late' : days <= 14 ? 'soon' : ''}">${days < 0 ? 'Overdue · ' : 'By '}${txt}</span>`;
+  }
+
+  function render() {
+    const items = state.items, done = items.filter(i => i.done).length;
+    const by = w => items.filter(i => i.who === w), dn = w => by(w).filter(i => i.done).length;
+    const shown = it => filter === 'all' || it.who === filter;
+    $('app').innerHTML = `
+      <header>
+        <div class="eyebrow">KD Personal Training · app launch</div>
+        <h1>Launch plan</h1>
+        <div class="dates">
+          <div><small>Soft launch</small><b>w/c 19 January 2027</b></div>
+          <div><small>Full push</small><b>March 2027</b></div>
+          <div><small>Everfit cancelled</small><b>End of March</b></div>
+        </div>
+        <div class="overall">
+          <div class="row"><b class="num">${done} <span>of ${items.length} done</span></b><span class="split"><span style="--c:var(--mint)">Kyle ${dn('kyle')}/${by('kyle').length}</span><span style="--c:var(--sky)">Claude ${dn('claude')}/${by('claude').length}</span></span></div>
+          <div class="bar" role="img" aria-label="${done} of ${items.length} tasks done"><i style="width:${(done / items.length * 100).toFixed(1)}%"></i></div>
+        </div>
+      </header>
+      <nav class="filters" aria-label="Show tasks for">${[['all', 'Everything'], ['kyle', 'Kyle'], ['claude', 'Claude']].map(([k, l]) => `<button aria-pressed="${filter === k}" data-filter="${k}">${l}</button>`).join('')}</nav>
+      ${state.phases.map(ph => { const list = items.filter(i => i.phase === ph.id && shown(i)), all = items.filter(i => i.phase === ph.id), pd = all.filter(i => i.done).length; return `
+      <section class="phase">
+        <div class="phase-head"><div><h2>${esc(ph.name)}</h2><div class="when">${esc(ph.when)}</div></div><span class="count num ${pd === all.length ? 'done' : ''}">${pd}/${all.length}</span></div>
+        <p class="note">${esc(ph.note)}</p>
+        ${list.length ? `<div class="list">${list.map(it => `
+          <button class="task ${it.done ? 'done' : ''}" data-id="${it.id}" role="checkbox" aria-checked="${it.done}" ${readOnly ? 'disabled' : ''}>
+            <span class="box">${CHECK}</span>
+            <span class="t"><b>${esc(it.t)}</b><small>${esc(it.d)}</small></span>
+            <span class="meta"><span class="who ${it.who}">${it.who === 'kyle' ? 'Kyle' : 'Claude'}</span>${dueLabel(it)}</span>
+          </button>`).join('')}</div>` : '<div class="break">Nothing for this person in this phase.</div>'}
+        ${ph.id === 'p2' ? '<div class="break">Break: 22 to 29 December.</div>' : ''}
+      </section>`; }).join('')}
+      <section class="phase decisions">
+        <div class="phase-head"><h2>Decisions</h2><span class="count num">${state.decisions.filter(d => d.state === 'open').length} open</span></div>
+        <div class="list">${state.decisions.map(d => `<div class="row2"><span><b>${esc(d.t)}</b><small>${esc(d.d)}</small></span><span class="state ${d.state}">${d.state === 'open' ? 'Open' : 'Decided'}</span></div>`).join('')}</div>
+      </section>
+      <p class="foot">${readOnly ? 'You can view this plan but not tick items off.' : 'Tap a task to tick it off. Changes save automatically for everyone who opens this page.'}</p>`;
+  }
+
+  // The page is the record: ticks are saved by publishing a new version of
+  // this same document, regenerated from the state above.
+  function documentFromState() {
+    const json = JSON.stringify(state).replace(/</g, '\\u003c');
+    const head = '<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body>';
+    return head + '<title>KDPT Launch Plan</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n'
+      + '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
+      + '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Poppins:wght@400;500;600&display=swap">\n'
+      + '<style id="page-style">' + PAGE_STYLE + '</style>\n\n<div class="wrap" id="app"></div>\n<div class="saving" id="saving" hidden></div>\n\n'
+      + '<script type="application/json" id="plan-state">' + json + '<\/script>\n\n<script id="page-script">' + PAGE_SCRIPT + '<\/script>\n</body></html>';
+  }
+
+  function showSaving(msg) { const s = $('saving'); s.textContent = msg; s.hidden = !msg; }
+
+  async function save() {
+    timer = null;
+    if (!artifact) { showSaving('Saving is not available here'); return; }
+    showSaving('Saving…');
+    try { sessionStorage.setItem('plan-scroll', String(window.scrollY)); } catch (e) {}
+    try { await artifact.publish(documentFromState()); }
+    catch (err) {
+      const code = err && err.code;
+      if (code === 'conflict') return;  // the page is reloading to the newer version
+      if (code === 'not_writer' || code === 'not_granted' || code === 'consent_required' || code === 'capability_disabled' || code === 'not_declared') {
+        readOnly = true; showSaving(''); render(); return;
+      }
+      showSaving('Could not save. Your ticks are still here; try again in a moment.');
+    }
+  }
+
+  document.addEventListener('click', e => {
+    const f = e.target.closest('[data-filter]');
+    if (f) { filter = f.dataset.filter; try { sessionStorage.setItem('plan-filter', filter); } catch (err) {} render(); return; }
+    const t = e.target.closest('.task');
+    if (!t || readOnly) return;
+    const it = state.items.find(i => i.id === t.dataset.id);
+    it.done = !it.done;
+    render();
+    showSaving('Saving in a moment…');
+    clearTimeout(timer); timer = setTimeout(save, 2500);  // batch quick ticks into one save
+  });
+
+  render();
+  try { const y = +sessionStorage.getItem('plan-scroll'); if (y) { window.scrollTo(0, y); sessionStorage.removeItem('plan-scroll'); } } catch (e) {}
+  if (window.claude && window.claude.use) window.claude.use('artifact').then(a => { artifact = a; }).catch(() => {});
+})();
+</script>

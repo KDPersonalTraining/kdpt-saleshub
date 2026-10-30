@@ -1,0 +1,2069 @@
+<title>KDPT App Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600&display=swap">
+<style>
+/* Layout: the client app alone. On a phone it fills the screen; on a desktop it
+   sits in a device frame. Dark-only by design. Mint is the brand and training
+   colour; food, check-ins and alerts each get their own hue so they stand apart. */
+:root {
+  --bg: #000000;
+  --s1: #0d0e0e;
+  --s2: #151716;
+  --s3: #1e211f;
+  --hair: rgba(255,255,255,0.08);
+  --fg: #f5f7f6;
+  --fg2: #a2a8a5;
+  --fg3: #676d6a;
+  --mint: #7ed597;
+  --mint-ink: #03140a;
+  --amber: #ffb45e;
+  --violet: #a99bff;
+  --sky: #6ec6ff;
+  --coral: #ff6b5e;
+  --display: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+  --body: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
+  --gut: max(20px, env(safe-area-inset-left, 0px));
+  --gut-r: max(20px, env(safe-area-inset-right, 0px));
+  color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.45; }
+h1, h2, h3, .d { font-family: var(--display); margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; border-radius: 12px; }
+svg { display: block; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---- Device ------------------------------------------------------------ */
+.device { position: relative; height: 100%; overflow: hidden; background: var(--bg); }
+.screen { height: 100%; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.screen::-webkit-scrollbar { display: none; }
+.statusbar { display: none; }
+@media (min-width: 700px) {
+  body { display: grid; place-items: center; padding-block: 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+         background: radial-gradient(60% 50% at 50% 40%, #0f1a13 0%, #000 70%); min-height: 100%; height: auto; }
+  .device { width: 393px; height: 852px; border-radius: 54px; box-shadow: 0 0 0 11px #111312, 0 0 0 12px #2a2d2b, 0 40px 120px rgba(0,0,0,.8); }
+  .statusbar { display: flex; position: absolute; inset: 0 0 auto; height: 50px; padding: 16px 32px 0; justify-content: space-between; font: 600 15px var(--display); z-index: 30; pointer-events: none; }
+  .statusbar i { width: 120px; height: 34px; border-radius: 20px; background: #000; position: absolute; left: 50%; top: 11px; transform: translateX(-50%); }
+  .screen { padding-top: 34px; }
+}
+.page { padding: 12px var(--gut-r) 120px var(--gut); display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.page.flush { padding-top: 0; }
+
+/* ---- Tab bar ----------------------------------------------------------- */
+.tabbar { position: absolute; left: 12px; right: 12px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); height: 68px; border-radius: 26px;
+  background: rgba(22,24,23,.78); backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--hair); display: grid; grid-template-columns: repeat(5, 1fr); z-index: 20; }
+.tabbar button { display: grid; place-items: center; align-content: center; gap: 4px; color: var(--fg3); position: relative; transition: color .2s; }
+.tabbar button span { font-size: 10px; font-weight: 500; letter-spacing: .02em; }
+.tabbar button.on { color: var(--fg); }
+.tabbar button.on svg { color: var(--mint); }
+.tabbar .pip { position: absolute; top: 12px; right: calc(50% - 16px); width: 8px; height: 8px; border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 2px #161817; }
+.tabbar[hidden] { display: none; }
+
+/* ---- Shared bits ------------------------------------------------------- */
+.ic { width: 22px; height: 22px; }
+.glass { background: rgba(255,255,255,.1); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.12); }
+.round { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 15px; font-size: 13px; font-weight: 500; }
+.chip svg { width: 15px; height: 15px; }
+.eyebrow { font: 600 11px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--fg3); }
+.sec-head { display: flex; justify-content: space-between; align-items: baseline; }
+.sec-head h2 { font-size: 20px; font-weight: 700; }
+.sec-head button { font-size: 14px; color: var(--fg2); }
+.card { background: var(--s2); border-radius: 24px; }
+.pill-btn { height: 56px; border-radius: 28px; padding: 0 26px; font: 700 16px var(--display); display: inline-flex; align-items: center; justify-content: center; gap: 10px; letter-spacing: -.01em; }
+.pill-btn.mint { background: var(--mint); color: var(--mint-ink); }
+.pill-btn.white { background: var(--fg); color: #000; }
+.pill-btn.dark { background: var(--s3); color: var(--fg); }
+.avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font: 700 14px var(--display); }
+
+/* ---- Home -------------------------------------------------------------- */
+.topbar { display: flex; justify-content: space-between; align-items: center; padding-top: 6px; }
+.topbar img { height: 22px; width: auto; }
+.topbar .avatar { background: linear-gradient(135deg, #2c3a31, #1a201c); color: var(--mint); width: 38px; height: 38px; font-size: 13px; }
+.greet .eyebrow { margin-bottom: 4px; }
+.greet h1 { font-size: 32px; font-weight: 800; line-height: 1.05; }
+
+.hero { position: relative; height: 340px; border-radius: 30px; overflow: hidden; display: flex; align-items: flex-end; text-align: left; width: 100%; }
+.hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,.55) 58%, rgba(0,0,0,.92) 100%); }
+.hero .in { position: relative; z-index: 1; padding: 22px; width: 100%; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.hero .tag { position: absolute; top: 18px; left: 18px; z-index: 1; background: rgba(0,0,0,.45); }
+.hero h2 { font-size: 30px; font-weight: 800; line-height: 1.02; margin-top: 6px; }
+.hero .meta { display: flex; gap: 14px; margin-top: 10px; color: rgba(255,255,255,.78); font-size: 14px; }
+.hero .meta span { display: inline-flex; align-items: center; gap: 6px; }
+.hero .meta svg { width: 16px; height: 16px; }
+.play { width: 64px; height: 64px; border-radius: 50%; background: var(--mint); color: var(--mint-ink); display: grid; place-items: center; flex: none; box-shadow: 0 10px 30px rgba(126,213,151,.35); }
+.play svg { width: 26px; height: 26px; margin-left: 3px; }
+
+.mom { padding: 18px 18px 18px 16px; display: flex; gap: 16px; align-items: center; width: 100%; text-align: left; }
+.mom .t { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.mom .word { font: 800 26px var(--display); letter-spacing: -.02em; color: var(--mint); line-height: 1.1; }
+.mom .t small { color: var(--fg2); font-size: 14px; }
+.mom-big { display: grid; justify-items: center; gap: 10px; text-align: center; }
+.mom-big .wrap { position: relative; width: 184px; height: 184px; }
+.mom-big .wrap .c { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; }
+.mom-big .wrap b { font: 800 30px var(--display); color: var(--mint); letter-spacing: -.02em; }
+.mom-big .wrap small { color: var(--fg3); font-size: 12px; }
+.mom-big p { margin: 0; color: var(--fg2); font-size: 15px; max-width: 30ch; }
+.contrib { display: grid; gap: 10px; }
+.crow { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 18px; background: var(--s2); }
+.crow .li { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; }
+.crow .li svg { width: 20px; height: 20px; }
+.crow b { font: 700 15px var(--display); display: block; }
+.crow small { color: var(--fg3); font-size: 12px; }
+.crow .bar { margin-top: 6px; }
+.crow .st { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 10px; white-space: nowrap; }
+.trend { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; height: 110px; padding: 0 4px; }
+.trend div { display: grid; justify-items: center; gap: 6px; height: 100%; align-content: end; font-size: 11px; color: var(--fg3); }
+.trend i { width: 100%; max-width: 30px; border-radius: 8px; background: var(--s3); }
+.trend .on i { background: var(--mint); }
+.trend .now i { background: repeating-linear-gradient(135deg, rgba(126,213,151,.5) 0 4px, rgba(126,213,151,.25) 4px 8px); }
+.trend .now { color: var(--fg); }
+.foot { color: var(--fg3); font-size: 12px; text-align: center; }
+.awards { display: flex; gap: 14px; overflow-x: auto; scrollbar-width: none; }
+.award { flex: none; width: 92px; display: grid; justify-items: center; gap: 8px; text-align: center; font-size: 12px; color: var(--fg2); }
+.award .medal { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; position: relative; }
+.award .medal::before { content: ""; position: absolute; inset: 0; border-radius: 50%; padding: 2px; background: conic-gradient(from 200deg, var(--c), transparent 60%, var(--c)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+.award .medal svg { width: 28px; height: 28px; }
+.award.locked { opacity: .35; }
+.headline { color: var(--fg2); font-size: 15px; margin-top: 6px; }
+.legend { display: grid; gap: 14px; }
+.legend div { display: grid; grid-template-columns: 30px minmax(0,1fr); gap: 10px; align-items: center; }
+.legend .li { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; }
+.legend .li svg { width: 16px; height: 16px; }
+.legend b { font: 700 18px var(--display); display: block; line-height: 1.1; }
+.legend small { color: var(--fg3); font-size: 12px; }
+
+.strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.strip div { display: grid; justify-items: center; gap: 8px; font-size: 12px; color: var(--fg3); }
+.strip i { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 600 13px var(--display); font-style: normal; color: var(--fg2); background: var(--s2); }
+.strip i svg { width: 16px; height: 16px; }
+.strip .done i { background: var(--mint); color: var(--mint-ink); }
+.strip .pt i { background: rgba(110,198,255,.16); color: var(--sky); }
+.strip .now i { background: var(--fg); color: #000; }
+.strip .now { color: var(--fg); }
+
+.actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.act { display: grid; justify-items: center; gap: 8px; font-size: 12px; color: var(--fg2); }
+.act i { width: 60px; height: 60px; border-radius: 20px; display: grid; place-items: center; }
+.act i svg { width: 24px; height: 24px; }
+
+.session { display: flex; align-items: center; gap: 16px; padding: 14px; width: 100%; text-align: left; }
+.datebox { width: 58px; height: 62px; border-radius: 16px; background: rgba(110,198,255,.12); color: var(--sky); display: grid; place-items: center; align-content: center; flex: none; }
+.datebox small { font: 700 10px var(--display); letter-spacing: .12em; }
+.datebox b { font: 800 24px var(--display); line-height: 1; }
+.session .t { flex: 1; min-width: 0; }
+.session .t b { display: block; font: 700 17px var(--display); }
+.session .t span { color: var(--fg3); font-size: 13px; display: inline-flex; gap: 5px; align-items: center; }
+.session .t span svg { width: 14px; height: 14px; }
+.chev { color: var(--fg3); }
+
+.note { padding: 18px; display: flex; gap: 14px; align-items: flex-start; width: 100%; text-align: left; }
+.note img.mark { width: 40px; height: 40px; border-radius: 50%; background: #0b0c0c; object-fit: contain; padding: 9px 6px; flex: none; border: 1px solid var(--hair); }
+.note p { margin: 2px 0 0; font-size: 15px; color: var(--fg); }
+.note small { color: var(--fg3); font-size: 12px; }
+
+/* ---- Train ------------------------------------------------------------- */
+.block { padding: 20px; display: grid; gap: 14px; }
+.segs { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+.segs i { height: 6px; border-radius: 3px; background: var(--s3); }
+.segs i.on { background: var(--mint); }
+.segs i.cur { background: linear-gradient(90deg, var(--mint) 50%, var(--s3) 50%); }
+.wrow { display: flex; align-items: center; gap: 14px; padding: 14px; width: 100%; text-align: left; }
+.wrow .tile { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; flex: none; background: var(--s3); color: var(--fg2); }
+.wrow .tile svg { width: 24px; height: 24px; }
+.wrow.today .tile { background: var(--mint); color: var(--mint-ink); }
+.wrow.done .tile { background: rgba(126,213,151,.14); color: var(--mint); }
+.wrow .t { flex: 1; min-width: 0; }
+.wrow .t b { font: 700 16px var(--display); display: block; }
+.wrow .t span { font-size: 13px; color: var(--fg3); }
+
+/* ---- Workout ----------------------------------------------------------- */
+.media { position: relative; height: 330px; overflow: hidden; }
+.media img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 28%; }
+.media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.45) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 60%, #000 100%); }
+.media .ctl { position: absolute; z-index: 2; top: 14px; left: var(--gut); right: var(--gut-r); display: flex; justify-content: space-between; align-items: center; }
+@media (min-width: 700px) { .media .ctl { top: 50px; } }
+.media .ctl .chip { color: #fff; }
+.media .dots { display: flex; gap: 5px; }
+.media .dots i { width: 6px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.35); transition: width .3s; }
+.media .dots i.on { width: 20px; background: #fff; }
+.media .dots i.done { background: var(--mint); }
+.media .playing { position: absolute; z-index: 2; left: var(--gut); bottom: 18px; color: rgba(255,255,255,.8); }
+.ex-title h1 { font-size: 30px; font-weight: 800; line-height: 1.05; }
+.ex-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.ex-meta .chip { background: var(--s2); color: var(--fg2); }
+.target { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 22px; width: 100%; text-align: left; }
+.target.up { background: linear-gradient(120deg, rgba(126,213,151,.2), rgba(126,213,151,.06)); }
+.target.hold { background: var(--s2); }
+.target .arrow { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; flex: none; }
+.target.up .arrow { background: var(--mint); color: var(--mint-ink); }
+.target.hold .arrow { background: var(--s3); color: var(--fg2); }
+.target b { font: 800 24px var(--display); display: block; line-height: 1.1; }
+.target small { color: var(--fg2); font-size: 13px; }
+.target .why { margin-left: auto; color: var(--fg3); }
+.why-text { font-size: 14px; color: var(--fg2); margin: -10px 4px 0; }
+
+.sets { display: grid; gap: 10px; }
+.setrow { display: grid; grid-template-columns: 36px minmax(0,1fr) minmax(0,1fr) 60px; align-items: center; gap: 10px; background: var(--s1); border: 1px solid var(--hair); border-radius: 22px; padding: 10px 10px 10px 12px; transition: background .25s, border-color .25s; }
+.setrow .n { width: 32px; height: 32px; border-radius: 50%; background: var(--s3); display: grid; place-items: center; font: 700 13px var(--display); color: var(--fg2); }
+.val { display: grid; }
+.val input { background: none; border: 0; color: var(--fg); font: 800 26px var(--display); width: 100%; padding: 0; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.val input:focus { outline: none; color: var(--mint); }
+.val input::placeholder { color: var(--fg3); }
+.val small { font-size: 11px; color: var(--fg3); letter-spacing: .04em; }
+.tick { width: 56px; height: 56px; border-radius: 50%; border: 2px solid var(--s3); display: grid; place-items: center; color: var(--fg3); transition: all .2s; }
+.tick svg { width: 26px; height: 26px; }
+.setrow.done { background: rgba(126,213,151,.08); border-color: rgba(126,213,151,.25); }
+.setrow.done .tick { background: var(--mint); border-color: var(--mint); color: var(--mint-ink); }
+.setrow.done .n { background: rgba(126,213,151,.18); color: var(--mint); }
+@media (prefers-reduced-motion: no-preference) { .setrow.done .tick { animation: pop .35s ease; } @keyframes pop { 50% { transform: scale(1.12); } } }
+
+.dock { position: absolute; left: 0; right: 0; bottom: 0; z-index: 15; padding: 14px var(--gut-r) calc(20px + env(safe-area-inset-bottom, 0px)) var(--gut);
+  background: linear-gradient(180deg, rgba(0,0,0,0), #000 35%); display: flex; gap: 10px; align-items: center; }
+.dock .round { width: 56px; height: 56px; background: var(--s2); border: 1px solid var(--hair); }
+.dock .round.pain { color: var(--coral); }
+.dock .pill-btn { flex: 1; }
+
+/* ---- Sheets & overlays ------------------------------------------------- */
+.scrim { position: absolute; inset: 0; z-index: 40; background: rgba(0,0,0,.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; align-items: flex-end; }
+.sheet { grid-template-columns: minmax(0, 1fr); width: 100%; background: var(--s1); border-top: 1px solid var(--hair); border-radius: 34px 34px 0 0; padding: 12px var(--gut-r) calc(28px + env(safe-area-inset-bottom, 0px)) var(--gut); display: grid; gap: 20px; max-height: 92%; overflow-y: auto; }
+@media (prefers-reduced-motion: no-preference) { .sheet { animation: up .32s cubic-bezier(.2,.9,.3,1); } @keyframes up { from { transform: translateY(40px); opacity: .4; } } }
+.grab { width: 40px; height: 5px; border-radius: 3px; background: var(--s3); margin: 0 auto; }
+.sheet h3 { font-size: 24px; font-weight: 800; }
+.sheet .sub { color: var(--fg2); font-size: 14px; margin-top: 4px; }
+.opts { display: grid; gap: 10px; }
+.opt { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 20px; background: var(--s2); border: 1.5px solid transparent; text-align: left; width: 100%; }
+.opt .tile { width: 48px; height: 48px; border-radius: 14px; background: var(--s3); display: grid; place-items: center; flex: none; color: var(--fg2); }
+.opt b { font: 700 16px var(--display); display: block; }
+.opt span { font-size: 13px; color: var(--fg3); }
+.opt[aria-pressed="true"] { border-color: var(--fg); }
+
+.durs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.dur { aspect-ratio: 1; max-width: 100%; border-radius: 50%; background: var(--s2); display: grid; place-items: center; align-content: center; border: 2px solid transparent; }
+.dur b { font: 800 24px var(--display); line-height: 1; }
+.dur small { font-size: 11px; color: var(--fg3); }
+.dur[aria-pressed="true"] { background: var(--fg); color: #000; }
+.dur[aria-pressed="true"] small { color: #444; }
+.cutlist { display: grid; gap: 8px; }
+.cutlist div { display: flex; justify-content: space-between; align-items: center; font-size: 15px; padding: 10px 14px; border-radius: 14px; background: var(--s2); }
+.cutlist div.cut { background: none; color: var(--fg3); text-decoration: line-through; }
+.cutlist div.trim span { color: var(--amber); }
+.cutlist span { color: var(--fg3); font-size: 13px; font-variant-numeric: tabular-nums; text-decoration: none; }
+
+.areas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.area { height: 52px; border-radius: 16px; background: var(--s2); font-weight: 500; font-size: 14px; border: 1.5px solid transparent; }
+.area[aria-pressed="true"] { border-color: var(--coral); color: var(--coral); background: rgba(255,107,94,.1); }
+.sev { display: grid; gap: 12px; }
+.sev .big { display: flex; align-items: baseline; gap: 10px; }
+.sev .big b { font: 800 48px var(--display); line-height: 1; }
+.sev .big span { color: var(--fg2); }
+.sev input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 10px; border-radius: 5px; background: linear-gradient(90deg, var(--mint), var(--amber) 55%, var(--coral)); }
+.sev input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; border-radius: 50%; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.5); }
+.sev input[type=range]::-moz-range-thumb { width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 0; }
+.tri { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tri button { border-radius: 20px; background: var(--s2); padding: 16px 8px; display: grid; justify-items: center; gap: 8px; font-size: 13px; font-weight: 500; border: 1.5px solid transparent; }
+.tri button svg { width: 24px; height: 24px; }
+.tri button[aria-pressed="true"] { border-color: var(--fg); }
+.sent { display: grid; justify-items: center; text-align: center; gap: 12px; padding: 12px 0; }
+.sent .ok { width: 76px; height: 76px; border-radius: 50%; background: var(--mint); color: var(--mint-ink); display: grid; place-items: center; }
+.sent .ok svg { width: 36px; height: 36px; }
+.sent p { margin: 0; color: var(--fg2); font-size: 14px; max-width: 30ch; }
+
+.rest { position: absolute; inset: 0; z-index: 45; background: rgba(0,0,0,.86); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: grid; place-items: center; align-content: center; gap: 28px; text-align: center; }
+.rest .ringwrap { position: relative; width: 240px; height: 240px; }
+.rest .ringwrap .c { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; }
+.rest .ringwrap b { font: 800 60px var(--display); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.rest .ringwrap small { color: var(--fg2); }
+.rest .nextup { color: var(--fg2); font-size: 15px; }
+.rest .nextup b { color: var(--fg); font-weight: 600; }
+.rest .btns { display: flex; gap: 12px; }
+
+.finish { min-height: 100%; display: grid; align-content: center; justify-items: center; gap: 26px; padding: 60px var(--gut-r) 40px var(--gut); text-align: center; }
+.finish h1 { font-size: 34px; font-weight: 800; }
+.stats { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat { background: var(--s2); border-radius: 22px; padding: 16px; text-align: left; display: grid; gap: 6px; }
+.stat svg { width: 20px; height: 20px; }
+.stat b { font: 800 26px var(--display); letter-spacing: -.02em; }
+.stat small { color: var(--fg3); font-size: 12px; }
+
+/* ---- Fuel -------------------------------------------------------------- */
+.macro { padding: 20px; display: grid; grid-template-columns: 140px minmax(0,1fr); gap: 18px; align-items: center; }
+.macro .lines { display: grid; gap: 14px; }
+.macro .line small { color: var(--fg3); font-size: 12px; display: block; }
+.macro .line b { font: 800 22px var(--display); }
+.macro .line b span { font-size: 14px; color: var(--fg3); font-weight: 600; }
+.bar { height: 6px; border-radius: 3px; background: var(--s3); margin-top: 6px; overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 3px; }
+.meals { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--gut-r)) 0 calc(-1 * var(--gut)); padding: 0 var(--gut-r) 0 var(--gut); scroll-snap-type: x mandatory; scroll-padding-inline: var(--gut) var(--gut-r); }
+.meals::-webkit-scrollbar { display: none; }
+.meal { flex: none; width: 150px; scroll-snap-align: start; text-align: left; }
+.meal .ph { width: 150px; height: 180px; border-radius: 22px; overflow: hidden; position: relative; background: var(--s2); display: grid; place-items: center; }
+.meal .ph img { width: 100%; height: 100%; object-fit: cover; }
+.meal .ph .ok { position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; border-radius: 50%; background: var(--amber); color: #2a1600; display: grid; place-items: center; }
+.meal .ph .ok svg { width: 14px; height: 14px; }
+.meal b { display: block; font: 600 14px var(--display); margin-top: 10px; }
+.meal small { color: var(--fg3); font-size: 12px; }
+.meal.add .ph { border: 1.5px dashed rgba(255,180,94,.45); background: rgba(255,180,94,.06); color: var(--amber); }
+.recipe { flex: none; width: 240px; scroll-snap-align: start; text-align: left; }
+.recipe .ph { height: 150px; border-radius: 22px; overflow: hidden; }
+.recipe .ph img { width: 100%; height: 100%; object-fit: cover; }
+.recipe b { display: block; font: 700 15px var(--display); margin-top: 10px; }
+.recipe .tags { display: flex; gap: 10px; color: var(--fg3); font-size: 12px; margin-top: 2px; }
+.recipe .tags span:first-child { color: var(--amber); }
+
+/* ---- Progress ---------------------------------------------------------- */
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--s2); border-radius: 16px; padding: 4px; }
+.seg button { height: 38px; border-radius: 12px; font-size: 14px; font-weight: 500; color: var(--fg2); }
+.seg button.on { background: var(--s3); color: var(--fg); }
+.big-stat { padding: 22px 22px 14px; display: grid; gap: 4px; }
+.big-stat .delta { font: 800 52px var(--display); letter-spacing: -.04em; color: var(--mint); line-height: 1; }
+.big-stat .lbl { color: var(--fg2); font-size: 14px; }
+.chart { width: 100%; height: auto; margin-top: 10px; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mini { padding: 18px; display: grid; gap: 4px; }
+.mini svg.i { width: 20px; height: 20px; margin-bottom: 6px; }
+.mini b { font: 800 26px var(--display); letter-spacing: -.02em; }
+.mini small { color: var(--fg3); font-size: 12px; }
+.heat { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; padding: 20px; }
+.heat .col { display: grid; gap: 6px; }
+.heat i { aspect-ratio: 1; max-width: 100%; border-radius: 6px; background: var(--s3); }
+.heat i.l1 { background: rgba(126,213,151,.35); }
+.heat i.l2 { background: var(--mint); }
+.heat i.pt { background: var(--sky); }
+
+/* ---- Chat -------------------------------------------------------------- */
+.chat-head { display: flex; align-items: center; gap: 12px; padding-top: 6px; }
+.chat-head img { width: 44px; height: 44px; border-radius: 50%; background: #0b0c0c; object-fit: contain; padding: 10px 7px; border: 1px solid var(--hair); }
+.chat-head b { font: 700 18px var(--display); display: block; }
+.chat-head small { color: var(--mint); font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+.chat-head small::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--mint); }
+.msgs { display: grid; gap: 8px; }
+.msg { max-width: 80%; padding: 12px 16px; border-radius: 22px; font-size: 15px; }
+.msg.them { background: var(--s2); border-bottom-left-radius: 8px; justify-self: start; }
+.msg.me { background: var(--mint); color: var(--mint-ink); border-bottom-right-radius: 8px; justify-self: end; }
+.stamp { text-align: center; font-size: 11px; color: var(--fg3); margin: 8px 0 2px; }
+.composer { display: flex; gap: 8px; align-items: center; }
+.composer label { flex: 1; min-width: 0; height: 50px; border-radius: 25px; background: var(--s2); display: flex; align-items: center; padding: 0 18px; }
+.composer input { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: 15px var(--body); }
+.composer input:focus { outline: none; }
+.composer .round { flex: none; width: 50px; height: 50px; background: var(--mint); color: var(--mint-ink); }
+
+.topbar .right { display: flex; gap: 8px; align-items: center; }
+.topbar .ib { width: 38px; height: 38px; border-radius: 50%; background: var(--s2); display: grid; place-items: center; position: relative; color: var(--fg); }
+.topbar .ib svg { width: 19px; height: 19px; }
+.topbar .ib .badge { position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--coral); color: #2a0703; font: 700 10px var(--display); display: grid; place-items: center; padding: 0 4px; box-shadow: 0 0 0 2px var(--bg); }
+.topbar .ib .dot { position: absolute; top: 1px; right: 1px; width: 9px; height: 9px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 2px var(--bg); }
+
+/* Onboarding */
+.onb { min-height: 100%; display: flex; flex-direction: column; }
+.onb-photo { height: 420px; position: relative; overflow: hidden; }
+.onb-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 40% 30%; }
+.onb-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.1) 30%, #000 96%); }
+.onb-body { padding: 0 var(--gut-r) 40px var(--gut); display: grid; gap: 16px; margin-top: -70px; position: relative; }
+.onb-mark { height: 30px; width: auto; }
+.onb h1 { font-size: 34px; font-weight: 800; line-height: 1.05; }
+.onb .lead { color: var(--fg2); font-size: 16px; margin: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .onb-mark { animation: markin .9s cubic-bezier(.2,.9,.3,1) both; }
+  .onb-body h1 { animation: markin .9s .15s cubic-bezier(.2,.9,.3,1) both; }
+  .onb-body .lead, .onb-body .pill-btn { animation: markin .9s .3s cubic-bezier(.2,.9,.3,1) both; }
+  @keyframes markin { from { opacity: 0; transform: translateY(14px); } }
+}
+.onb-top { display: flex; align-items: center; gap: 14px; padding: 14px var(--gut-r) 0 var(--gut); }
+.onb-prog { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.onb-prog i { height: 4px; border-radius: 2px; background: var(--s3); transition: background .3s; }
+.onb-prog i.on { background: var(--mint); }
+.onb-step { padding: 26px var(--gut-r) 140px var(--gut); display: grid; gap: 22px; align-content: start; }
+.onb-step h1 { font-size: 28px; }
+.goal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.goal { min-height: 132px; border-radius: 24px; background: var(--s2); display: grid; align-content: space-between; padding: 16px; text-align: left; border: 2px solid transparent; font: 700 16px var(--display); }
+.goal .gi { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; }
+.goal[aria-pressed="true"] { border-color: var(--mint); background: rgba(126,213,151,.07); }
+.days-pick { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.days-pick button { aspect-ratio: 1; max-width: 100%; border-radius: 50%; background: var(--s2); font: 800 24px var(--display); }
+.days-pick button[aria-pressed="true"] { background: var(--fg); color: #000; }
+.freq { display: grid; gap: 10px; }
+.fopt { display: flex; gap: 14px; align-items: center; padding: 16px; border-radius: 22px; background: var(--s2); border: 2px solid transparent; text-align: left; width: 100%; }
+.fopt[aria-pressed="true"] { border-color: var(--violet); background: rgba(169,155,255,.08); }
+.fopt .t { flex: 1; min-width: 0; }
+.fopt b { font: 700 17px var(--display); display: block; }
+.fopt small { color: var(--fg3); font-size: 13px; }
+.acc { display: flex; gap: 3px; align-items: flex-end; }
+.acc i { width: 6px; border-radius: 3px; background: var(--s4, #2a2d2b); }
+.acc i:nth-child(1) { height: 8px; } .acc i:nth-child(2) { height: 13px; } .acc i:nth-child(3) { height: 18px; }
+.acc i.on { background: var(--violet); }
+.preview { display: flex; gap: 14px; align-items: center; padding: 14px 16px; border-radius: 20px; background: var(--s1); border: 1px solid var(--hair); }
+.preview b { font: 700 15px var(--display); display: block; }
+.preview small { color: var(--fg3); font-size: 12px; }
+.daychips { display: flex; gap: 6px; flex-wrap: wrap; }
+.daychips button { height: 40px; padding: 0 16px; border-radius: 20px; background: var(--s2); font-weight: 500; font-size: 14px; }
+.daychips button[aria-pressed="true"] { background: var(--violet); color: #120d2b; }
+.toggles { display: grid; gap: 8px; }
+.tg { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 18px; background: var(--s2); }
+.tg .li { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; flex: none; }
+.tg .li svg { width: 18px; height: 18px; }
+.tg span.t { flex: 1; min-width: 0; }
+.tg b { font-weight: 600; font-size: 15px; display: block; }
+.tg small { color: var(--fg3); font-size: 12px; }
+.sw { width: 50px; height: 30px; border-radius: 15px; background: var(--s3); position: relative; flex: none; transition: background .2s; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; transition: transform .2s; }
+.sw[aria-checked="true"] { background: var(--mint); }
+.sw[aria-checked="true"]::after { transform: translateX(20px); }
+.onb-done { min-height: 100%; display: grid; place-items: center; align-content: center; gap: 22px; text-align: center; padding: 60px var(--gut-r) 40px var(--gut); }
+.onb-done h1 { font-size: 34px; font-weight: 800; }
+.summary { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.summary .chip { background: var(--s2); color: var(--fg2); }
+
+/* Notifications */
+.ntop { display: flex; align-items: center; gap: 12px; padding-top: 6px; }
+.ntop h1 { flex: 1; font-size: 28px; font-weight: 800; }
+.ntop .ib { width: 44px; height: 44px; border-radius: 50%; background: var(--s2); display: grid; place-items: center; }
+.ngroup { display: grid; gap: 8px; }
+.nrow { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; padding: 14px; border-radius: 20px; background: var(--s2); text-align: left; width: 100%; position: relative; }
+.nrow.unread::after { content: ""; position: absolute; top: 18px; right: 16px; width: 8px; height: 8px; border-radius: 50%; background: var(--coral); }
+.nrow .li { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; }
+.nrow .li svg { width: 20px; height: 20px; }
+.nrow b { font-weight: 600; font-size: 15px; display: block; padding-right: 18px; }
+.nrow p { margin: 2px 0 0; color: var(--fg2); font-size: 14px; }
+.nrow time { color: var(--fg3); font-size: 12px; display: block; margin-top: 4px; }
+.cta { margin-top: 10px; display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: 17px; font: 600 13px var(--display); }
+
+/* Community */
+.drop { border-radius: 28px; background: linear-gradient(160deg, #221d38 0%, var(--s2) 62%); border: 1px solid rgba(169,155,255,.2); padding: 20px; display: grid; gap: 12px; }
+.drop .by { display: flex; gap: 10px; align-items: center; }
+.drop .by img { width: 36px; height: 36px; border-radius: 50%; background: #000; object-fit: contain; padding: 8px 5px; }
+.drop .by b { font-size: 14px; font-weight: 600; display: block; }
+.drop .by small { color: var(--fg3); font-size: 12px; }
+.drop h2 { font-size: 24px; font-weight: 800; line-height: 1.1; }
+.drop p { margin: 0; color: var(--fg2); font-size: 15px; }
+.reacts { display: flex; gap: 8px; }
+.react { height: 36px; padding: 0 12px; border-radius: 18px; background: rgba(255,255,255,.07); display: inline-flex; gap: 6px; align-items: center; font: 600 13px var(--display); }
+.react svg { width: 16px; height: 16px; }
+.react.on { background: var(--violet); color: #120d2b; }
+.meal3 { display: grid; gap: 10px; }
+.m3 { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 10px 14px 10px 10px; border-radius: 22px; background: var(--s2); text-align: left; width: 100%; }
+.m3 img { width: 92px; height: 92px; border-radius: 16px; object-fit: cover; }
+.m3 b { font: 700 16px var(--display); display: block; line-height: 1.2; }
+.m3 .macros { display: flex; gap: 10px; margin-top: 6px; font-size: 12px; color: var(--fg3); }
+.m3 .macros span:first-child { color: var(--amber); font-weight: 600; }
+.m3 .add { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,180,94,.14); color: var(--amber); display: grid; place-items: center; }
+.m3 .add.on { background: var(--amber); color: #2a1600; }
+.ann { display: flex; gap: 14px; padding: 16px; border-radius: 20px; background: var(--s2); align-items: center; text-align: left; width: 100%; }
+.ann .li { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; flex: none; }
+.ann .t { flex: 1; min-width: 0; }
+.ann b { font-weight: 600; display: block; }
+.ann small { color: var(--fg3); font-size: 13px; }
+
+/* Push banner */
+.push { position: absolute; left: 10px; right: 10px; top: 10px; z-index: 70; border-radius: 24px; background: rgba(44,46,45,.86); backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%); padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start; text-align: left; box-shadow: 0 16px 40px rgba(0,0,0,.5); transform: translateY(-160%); transition: transform .5s cubic-bezier(.2,.9,.3,1); }
+.push.show { transform: none; }
+@media (min-width: 700px) { .push { top: 50px; } }
+.push img { width: 38px; height: 38px; border-radius: 10px; background: #000; object-fit: contain; padding: 9px 5px; flex: none; }
+.push .t { flex: 1; min-width: 0; }
+.push .row { display: flex; justify-content: space-between; font-size: 12px; color: var(--fg2); }
+.push b { font-weight: 600; font-size: 14px; display: block; }
+.push p { margin: 0; font-size: 14px; color: var(--fg); }
+
+/* Booking, payment, check-in sheets */
+.paycard { border-radius: 22px; padding: 18px; background: var(--s2); display: grid; gap: 10px; }
+.line { display: flex; justify-content: space-between; color: var(--fg2); font-size: 14px; }
+.line.total { color: var(--fg); font: 800 24px var(--display); border-top: 1px solid var(--hair); padding-top: 12px; }
+.cardrow { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 18px; background: var(--s2); }
+.cardrow .brand { width: 46px; height: 30px; border-radius: 6px; background: linear-gradient(135deg, #1a1f71, #2b55c2); color: #fff; font: 800 10px var(--display); display: grid; place-items: center; letter-spacing: .06em; }
+.cardrow .t { flex: 1; }
+.cardrow b { font-weight: 600; display: block; font-size: 15px; }
+.cardrow small { color: var(--fg3); font-size: 12px; }
+.cimetric { display: grid; gap: 8px; }
+.cimetric .lab { display: flex; justify-content: space-between; align-items: baseline; }
+.cimetric .lab b { font: 700 16px var(--display); }
+.cimetric .lab small { color: var(--fg3); font-size: 12px; }
+.scale5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.scale5 button { height: 46px; border-radius: 14px; background: var(--s2); font: 700 16px var(--display); }
+.scale5 button[aria-pressed="true"] { background: var(--c); color: #0a0a0a; }
+.wt { display: flex; align-items: center; gap: 10px; background: var(--s2); border-radius: 16px; padding: 0 16px; height: 56px; }
+.wt input { background: none; border: 0; color: var(--fg); font: 800 24px var(--display); width: 100px; }
+.wt input:focus { outline: none; }
+.wt span { color: var(--fg3); }
+
+.toast { position: absolute; left: 50%; top: 60px; transform: translateX(-50%); z-index: 60; background: var(--fg); color: #000; padding: 10px 18px; border-radius: 22px; font-size: 14px; font-weight: 500; white-space: nowrap; max-width: calc(100% - 40px); overflow: hidden; text-overflow: ellipsis; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+@media (prefers-reduced-motion: no-preference) { .fade { animation: fade .28s ease; } @keyframes fade { from { opacity: 0; transform: translateY(6px); } } }
+
+/* ---- Refined system ----------------------------------------------------
+   Labels are plain text with a colour dot, never pills. Related rows sit in
+   one grouped list with hairline dividers. Calls to action are square-cornered
+   and uppercase. The tab bar is flat. Kyle is mint with his monogram;
+   KAI is violet with the orb. */
+.card { border-radius: 16px; }
+.chip { height: auto; padding: 0; border-radius: 0; background: none !important; gap: 6px; font-size: 13px; color: var(--fg2); }
+.chip.glass { backdrop-filter: none; -webkit-backdrop-filter: none; border: 0; color: #fff; text-shadow: 0 1px 10px rgba(0,0,0,.7); }
+.ex-meta { gap: 18px; }
+.label-dot { display: inline-flex; align-items: center; gap: 7px; font: 700 11px var(--display); letter-spacing: .14em; text-transform: uppercase; }
+.label-dot::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.hero { border-radius: 20px; }
+.hero .tag { background: none; font: 700 11px var(--display); letter-spacing: .18em; text-transform: uppercase; }
+.hero h2, .ex-title h1, .finish h1 { text-transform: uppercase; letter-spacing: -.01em; }
+.play { border-radius: 16px; }
+.pill-btn { border-radius: 14px; height: 54px; font: 800 13px var(--display); letter-spacing: .1em; text-transform: uppercase; }
+.pill-btn svg { width: 18px; height: 18px; }
+.timebtn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 10px; background: rgba(0,0,0,.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: #fff; font: 700 13px var(--display); }
+.timebtn svg { width: 15px; height: 15px; }
+.tabbar { left: 0; right: 0; bottom: 0; height: calc(64px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); border-radius: 0; border: 0; border-top: 1px solid var(--hair); background: rgba(8,9,9,.86); }
+.tabbar .pip { top: 9px; }
+.group { background: var(--s2); border-radius: 16px; overflow: hidden; display: grid; --inset: 68px; }
+.group > * { background: none !important; border-radius: 0 !important; border: 0 !important; position: relative; }
+.group > * + *::before { content: ""; position: absolute; top: 0; left: var(--inset); right: 0; height: 1px; background: var(--hair); }
+.st { background: none !important; padding: 0 !important; display: inline-flex; align-items: center; gap: 6px; }
+.st::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.cta { background: none !important; padding: 0; height: auto; margin-top: 8px; font: 700 12px var(--display); letter-spacing: .1em; text-transform: uppercase; gap: 4px; }
+.cta::after { content: "→"; font-family: var(--body); }
+.react { background: none; padding: 0 12px 0 0; height: 32px; }
+.react.on { background: none; color: var(--violet); }
+.drop { border-radius: 20px; }
+.summary { gap: 18px; }
+.seg { border-radius: 10px; padding: 3px; } .seg button { border-radius: 8px; height: 34px; }
+.area { border-radius: 12px; } .daychips button { border-radius: 10px; }
+.opt, .fopt, .goal { border-radius: 16px; } .tg { border-radius: 14px; }
+.toast { border-radius: 12px; }
+.sheet { border-radius: 26px 26px 0 0; }
+.msg { border-radius: 20px; }
+.mini, .stat { border-radius: 16px; }
+
+/* Kyle and KAI */
+.kd-av { width: 38px; height: 38px; border-radius: 50%; background: #050606; border: 1.5px solid var(--mint); display: grid; place-items: center; position: relative; flex: none; }
+.kd-av img { width: 24px; height: auto; }
+.kd-av .dot { position: absolute; bottom: -1px; right: -1px; top: auto; width: 10px; height: 10px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 2px var(--bg); }
+.orb { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle at 32% 28%, #e3dcff 0%, #a99bff 38%, #4b3cc4 100%); display: grid; place-items: center; color: #fff; box-shadow: 0 0 22px rgba(169,155,255,.35); flex: none; }
+.orb svg { width: 20px; height: 20px; }
+.orb.sm { width: 24px; height: 24px; box-shadow: none; } .orb.sm svg { width: 12px; height: 12px; }
+.orb.lg { width: 92px; height: 92px; } .orb.lg svg { width: 38px; height: 38px; }
+@media (prefers-reduced-motion: no-preference) { .orb.lg { animation: breathe 4s ease-in-out infinite; } @keyframes breathe { 50% { box-shadow: 0 0 52px rgba(169,155,255,.6); transform: scale(1.04); } } }
+.convo-head { display: flex; align-items: center; gap: 12px; padding-top: 6px; }
+.convo-head .t { flex: 1; min-width: 0; }
+.convo-head b { font: 700 18px var(--display); display: block; }
+.convo-head small { font-size: 12px; }
+.switchto { display: inline-flex; align-items: center; gap: 8px; font: 700 12px var(--display); letter-spacing: .08em; text-transform: uppercase; }
+.ai-empty { display: grid; justify-items: center; text-align: center; gap: 12px; padding: 24px 0 6px; }
+.ai-empty h2 { font-size: 24px; font-weight: 800; }
+.ai-empty p { margin: 0; color: var(--fg2); max-width: 28ch; }
+.prompt { display: flex; gap: 12px; align-items: center; padding: 15px 16px; text-align: left; width: 100%; font-size: 15px; }
+.prompt svg { width: 18px; height: 18px; color: var(--violet); flex: none; }
+.prompt span { flex: 1; }
+.ai-thread { display: grid; gap: 18px; }
+.q { justify-self: end; max-width: 82%; background: var(--s3); padding: 10px 14px; border-radius: 18px 18px 4px 18px; font-size: 15px; }
+.a { display: grid; gap: 10px; }
+.a .who { display: flex; gap: 8px; align-items: center; font: 700 11px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--violet); }
+.a p { margin: 0; font-size: 16px; line-height: 1.6; }
+.a .src { font-size: 12px; color: var(--fg3); display: flex; gap: 6px; align-items: center; }
+.a .src svg { width: 13px; height: 13px; }
+.a .go { justify-self: start; font: 700 12px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--violet); }
+.a .go::after { content: " →"; font-family: var(--body); }
+.handoff { display: flex; gap: 12px; align-items: center; padding: 14px; border-radius: 14px; background: rgba(126,213,151,.07); border: 1px solid rgba(126,213,151,.22); text-align: left; width: 100%; }
+.handoff .t { flex: 1; }
+.handoff b { display: block; font-weight: 600; font-size: 15px; }
+.handoff small { color: var(--fg2); font-size: 13px; }
+.disclaimer { font-size: 11px; color: var(--fg3); text-align: center; margin: 0; }
+.composer.ai .round { background: var(--violet); color: #120d2b; }
+.sysnote { display: flex; gap: 8px; justify-content: center; align-items: center; font-size: 12px; color: var(--fg3); margin: 10px 0 2px; }
+.sets { gap: 0; background: var(--s1); border-radius: 16px; overflow: hidden; }
+.setrow { border: 0; border-radius: 0; background: none; padding: 12px 12px 12px 14px; }
+.setrow + .setrow { box-shadow: inset 0 1px 0 var(--hair); }
+.setrow.done { background: rgba(126,213,151,.06); }
+.target { border-radius: 16px; }
+/* Icons sit in a bordered tile tinted with their own colour. The tile takes
+   its colour from the element's `color`, so markup only sets one value. */
+.li, .gi, .act i:not(:has(.orb)), .wintile, .suptile {
+  background: color-mix(in srgb, currentColor 13%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 45%, transparent) !important;
+  display: grid; place-items: center; flex: none; }
+.li svg, .gi svg, .act i svg, .wintile svg, .suptile svg { color: inherit; }
+.li { width: 40px !important; height: 40px !important; border-radius: 12px !important; }
+.li svg { width: 22px !important; height: 22px !important; }
+.crow .li { color: var(--k) !important; }
+.actions { background: var(--s2); border-radius: 16px; padding: 16px 6px 12px; }
+.act { color: var(--fg2); font-weight: 500; font-size: 12px; gap: 9px; }
+.act i { width: 56px; height: 56px; border-radius: 17px; }
+.act i svg { width: 28px; height: 28px; }
+.act .orb { width: 56px !important; height: 56px !important; }
+.gi { width: 48px !important; height: 48px !important; border-radius: 14px !important; }
+.gi svg { width: 26px; height: 26px; }
+.group { --inset: 68px !important; }
+.tabbar svg { width: 25px; height: 25px; }
+.tabbar button { color: #5d635f; }
+.wrow .tile svg { width: 26px; height: 26px; }
+.wrow .tile { background: var(--s3); color: var(--fg); border-radius: 14px; }
+.wrow.today .tile { background: var(--mint); color: var(--mint-ink); }
+.wrow.done .tile { background: none; color: var(--mint); }
+.dock .round svg { width: 24px; height: 24px; }
+.orb svg { width: 60%; height: 60%; }
+
+/* Check-in */
+.ci-wrap { min-height: 100%; }
+.words { width: 100%; min-height: 96px; background: var(--s2); border: 0; border-radius: 16px; padding: 14px 16px; color: var(--fg); font: 15px/1.5 var(--body); resize: none; }
+.words:focus { outline: 2px solid var(--mint); }
+.quotecard { display: grid; gap: 10px; padding: 18px; border-radius: 16px; background: linear-gradient(150deg, rgba(126,213,151,.16), rgba(126,213,151,.03)); }
+.quotecard p { margin: 0; font: 800 21px/1.25 var(--display); letter-spacing: -.01em; }
+.quotecard small { display: flex; align-items: center; gap: 8px; color: var(--fg2); font-size: 13px; }
+.quotecard small img { width: 22px; }
+.wins { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.win { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; background: var(--s2); text-align: left; font-size: 14px; font-weight: 500; border: 1.5px solid transparent; }
+.wintile, .suptile { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; flex: none; }
+.wintile svg, .suptile svg { width: 20px; height: 20px; }
+.win[aria-pressed="true"] { border-color: var(--mint); background: rgba(126,213,151,.08); }
+.optrow { display: flex; align-items: center; gap: 12px; padding: 12px 14px; width: 100%; text-align: left; }
+.optrow .t { flex: 1; min-width: 0; }
+.optrow b { font-weight: 600; font-size: 15px; display: block; }
+.optrow small { color: var(--fg3); font-size: 12px; }
+.optrow .li { width: 38px; height: 38px; display: grid; place-items: center; flex: none; }
+.optrow .add { font: 700 12px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--mint); }
+.meas { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 14px 14px; }
+.meas label { display: grid; gap: 4px; background: var(--s3); border-radius: 12px; padding: 10px 12px; font-size: 12px; color: var(--fg3); }
+.meas input { background: none; border: 0; color: var(--fg); font: 800 20px var(--display); width: 100%; }
+.meas input:focus { outline: none; }
+.sup { display: flex; align-items: center; gap: 12px; padding: 12px 14px; width: 100%; text-align: left; font-size: 15px; font-weight: 500; }
+.sup .t { flex: 1; }
+.sup .tick { width: 26px; height: 26px; border-width: 2px; }
+.sup .tick svg { width: 15px; height: 15px; }
+.sup[aria-pressed="true"] .tick { background: var(--mint); border-color: var(--mint); color: var(--mint-ink); }
+.ci-done { min-height: 100%; display: grid; place-items: center; align-content: center; gap: 20px; text-align: center; padding: 60px var(--gut-r) 40px var(--gut); }
+.ci-done h1 { font-size: 32px; font-weight: 800; text-transform: uppercase; }
+.ci-done .orbok { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(160deg, rgba(255,255,255,.35), rgba(255,255,255,0) 60%), var(--violet); color: #120d2b; box-shadow: 0 14px 40px -10px var(--violet); }
+.ci-done .orbok svg { width: 44px; height: 44px; }
+.ci-sum { width: 100%; text-align: left; }
+.ci-sum .optrow b { font-size: 14px; }
+.mind { width: 210px; height: 210px; margin: 4px auto 0; border-radius: 46% 54% 52% 48% / 50% 46% 54% 50%;
+  background: radial-gradient(circle at 34% 28%, rgba(255,255,255,.6), rgba(255,255,255,0) 42%), radial-gradient(circle at 50% 58%, var(--c) 0%, color-mix(in srgb, var(--c) 35%, #000) 85%);
+  box-shadow: 0 40px 90px -36px var(--c); transition: background .5s, box-shadow .5s; }
+@media (prefers-reduced-motion: no-preference) { .mind { animation: morph 9s ease-in-out infinite; }
+  @keyframes morph { 33% { border-radius: 55% 45% 43% 57% / 46% 55% 45% 54%; transform: rotate(8deg) scale(1.02); } 66% { border-radius: 47% 53% 58% 42% / 55% 47% 53% 45%; transform: rotate(-6deg); } } }
+.mindword { display: block; text-align: center; font: 800 36px var(--display); text-transform: uppercase; letter-spacing: -.01em; margin-top: 22px; }
+.moodrange { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--coral), var(--amber), #c9cfcb, var(--sky), var(--mint)); margin-top: 6px; }
+.moodrange::-webkit-slider-thumb { -webkit-appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
+.moodrange::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 0; }
+.moodlabels { display: flex; justify-content: space-between; font-size: 12px; color: var(--fg3); margin-top: 10px; }
+.scale5 { gap: 4px; }
+.scale5 button { height: 38px; border-radius: 5px; background: var(--s2); font-size: 13px; color: var(--fg3); transition: background .2s; }
+.scale5 button:first-child { border-radius: 12px 5px 5px 12px; }
+.scale5 button:last-child { border-radius: 5px 12px 12px 5px; }
+.scale5 button.lit { background: color-mix(in srgb, var(--c) 55%, transparent); color: #0b0c0b; }
+.scale5 button[aria-pressed="true"] { background: var(--c); color: #0b0c0b; }
+.cimetric .lab b svg { width: 18px !important; height: 18px !important; }
+.wins { gap: 10px; }
+.win { flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px; min-height: 104px; border-radius: 16px; font-size: 14px; position: relative; }
+.win .wintile { width: 44px; height: 44px; border-radius: 13px; }
+.win .wintile svg { width: 28px; height: 28px; }
+.win[aria-pressed="true"] { border-color: var(--mint); background: rgba(126,213,151,.07); }
+.win[aria-pressed="true"] .wintile { color: var(--mint) !important; }
+.win[aria-pressed="true"]::after { content: ""; position: absolute; top: 14px; right: 14px; width: 20px; height: 20px; border-radius: 50%; background: var(--mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5' fill='none' stroke='%2303140a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 13px no-repeat; }
+.sup .suptile { width: 36px; height: 36px; border-radius: 10px; }
+.sup .suptile svg { width: 20px; height: 20px; }
+/* Fuel */
+.days7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.days7 button { display: grid; justify-items: center; gap: 4px; padding: 8px 0; border-radius: 12px; font-size: 11px; color: var(--fg3); }
+.days7 button b { font: 700 15px var(--display); color: var(--fg2); }
+.days7 button i { width: 5px; height: 5px; border-radius: 50%; background: var(--amber); }
+.days7 button i.none { background: transparent; }
+.days7 button.on { background: var(--fg); color: #000; }
+.days7 button.on b { color: #000; }
+.fsum { padding: 18px; display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 18px; align-items: center; }
+.mrow { display: grid; gap: 5px; }
+.mrow .top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: var(--fg2); }
+.mrow .top b { font: 700 15px var(--display); color: var(--fg); }
+.mrow .top b span { color: var(--fg3); font-weight: 600; font-size: 12px; }
+.mbar { height: 7px; border-radius: 4px; background: var(--s3); overflow: hidden; }
+.mbar i { display: block; height: 100%; border-radius: 4px; }
+.slot-head { display: flex; align-items: center; gap: 12px; padding: 14px 14px 12px; }
+.slot-head b { font: 700 16px var(--display); flex: 1; }
+.slot-head span { color: var(--fg3); font-size: 13px; }
+.addbtn { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: var(--amber); box-shadow: inset 0 0 0 1px rgba(255,180,94,.45); background: rgba(255,180,94,.1); }
+.addbtn svg { width: 18px; height: 18px; }
+.food { display: flex; align-items: center; gap: 12px; padding: 11px 14px; }
+.food .t { flex: 1; min-width: 0; }
+.food b { font-weight: 500; font-size: 15px; display: block; }
+.food small { color: var(--fg3); font-size: 12px; }
+.food .kc { text-align: right; font: 700 14px var(--display); }
+.food .kc small { display: block; font: 500 11px var(--body); color: var(--amber); }
+.food img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; }
+.empty { padding: 4px 14px 16px; color: var(--fg3); font-size: 14px; }
+.water { display: flex; align-items: center; gap: 12px; padding: 14px; }
+.water .cups { display: flex; gap: 4px; flex: 1; }
+.water .cups i { flex: 1; height: 22px; border-radius: 5px; background: var(--s3); }
+.water .cups i.on { background: var(--sky); }
+.search { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 14px; border-radius: 14px; background: var(--s2); color: var(--fg3); }
+.search input { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: 16px var(--body); }
+.search input:focus { outline: none; }
+.tabs4 { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--s2); border-radius: 10px; padding: 3px; }
+.tabs4 button { height: 34px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--fg2); }
+.tabs4 button.on { background: var(--s3); color: var(--fg); }
+.scanbox { aspect-ratio: 4 / 3; max-width: 100%; border-radius: 16px; background: radial-gradient(circle at 50% 40%, #1b1f1d, #090a0a); display: grid; place-items: center; position: relative; color: var(--fg2); text-align: center; font-size: 14px; }
+.scanbox::before { content: ""; position: absolute; inset: 22% 16%; border: 2px solid var(--amber); border-radius: 14px; box-shadow: 0 0 0 999px rgba(0,0,0,.25); }
+.qa { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.qa label { display: grid; gap: 4px; background: var(--s2); border-radius: 12px; padding: 10px 12px; font-size: 12px; color: var(--fg3); }
+.qa input { background: none; border: 0; color: var(--fg); font: 800 20px var(--display); width: 100%; }
+.qa input:focus { outline: none; }
+
+/* Progress */
+.seg.four { grid-template-columns: repeat(4, 1fr); }
+.liftchips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--gut-r)) 0 calc(-1 * var(--gut)); padding: 0 var(--gut-r) 0 var(--gut); }
+.liftchips button { flex: none; height: 36px; padding: 0 14px; border-radius: 10px; background: var(--s2); font-size: 13px; font-weight: 500; color: var(--fg2); }
+.liftchips button.on { background: var(--mint); color: var(--mint-ink); }
+.chart2 { width: 100%; height: auto; margin-top: 12px; }
+.sess { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 12px 14px; font-size: 14px; }
+.sess time { color: var(--fg3); font-size: 12px; }
+.sess b { font: 700 15px var(--display); }
+.sess small { display: block; color: var(--fg3); font-size: 12px; }
+.sess .chg { font: 700 13px var(--display); }
+.explain { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--s1); color: var(--fg2); font-size: 13px; line-height: 1.5; }
+.explain svg { flex: none; width: 18px; height: 18px; color: var(--sky); margin-top: 1px; }
+.vbars { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; align-items: end; height: 90px; margin-top: 12px; }
+.vbars div { display: grid; gap: 4px; justify-items: center; align-content: end; height: 100%; font-size: 10px; color: var(--fg3); }
+.vbars i { width: 100%; border-radius: 5px; background: rgba(110,198,255,.35); }
+.vbars div:last-child i { background: var(--sky); }
+.rec { display: flex; gap: 12px; align-items: center; padding: 13px 14px; }
+.rec .t { flex: 1; min-width: 0; }
+.rec b { font-weight: 600; font-size: 15px; display: block; }
+.rec small { color: var(--fg3); font-size: 12px; }
+.rec .v { text-align: right; font: 800 16px var(--display); }
+.rec .v small { display: block; color: var(--mint); font: 600 11px var(--body); }
+.guide { padding: 0 14px 14px 68px; margin: 0; color: var(--fg2); font-size: 14px; display: grid; gap: 6px; }
+.photos3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.photos3 button { aspect-ratio: 3 / 4; max-width: 100%; border-radius: 14px; border: 1.5px dashed var(--hair); display: grid; place-items: center; align-content: center; gap: 6px; color: var(--fg3); font-size: 12px; }
+.photos3 svg { width: 30px; height: 30px; }
+.cal8 { display: grid; grid-template-columns: 46px repeat(7, 1fr); gap: 5px; align-items: center; padding: 16px; font-size: 11px; color: var(--fg3); }
+.cal8 span.h { text-align: center; font-weight: 600; }
+.cal8 i { aspect-ratio: 1; max-width: 100%; border-radius: 6px; background: var(--s3); }
+.cal8 i.w { background: var(--mint); }
+.cal8 i.pt { background: var(--sky); }
+.cal8 i.x { background: transparent; box-shadow: inset 0 0 0 1.5px var(--coral); }
+.legend2 { display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 0 16px 16px; font-size: 12px; color: var(--fg2); }
+.legend2 span { display: flex; gap: 6px; align-items: center; }
+.legend2 i { width: 12px; height: 12px; border-radius: 3px; }
+
+/* Community */
+.comp { display: flex; gap: 10px; align-items: center; padding: 12px; border-radius: 16px; background: var(--s2); }
+.comp input { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: 15px var(--body); }
+.comp input:focus { outline: none; }
+.comp .postbtn { font: 700 12px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--mint); }
+.post { background: var(--s2); border-radius: 16px; padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.post.pinned { box-shadow: inset 0 0 0 1px rgba(110,198,255,.35); }
+.post .by { display: flex; gap: 10px; align-items: center; }
+.post .by .t { flex: 1; min-width: 0; }
+.post .by .label-dot { flex: 0 1 auto; min-width: 0; font-size: 10px; letter-spacing: .1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.post .by b { font-weight: 600; font-size: 15px; }
+.post .by small { display: block; color: var(--fg3); font-size: 12px; }
+.av { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 700 13px var(--display); flex: none; }
+.coachtag { font: 700 10px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--mint); margin-left: 6px; }
+.post p { margin: 0; font-size: 15px; line-height: 1.5; }
+.post h3 { font-size: 19px; font-weight: 800; }
+.post .strip3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.post .strip3 img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; }
+.post .acts { display: flex; gap: 18px; color: var(--fg2); font-size: 13px; font-weight: 600; }
+.post .acts button { display: inline-flex; gap: 6px; align-items: center; }
+.post .acts svg { width: 18px; height: 18px; }
+.post .acts .on { color: var(--coral); }
+.cmts { display: grid; gap: 10px; padding-top: 4px; border-top: 1px solid var(--hair); }
+.cmt { display: flex; gap: 10px; font-size: 14px; }
+.cmt .av { width: 28px; height: 28px; font-size: 10px; }
+.cmt b { font-weight: 600; margin-right: 6px; }
+.reply { display: flex; gap: 8px; min-width: 0; }
+.reply .addbtn { flex: none; }
+.reply input { flex: 1; min-width: 0; height: 38px; border-radius: 10px; background: var(--s3); border: 0; color: var(--fg); padding: 0 12px; font: 14px var(--body); }
+.board { display: grid; gap: 6px; }
+.board div { display: flex; justify-content: space-between; font-size: 14px; padding: 8px 10px; border-radius: 10px; background: var(--s3); }
+.board div:first-child { background: rgba(255,180,94,.14); color: var(--amber); }
+.cats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cat { display: grid; gap: 14px; padding: 16px; border-radius: 16px; background: var(--s2); text-align: left; min-height: 128px; align-content: space-between; }
+.cat b { font: 700 16px var(--display); display: block; }
+.cat small { color: var(--fg3); font-size: 12px; }
+.cat.wide { grid-column: 1 / -1; min-height: 0; grid-template-columns: auto 1fr; align-items: center; }
+.datebox.sm { width: 46px; height: 48px; border-radius: 12px; }
+.datebox.sm b { font-size: 18px; }
+.datebox.sm small { font-size: 9px; }
+.avrow { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 12px 14px; min-height: 58px; }
+.avrow b { font: 700 15px var(--display); }
+.avrow .t { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--fg3); }
+.avrow select { height: 36px; border-radius: 10px; background: var(--s3); border: 0; color: var(--fg); padding: 0 10px; font: 600 14px var(--display); }
+.avrow.off { opacity: .45; }
+.code6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.code6 input { height: 58px; border-radius: 14px; background: var(--s2); border: 1.5px solid var(--hair); color: var(--fg); text-align: center; font: 800 24px var(--display); width: 100%; }
+.code6 input:focus { outline: none; border-color: var(--mint); }
+.yn { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 14px; font-size: 14px; }
+.ynb { display: flex; gap: 4px; }
+.ynb button { height: 34px; padding: 0 12px; border-radius: 9px; background: var(--s3); font-size: 13px; font-weight: 600; color: var(--fg2); }
+.ynb button[aria-pressed="true"]:first-child { background: var(--amber); color: #2a1600; }
+.ynb button[aria-pressed="true"]:last-child { background: var(--mint); color: var(--mint-ink); }
+.cons { display: flex; align-items: center; gap: 12px; padding: 14px; }
+.cons .t { flex: 1; min-width: 0; }
+.cons b { font-weight: 600; font-size: 15px; display: block; }
+.cons b small { font-size: 11px; font-weight: 600; margin-left: 4px; }
+.cons small { color: var(--fg3); font-size: 12px; }
+.tsize { display: flex; gap: 4px; }
+.tsize button { width: 40px; height: 36px; border-radius: 9px; background: var(--s3); font-family: var(--display); font-weight: 700; color: var(--fg2); }
+.tsize button[aria-pressed="true"] { background: var(--fg); color: #000; }
+.quote { border-left: 2px solid var(--violet); padding: 2px 0 2px 10px; margin-bottom: 6px; font-size: 13px; opacity: .85; }
+/* History, exercise library, offline and error states */
+.hrow { display: flex; align-items: center; gap: 12px; padding: 14px; width: 100%; text-align: left; }
+.hrow .t { flex: 1; min-width: 0; }
+.hrow .t b { font: 700 16px var(--display); display: block; }
+.hrow .t small { color: var(--fg3); font-size: 13px; }
+.hrow .chev { transition: transform .2s; }
+.hrow .pr { display: flex; align-items: center; gap: 4px; font-weight: 700; font-size: 14px; }
+.hrow .pr svg { width: 18px; height: 18px; }
+.hsets { display: grid; gap: 10px; padding: 0 14px 16px; }
+.hsets div { display: grid; gap: 2px; padding-left: 12px; border-left: 2px solid var(--s3); }
+.hsets b { font-size: 14px; font-weight: 600; }
+.hsets span { font-size: 13px; color: var(--fg3); }
+.blank { display: grid; justify-items: center; text-align: center; gap: 10px; padding: 40px 12px; }
+.blank .li { width: 64px !important; height: 64px !important; border-radius: 20px !important; }
+.blank .li svg { width: 30px !important; height: 30px !important; }
+.blank b { font: 800 20px var(--display); }
+.blank p { color: var(--fg3); font-size: 14px; max-width: 290px; line-height: 1.45; }
+.blank .pill-btn { margin-top: 8px; width: 100%; }
+.demo { aspect-ratio: 16 / 10; border-radius: 22px; border: 1px dashed color-mix(in srgb, var(--c) 40%, transparent);
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--c) 14%, transparent), transparent 70%), var(--s1);
+  display: grid; place-content: center; justify-items: center; gap: 8px; text-align: center; padding: 16px; }
+.demo b { font: 700 17px var(--display); }
+.demo small { color: var(--fg3); font-size: 13px; max-width: 250px; }
+.exfacts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.exfacts div { background: var(--s2); border-radius: 18px; padding: 12px; display: grid; gap: 4px; align-content: start; }
+.exfacts .li { width: 34px !important; height: 34px !important; margin-bottom: 4px; }
+.exfacts .li svg { width: 18px !important; height: 18px !important; }
+.exfacts small { color: var(--fg3); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+.exfacts b { font-size: 14px; font-weight: 600; line-height: 1.25; }
+.cues { counter-reset: c; list-style: none; display: grid; gap: 8px; padding: 0; margin: 0; }
+.cues li { counter-increment: c; display: flex; gap: 12px; align-items: flex-start; background: var(--s2); border-radius: 16px; padding: 14px; font-size: 15px; line-height: 1.4; }
+.cues li::before { content: counter(c); flex: none; width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center;
+  border: 1px solid rgba(126,213,151,.4); color: var(--mint); font: 700 13px var(--display); }
+.netbar { position: sticky; top: 8px; margin: 8px var(--gut-r, 16px) 0 var(--gut, 16px); z-index: 15; display: flex; gap: 10px; align-items: center;
+  padding: 10px 14px; border-radius: 16px; background: rgba(40,30,12,.92); border: 1px solid rgba(255,180,94,.35); backdrop-filter: blur(18px); font-size: 13px; color: var(--fg2); }
+.netbar svg { width: 20px; height: 20px; color: var(--amber); flex: none; }
+.netbar b { color: var(--fg); font-weight: 600; }
+.alert { display: flex; gap: 12px; align-items: center; width: 100%; text-align: left; padding: 14px; border-radius: 20px;
+  background: rgba(255,107,94,.08); border: 1px solid rgba(255,107,94,.35); }
+.alert .t { flex: 1; min-width: 0; }
+.alert b { display: block; font: 700 15px var(--display); }
+.alert small { color: var(--fg3); font-size: 13px; }
+.failbox { display: flex; gap: 12px; padding: 14px; border-radius: 16px; background: rgba(255,107,94,.08); border: 1px solid rgba(255,107,94,.35); font-size: 14px; color: var(--fg2); line-height: 1.4; }
+.failbox svg { width: 22px; height: 22px; color: var(--coral); flex: none; }
+.failbox b { color: var(--fg); }
+</style>
+
+<div class="device" id="device">
+  <div class="statusbar"><span>9:41</span><i></i><span>●●● ▮</span></div>
+  <div class="screen" id="screen"><div id="view"></div></div>
+  <nav class="tabbar" id="tabbar" aria-label="App sections"></nav>
+  <div id="layer"></div>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <button class="push" id="push" hidden aria-live="polite"></button>
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// Icons
+// ---------------------------------------------------------------------------
+// Icons: solid, two-tone glyphs on a 24px grid. The full-strength layer is the
+// subject; the 40% layer is context. Line work is only used for arrows and ticks.
+const st = (d, w = 2.4) => `<path d="${d}" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+const CAL = '<rect x="2.5" y="4.5" width="19" height="17" rx="3.5" opacity=".4"/><path d="M6 4.5h12A3.5 3.5 0 0 1 21.5 8v1.5h-19V8A3.5 3.5 0 0 1 6 4.5z"/><rect x="6.5" y="2" width="2.4" height="5" rx="1.2"/><rect x="15.1" y="2" width="2.4" height="5" rx="1.2"/><rect x="6.5" y="12.5" width="3.4" height="3" rx="1"/><rect x="10.3" y="12.5" width="3.4" height="3" rx="1"/><rect x="14.1" y="12.5" width="3.4" height="3" rx="1"/><rect x="6.5" y="16.5" width="3.4" height="3" rx="1"/>';
+const BAR = '<rect x="1.5" y="9" width="2.6" height="6" rx="1.1" opacity=".55"/><rect x="4.3" y="5.5" width="3.8" height="13" rx="1.4"/><rect x="8.1" y="10.8" width="7.8" height="2.4" rx="1" opacity=".55"/><rect x="15.9" y="5.5" width="3.8" height="13" rx="1.4"/><rect x="19.9" y="9" width="2.6" height="6" rx="1.1" opacity=".55"/>';
+const HOME = '<path d="M10.6 3.6a2 2 0 0 1 2.8 0l7 6.4c.6.6.2 1.6-.6 1.6H19V19a2 2 0 0 1-2 2h-3v-5a2 2 0 0 0-4 0v5H7a2 2 0 0 1-2-2v-7.4H3.2c-.8 0-1.2-1-.6-1.6z"/>';
+const CHAT = '<path d="M12 3c5 0 9 3.4 9 7.7s-4 7.7-9 7.7c-.9 0-1.8-.1-2.6-.3L5 20.5c-.5.3-1.1-.2-1-.7l.8-3.4C3.7 15 3 13 3 10.7 3 6.4 7 3 12 3z"/>';
+const BOLT = '<path d="M13.6 2.3 4.4 13.2c-.5.6 0 1.5.8 1.5H11l-1.3 6.6c-.2.9.9 1.4 1.5.7l9.2-10.9c.5-.6 0-1.5-.8-1.5H14l1.3-6.6c.2-.9-.9-1.4-1.7-.7z"/>';
+const PLAY = '<path d="M7 4.6v14.8a1 1 0 0 0 1.5.9l12.2-7.4a1 1 0 0 0 0-1.8L8.5 3.7A1 1 0 0 0 7 4.6z"/>';
+const P = {
+  home: HOME, today: HOME,
+  train: BAR, dumbbell: BAR,
+  fuel: '<path d="M2.6 11.5h18.8a1 1 0 0 1 1 1.1A10.5 10.5 0 0 1 12 21.5 10.5 10.5 0 0 1 1.6 12.6a1 1 0 0 1 1-1.1z"/><path opacity=".5" d="M12.4 9.6c0-3.6 2.5-6.1 6.6-6.1 0 3.6-2.5 6.1-6.6 6.1zM8 9.8a3 3 0 0 1 3-3v3z"/>',
+  progress: '<rect x="3" y="13" width="4.6" height="8" rx="1.4" opacity=".4"/><rect x="9.7" y="8.5" width="4.6" height="12.5" rx="1.4" opacity=".7"/><rect x="16.4" y="3" width="4.6" height="18" rx="1.4"/>',
+  community: '<circle cx="12" cy="7.5" r="3.5"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0 1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1z"/><g opacity=".45"><circle cx="4.8" cy="9.2" r="2.5"/><circle cx="19.2" cy="9.2" r="2.5"/><path d="M.8 17.6a4.4 4.4 0 0 1 6.6-3.5 8 8 0 0 0-2.8 4.4H1.8a1 1 0 0 1-1-.9zM23.2 17.6a4.4 4.4 0 0 0-6.6-3.5 8 8 0 0 1 2.8 4.4h2.8a1 1 0 0 0 1-.9z"/></g>',
+  clients: '<circle cx="9" cy="7.5" r="3.5"/><path d="M2.5 19.5a6.5 6.5 0 0 1 13 0 1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1z"/><g opacity=".45"><circle cx="17" cy="8.5" r="2.8"/><path d="M17 13a5 5 0 0 1 5 5 1 1 0 0 1-1 1h-3.6a8 8 0 0 0-2.2-5.6A5 5 0 0 1 17 13z"/></g>',
+  user: '<circle cx="12" cy="7.5" r="4.5"/><path opacity=".5" d="M3.5 20a8.5 8.5 0 0 1 17 0 1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z"/>',
+  chat: CHAT, messages: CHAT,
+  play: PLAY, video: PLAY,
+  clock: '<circle cx="12" cy="12" r="9.5" opacity=".35"/>' + st('M12 7v5.2l3.4 2'),
+  snooze: '<circle cx="12" cy="13" r="8.5" opacity=".35"/>' + st('M12 9v4.2l2.6 1.6M4.5 3.5l-2 2M19.5 3.5l2 2'),
+  layers: '<path opacity=".45" d="m3 14.8 9 4.8 9-4.8-2.9-1.6-6.1 3.2-6.1-3.2z"/><path d="M11.1 3.5a2 2 0 0 1 1.8 0l8 4.3c.8.4.8 1.4 0 1.8l-8 4.3a2 2 0 0 1-1.8 0l-8-4.3c-.8-.4-.8-1.4 0-1.8z"/>',
+  swap: st('M4 8h13M13.5 4.5 17 8l-3.5 3.5') + '<g opacity=".5">' + st('M20 16H7M10.5 12.5 7 16l3.5 3.5') + '</g>',
+  pain: '<path fill-rule="evenodd" d="M10.3 3.4a2 2 0 0 1 3.4 0l8 13.6A2 2 0 0 1 20 20H4a2 2 0 0 1-1.7-3zM12 8.2a1.2 1.2 0 0 0-1.2 1.3l.3 4.3a.9.9 0 0 0 1.8 0l.3-4.3A1.2 1.2 0 0 0 12 8.2zm0 7.6a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6z"/>',
+  check: st('m4.5 12.5 4.8 4.8L19.5 7', 2.8),
+  back: st('M15 4.5 7.5 12l7.5 7.5', 2.6),
+  right: st('m9 4.5 7.5 7.5L9 19.5', 2.6),
+  up: st('M12 19.5v-15M5.5 11 12 4.5 18.5 11', 2.6), arrowup: st('M12 19.5v-15M5.5 11 12 4.5 18.5 11', 2.6),
+  down: st('m6 9 6 6 6-6', 2.6),
+  equal: st('M5.5 9.5h13M5.5 14.5h13', 2.6),
+  close: st('M6 6l12 12M18 6 6 18', 2.6),
+  plus: st('M12 5v14M5 12h14', 2.8),
+  camera: '<path fill-rule="evenodd" d="M8.6 4.5a1.5 1.5 0 0 1 1.3-.8h4.2c.5 0 1 .3 1.3.8l1.1 2H19a2.5 2.5 0 0 1 2.5 2.5v8.5A2.5 2.5 0 0 1 19 20H5a2.5 2.5 0 0 1-2.5-2.5V9A2.5 2.5 0 0 1 5 6.5h2.5zM12 9a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/><circle cx="12" cy="13" r="2" opacity=".45"/>',
+  cal: CAL, schedule: CAL, calup: CAL,
+  clip: '<rect x="4" y="3.5" width="16" height="18" rx="3" opacity=".4"/><rect x="8" y="2" width="8" height="4" rx="1.5"/>' + st('m8.5 13.5 2.5 2.5 4.5-5'),
+  // KAI's mark: the open arc of the D in the KD logo, with a core.
+  spark: st('M12 4.5A7.5 7.5 0 1 1 4.5 12', 2.8) + '<circle cx="12" cy="12" r="2.6"/><circle cx="6" cy="6" r="1.7" opacity=".55"/>',
+  pin: '<path fill-rule="evenodd" d="M12 2a7.5 7.5 0 0 0-7.5 7.5c0 5.2 6 11.2 6.7 11.9a1.1 1.1 0 0 0 1.6 0c.7-.7 6.7-6.7 6.7-11.9A7.5 7.5 0 0 0 12 2zm0 4.7a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6z"/>',
+  info: '<circle cx="12" cy="12" r="9.5" opacity=".3"/>' + st('M12 11v5.5') + '<circle cx="12" cy="7.8" r="1.4"/>',
+  trophy: '<path d="M7 3h10v6.5a5 5 0 0 1-10 0z"/><path opacity=".45" d="M7 5H4.5A1.5 1.5 0 0 0 3 6.5 4.5 4.5 0 0 0 7.2 11zM17 5h2.5A1.5 1.5 0 0 1 21 6.5a4.5 4.5 0 0 1-4.2 4.5z"/><rect x="10.8" y="14" width="2.4" height="4"/><rect x="7" y="18" width="10" height="3" rx="1.2"/>',
+  flame: '<path opacity=".45" d="M12 22a7.5 7.5 0 0 0 7.5-7.5c0-5-4-7.6-5.3-11.5-.2-.6-1-.8-1.4-.3C11 5 10.6 7 11 8.6 9.6 7.6 8.8 6.3 8.6 5c-.1-.7-1-1-1.5-.5C5.6 6.3 4.5 9.4 4.5 14.5A7.5 7.5 0 0 0 12 22z"/><path d="M12 22a4 4 0 0 0 4-4c0-2.5-2-3.8-2.7-5.8-.1-.4-.6-.5-.9-.2C10.6 14 8 15 8 18a4 4 0 0 0 4 4z"/>',
+  bolt: BOLT, automation: BOLT,
+  weight: '<path fill-rule="evenodd" d="M8 3h8a2.5 2.5 0 0 1 2.5 2.5v1.7c0 .9-.4 1.7-1 2.3A7.5 7.5 0 1 1 6.5 9.5c-.6-.6-1-1.4-1-2.3V5.5A2.5 2.5 0 0 1 8 3zm0 2.3a.7.7 0 0 0-.7.7v1.1c0 .4.2.7.5.9a7.5 7.5 0 0 1 8.4 0c.3-.2.5-.5.5-.9V6a.7.7 0 0 0-.7-.7z"/>',
+  send: '<path d="M3.4 4.2c-.4-.9.5-1.8 1.4-1.4l16.5 7.8c.9.4.9 1.7 0 2.1L4.8 20.6c-.9.4-1.8-.5-1.4-1.4L6.5 12z"/>',
+  skip: '<path d="M5 5.2v13.6a1 1 0 0 0 1.6.8l8.6-6.8a1 1 0 0 0 0-1.6L6.6 4.4A1 1 0 0 0 5 5.2z"/><rect x="16.5" y="4" width="2.8" height="16" rx="1.4"/>',
+  stop: '<rect x="5" y="5" width="14" height="14" rx="3"/>',
+  bell: '<path d="M12 2.5a6.5 6.5 0 0 0-6.5 6.5v4.3l-1.7 2.6c-.5.8.1 1.6.9 1.6h14.6c.8 0 1.4-.8.9-1.6l-1.7-2.6V9A6.5 6.5 0 0 0 12 2.5z"/><path opacity=".45" d="M9.2 19h5.6a2.8 2.8 0 0 1-5.6 0z"/>',
+  machine: '<rect x="3" y="3" width="6" height="18" rx="2"/><path opacity=".45" d="M9 7h6.5a2 2 0 0 1 1.9 1.4l2.5 8.1A1.9 1.9 0 0 1 18 19H9z"/>',
+  body: '<circle cx="12" cy="4.5" r="2.5"/><path d="M5 8.5c0-.8.7-1.5 1.5-1.5h11a1.5 1.5 0 0 1 0 3h-3v4l2 6.5a1.3 1.3 0 0 1-2.5.8L12 15.5l-2 5.8a1.3 1.3 0 0 1-2.5-.8l2-6.5v-4h-3A1.5 1.5 0 0 1 5 8.5z"/>',
+  card: '<rect x="2" y="4.5" width="20" height="15" rx="3" opacity=".4"/><rect x="2" y="8" width="20" height="3.2"/><rect x="5" y="14.5" width="5" height="2" rx="1"/>',
+  heart: '<path d="M12 21c-.3 0-.6-.1-.8-.3C8.6 18.6 2.5 14.2 2.5 8.9A5.2 5.2 0 0 1 12 6a5.2 5.2 0 0 1 9.5 2.9c0 5.3-6.1 9.7-8.7 11.8-.2.2-.5.3-.8.3z"/>',
+  gear: st('M4 7h9M17 7h3M4 17h3M11 17h9') + '<circle cx="15" cy="7" r="2.6"/><circle cx="9" cy="17" r="2.6"/>',
+  megaphone: '<path opacity=".45" d="M7 15h2.5l1.2 4.8a1.3 1.3 0 0 1-2.5.6z"/><path d="M3 10.5A2.5 2.5 0 0 1 5.5 8H9l8.5-4.4c.7-.4 1.5.1 1.5.9v15c0 .8-.8 1.3-1.5.9L9 16H5.5A2.5 2.5 0 0 1 3 13.5z"/><rect x="20.2" y="9.5" width="2" height="5" rx="1" opacity=".45"/>',
+  shirt: '<path d="M8.6 3.2 3.8 5.6a1 1 0 0 0-.5 1.2l1.4 3.7a1 1 0 0 0 1.3.6l.9-.4V20a1 1 0 0 0 1 1h8.2a1 1 0 0 0 1-1v-9.3l.9.4a1 1 0 0 0 1.3-.6l1.4-3.7a1 1 0 0 0-.5-1.2l-4.8-2.4a3.5 3.5 0 0 1-6.8 0z"/>',
+  moon: '<path d="M20 14.6A8.6 8.6 0 0 1 9.4 4a.7.7 0 0 0-.9-.8A9 9 0 1 0 20.8 15.5a.7.7 0 0 0-.8-.9z"/>',
+  sun: '<circle cx="12" cy="12" r="4.6"/><g opacity=".5">' + st('M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.5 1.5M17.2 17.2l1.5 1.5M5.3 18.7l1.5-1.5M17.2 6.8l1.5-1.5') + '</g>',
+  drop: '<path d="M12 2.6c.3 0 .6.1.8.4C14.4 5 19 10.4 19 14.5a7 7 0 0 1-14 0C5 10.4 9.6 5 11.2 3c.2-.3.5-.4.8-.4z"/>',
+  programmes: '<rect x="3.5" y="2.5" width="17" height="19" rx="3" opacity=".4"/><rect x="7" y="7" width="10" height="2.4" rx="1.2"/><rect x="7" y="11" width="10" height="2.4" rx="1.2"/><rect x="7" y="15" width="6" height="2.4" rx="1.2"/>',
+  library: '<rect x="2" y="4" width="20" height="16" rx="3.5" opacity=".4"/><path d="M10 8.6v6.8a.8.8 0 0 0 1.2.7l5.4-3.4a.8.8 0 0 0 0-1.4l-5.4-3.4a.8.8 0 0 0-1.2.7z"/>',
+  film: '<rect x="2" y="5" width="15" height="14" rx="3"/><path opacity=".45" d="M18 10.2 21.6 8c.6-.4 1.4.1 1.4.8v6.4c0 .7-.8 1.2-1.4.8L18 13.8z"/>',
+  reply: st('M10 7 5 12l5 5M5 12h9.5a5 5 0 0 1 5 5v1.5'),
+  open: st('M14 4h6v6M20 4l-8.5 8.5') + '<path opacity=".4" d="M5 6h6v2H6v10h10v-5h2v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/>',
+  trash: '<path opacity=".45" d="M6 7.5h12l-.9 12a2 2 0 0 1-2 1.8H8.9a2 2 0 0 1-2-1.8z"/><path d="M9.5 3.5h5a1 1 0 0 1 1 1V6H20a1 1 0 0 1 0 2H4a1 1 0 0 1 0-2h4.5V4.5a1 1 0 0 1 1-1z"/>',
+  wifi: st('M2.5 9a14 14 0 0 1 19 0M5.8 12.6a9.2 9.2 0 0 1 12.4 0M9 16.1a4.5 4.5 0 0 1 6 0') + '<circle cx="12" cy="19.5" r="1.6"/>' + '<g opacity=".9">' + st('M3 3l18 18', 2.4) + '</g>',
+  search: '<circle cx="10.5" cy="10.5" r="6.5" opacity=".3"/>' + st('M10.5 4a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM20 20l-4.6-4.6')
+};
+const ic = (n, cls = 'ic') => `<svg class="${cls}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${P[n]}</svg>`;
+
+// A ring: pct 0..1, drawn clockwise from 12 o'clock.
+function ring(size, stroke, pct, color, track = 'var(--s3)') {
+  const r = (size - stroke) / 2, c = 2 * Math.PI * r;
+  return `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${track}" stroke-width="${stroke}"/>
+    <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - Math.min(pct, 1))}" transform="rotate(-90 ${size / 2} ${size / 2})"/>`;
+}
+
+// Apple-style triple ring: training (outer), fuel, check-in (inner).
+const MOM = [
+  { k: 'Training', icon: 'train', col: 'var(--mint)', tr: 'rgba(126,213,151,.15)', pct: 2 / 3, val: '2 of 3 workouts', st: ['On track', 'rgba(126,213,151,.14)', 'var(--mint)'] },
+  { k: 'Fuel', icon: 'fuel', col: 'var(--amber)', tr: 'rgba(255,180,94,.15)', pct: 5 / 7, val: '5 of 7 protein days', st: ['Nearly', 'rgba(255,180,94,.14)', 'var(--amber)'] },
+  { k: 'Recovery', icon: 'clip', col: 'var(--violet)', tr: 'rgba(169,155,255,.15)', pct: 0.8, val: 'Feeling good · 3 wins this week', st: ['Good', 'rgba(169,155,255,.14)', 'var(--violet)'] }
+];
+function rings(size, stroke) {
+  const gap = stroke + 3;
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-hidden="true" style="flex:none">${MOM.map((m, i) =>
+    `<g transform="translate(${i * gap} ${i * gap})">${ring(size - 2 * i * gap, stroke, m.pct, m.col, m.tr)}</g>`).join('')}</svg>`;
+}
+
+// ---------------------------------------------------------------------------
+// Sample data (invented for testing)
+// ---------------------------------------------------------------------------
+const WORKOUT = {
+  name: 'Lower Body A',
+  exercises: [
+    { id: 'lp',  name: 'Leg Press',          sets: 3, reps: [10, 12], rest: 120, inc: 10, priority: 'must_keep', setup: 1.5, kit: 'machine',
+      last: { load: 120, reps: [12, 12, 12] },
+      alts: [ ['Hack Squat', 'Same pattern · start 70kg', 'machine'], ['Goblet Squat', 'If machines are busy · 24kg', 'dumbbell'], ['Box Squat', 'Easier on the knees', 'body'] ] },
+    { id: 'rdl', name: 'Romanian Deadlift',  sets: 3, reps: [8, 10],  rest: 120, inc: 2.5, priority: 'must_keep', setup: 1.5, kit: 'dumbbell',
+      last: { load: 60, reps: [10, 9, 8] },
+      alts: [ ['Dumbbell RDL', 'Same pattern · 2 × 24kg', 'dumbbell'], ['Cable Pull-through', 'Lighter on the lower back', 'machine'] ] },
+    { id: 'lun', name: 'Walking Lunge',      sets: 3, reps: [10, 10], rest: 90,  inc: 2,   priority: 'keep_if_time', setup: 1, kit: 'dumbbell',
+      last: { load: 12, reps: [10, 10, 10] },
+      alts: [ ['Split Squat', 'Stationary · easier balance', 'dumbbell'], ['Step-up', 'Knee-friendly', 'body'] ] },
+    { id: 'lc',  name: 'Seated Leg Curl',    sets: 3, reps: [12, 15], rest: 75,  inc: 5,   priority: 'keep_if_time', setup: 1, kit: 'machine',
+      last: { load: 40, reps: [15, 14, 13] },
+      alts: [ ['Lying Leg Curl', 'Same muscles', 'machine'], ['Swiss Ball Curl', 'No machine needed', 'body'] ] },
+    { id: 'cr',  name: 'Calf Raise',         sets: 2, reps: [15, 20], rest: 60,  inc: 5,   priority: 'first_to_cut', setup: 0.5, kit: 'machine',
+      last: { load: 50, reps: [20, 18] }, alts: [] },
+    { id: 'db',  name: 'Dead Bug',           sets: 2, reps: [10, 10], rest: 45,  inc: 0,   priority: 'first_to_cut', setup: 0.5, kit: 'body',
+      last: { load: 0, reps: [10, 10] }, alts: [] }
+  ]
+};
+
+// ---------------------------------------------------------------------------
+// Coaching rules (mirrors the TypeScript rules engine)
+// ---------------------------------------------------------------------------
+function suggestLoad(ex) {
+  const top = ex.reps[1];
+  const hitAll = ex.last.reps.length >= ex.sets && ex.last.reps.every(r => r >= top);
+  if (ex.inc > 0 && hitAll) return { load: ex.last.load + ex.inc, up: true,
+    why: `You hit ${top} reps on every set at ${ex.last.load}kg last time, so the weight goes up.` };
+  const short = ex.last.reps.filter(r => r < top).length;
+  return { load: ex.last.load, up: false,
+    why: ex.inc === 0 ? 'Bodyweight. Slow and controlled.' : `${short} set${short > 1 ? 's' : ''} fell short of ${top} last time. Hit ${top} on every set, then it goes up.` };
+}
+const exMinutes = (ex, sets) => ex.setup + (sets * 50 + (sets - 1) * ex.rest) / 60 + 1;
+function fitToTime(minutes) {
+  let plan = WORKOUT.exercises.map(ex => ({ ex, sets: ex.sets }));
+  const total = () => plan.reduce((m, p) => m + exMinutes(p.ex, p.sets), 0) + 8;
+  const steps = [
+    () => { const c = [...plan].reverse().find(p => p.ex.priority === 'first_to_cut'); if (!c) return false; plan = plan.filter(p => p !== c); return true; },
+    () => { const c = plan.find(p => p.ex.priority === 'keep_if_time' && p.sets > 2); if (!c) return false; c.sets = 2; return true; },
+    () => { const c = [...plan].reverse().find(p => p.ex.priority === 'keep_if_time'); if (!c) return false; plan = plan.filter(p => p !== c); return true; },
+    () => { const c = plan.find(p => p.ex.priority === 'must_keep' && p.sets > 2); if (!c) return false; c.sets = 2; return true; }
+  ];
+  for (const step of steps) while (total() > minutes && step()) {}
+  return { plan, minutes: Math.round(total()) };
+}
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+const S = { onb: { step: 0, goal: 'strength', days: 3, freq: 'weekly', day: 'Sun', parq: [], injuries: '', consent: { terms: true, health: true, kai: true }, os: 'ios' },
+  scale: 1, session: { cancelled: false, step: 'view' }, sessionsLeft: 6, consentSet: null, delAsk: false,
+  notifs: { workout: true, booking: true, session: true, payment: true, drop: true, checkin: true },
+  book: { req: {}, pick: null, done: false }, avail: { days: { Tue: [16.5, 19.5], Thu: [14, 19.5] }, note: '', sent: false }, paid: false, autopay: true, ci: null,
+  liked: {}, saved: {}, read: false, ai: [], handed: false,
+  view: 'home', duration: 60, idx: 0, logs: {}, swaps: {}, why: false, sheet: null,
+  pain: { area: null, sev: 3, act: null, sent: false }, rest: null, progTab: 0, chat: [],
+  fuelDay: 2, log: { Breakfast: ['eggs', 'sourdough', 'avo'], Lunch: ['wrap'], Snacks: ['yog', 'berries'], Dinner: [] }, water: 6,
+  add: null, lift: 'Leg Press', guide: {}, showWeight: false,
+  comm: { tab: 'feed', cat: null, open: { q1: true }, liked: {}, posts: null },
+  libq: '', libPat: 'all', exId: 'lp', histOpen: 0, demo: { offline: false, payFail: false, fresh: false } };
+const plan = () => fitToTime(S.duration);
+const newCheckin = () => ({ step: 1, mood: 3, words: '', sleep: 4, energy: 3, stress: 3, food: 4, motivation: 4, aches: 'None',
+  wins: {}, photo: false, measure: false, waist: '', weight: '', support: {}, note: '' });
+function setsFor(ex, n) {
+  const cur = S.logs[ex.id] || [];
+  if (cur.length !== n) {
+    const s = suggestLoad(ex);
+    S.logs[ex.id] = Array.from({ length: n }, (_, i) => cur[i] || { load: s.load, reps: '', done: false });
+  }
+  return S.logs[ex.id];
+}
+
+// ---------------------------------------------------------------------------
+// Views
+// ---------------------------------------------------------------------------
+const vHome = () => {
+  const p = plan();
+  const days = [['M', 'pt', 'PT'], ['T', 'done', ic('check')], ['W', 'now', '21'], ['T', 'pt', 'PT'], ['F', '', '23'], ['S', '', '24'], ['S', '', '25']];
+  return `<div class="page fade">
+    <div class="topbar"><img src="assets/kd-mark.png" alt="KD Personal Training"><div class="right">
+      <button class="ib" data-go="notifs" aria-label="Notifications">${ic('bell')}${S.read ? '' : '<span class="badge">3</span>'}</button>
+      <button class="kd-av" data-go="chat" aria-label="Messages from Kyle"><img src="assets/kd-mark.png" alt=""><span class="dot"></span></button>
+      <button class="avatar" data-go="profile" aria-label="Profile and settings">SM</button></div></div>
+    <div class="greet"><div class="eyebrow">Wednesday 21 October</div><h1>Morning, Sarah</h1></div>
+    ${S.demo.payFail && !S.paid ? `<button class="alert" data-sheet="pay"><span class="li" style="color:var(--coral)">${ic('card')}</span><span class="t"><b>November payment didn't go through</b><small>Your bank declined £260. Update your card to keep your sessions.</small></span><span class="chev">${ic('right')}</span></button>` : ''}
+
+    <button class="card mom" data-sheet="momentum" aria-label="Momentum: strong. See the breakdown">
+      ${rings(96, 9)}
+      <span class="t"><span class="eyebrow">Momentum</span><span class="word">Strong</span><small>2 of 3 workouts done. Protein nearly there.</small></span>
+      <span class="chev">${ic('right')}</span>
+    </button>
+
+    <button class="hero" data-go="workout" aria-label="Start ${WORKOUT.name}">
+      <img src="assets/gym.jpg" alt="">
+      <span class="tag label-dot" style="color:var(--mint)">Today</span>
+      <div class="in">
+        <div><h2>${WORKOUT.name}</h2>
+          <div class="meta num"><span>${ic('clock')} ${p.minutes} min</span><span>${ic('layers')} ${p.plan.length} exercises</span></div></div>
+        <span class="play">${ic('play')}</span>
+      </div>
+    </button>
+
+    <div class="strip">${days.map(([d, c, t]) => `<div class="${c}"><i>${t}</i>${d}</div>`).join('')}</div>
+
+
+    <div class="actions">
+      <button class="act" data-go="fuel"><i style="color:var(--amber)">${ic('fuel')}</i>Log food</button>
+      <button class="act" data-sheet="book"><i style="color:var(--sky)">${ic('cal')}</i>Book</button>
+      <button class="act" data-checkin><i style="color:var(--violet)">${ic('clip')}</i>Check-in</button>
+      <button class="act" data-go="coachai"><i style="background:none"><span class="orb" style="width:60px;height:60px;box-shadow:none">${ic('spark')}</span></i>Ask KAI</button>
+    </div>
+
+    <button class="card session" data-session>
+      <span class="datebox"><small>THU</small><b>22</b></span>
+      <span class="t"><b>PT with Kyle</b><span>${ic('clock')} 7:00 &nbsp; ${ic('pin')} Studio</span></span>
+      <span class="chev">${ic('right')}</span>
+    </button>
+
+    <button class="card note" data-go="chat">
+      <img class="mark" src="assets/kd-mark.png" alt="">
+      <span><small>Kyle · yesterday</small><p>Leg press goes up today. Take the first set steady 💪</p></span>
+    </button>
+  </div>`;
+};
+
+const vTrain = () => {
+  const p = plan();
+  const rows = [['Lower Body A', `${p.plan.length} exercises · ${p.minutes} min`, 'today'], ['Upper Body A', '6 exercises · 52 min', 'done'], ['Lower Body B', '5 exercises · 45 min', ''], ['Upper Body B', '6 exercises · 50 min', '']];
+  return `<div class="page fade">
+    <div class="greet" style="padding-top:6px"><div class="eyebrow">Your programme</div><h1>Strength Block 1</h1></div>
+    <div class="card block">
+      <div class="sec-head"><span class="d" style="font-weight:700">Week 6 <span style="color:var(--fg3)">of 8</span></span><span class="chip" style="color:var(--mint)">${ic('bolt')} On track</span></div>
+      <div class="segs">${Array.from({ length: 8 }, (_, i) => `<i class="${i < 5 ? 'on' : i === 5 ? 'cur' : ''}"></i>`).join('')}</div>
+    </div>
+    <div class="group" style="--inset:82px">${rows.map(([n, m, c]) => `
+      <button class="wrow ${c}" ${c === 'today' ? 'data-go="workout"' : `data-toast="${n}"`}>
+        <span class="tile">${c === 'done' ? ic('check') : c === 'today' ? ic('play') : ic('train')}</span>
+        <span class="t"><b>${n}</b><span>${m}</span></span>
+        <span class="chev">${ic('right')}</span>
+      </button>`).join('')}</div>
+    <div class="actions" style="grid-template-columns:repeat(3,1fr)">
+      <button class="act" data-go="library"><i style="background:var(--s2)">${ic('layers')}</i>Library</button>
+      <button class="act" data-go="history"><i style="background:var(--s2)">${ic('clock')}</i>History</button>
+      <button class="act" data-go="progress"><i style="background:var(--s2)">${ic('trophy')}</i>Records</button>
+    </div>
+  </div>`;
+};
+
+// ---------------------------------------------------------------------------
+// Train: history, exercise library, exercise detail
+// ---------------------------------------------------------------------------
+// [date, workout, minutes, [[exercise, [[kg, reps], ...]], ...], records]
+const HISTORY = [
+  ['Mon 19 Oct', 'Lower Body A', 58, [['Leg Press', [[130, 10], [130, 10], [130, 9]]], ['Romanian Deadlift', [[60, 10], [60, 9], [60, 8]]], ['Walking Lunge', [[12, 10], [12, 10], [12, 10]]], ['Seated Leg Curl', [[40, 15], [40, 14], [40, 13]]]], 2],
+  ['Tue 20 Oct', 'Upper Body A', 52, [['Lat Pulldown', [[42.5, 12], [42.5, 11], [42.5, 10]]], ['Hip Thrust', [[80, 12], [80, 11], [80, 10]]], ['DB Shoulder Press', [[14, 10], [14, 9], [14, 8]]], ['Seated Row', [[45, 12], [45, 12], [45, 11]]]], 2],
+  ['Thu 15 Oct', 'Lower Body B', 47, [['Hip Thrust', [[80, 10], [80, 10], [80, 9]]], ['Goblet Squat', [[24, 12], [24, 12], [24, 10]]], ['Leg Extension', [[35, 15], [35, 14]]]], 1],
+  ['Tue 13 Oct', 'Lower Body A', 61, [['Leg Press', [[120, 12], [120, 12], [120, 12]]], ['Romanian Deadlift', [[57.5, 10], [57.5, 10], [57.5, 9]]], ['Walking Lunge', [[12, 10], [12, 10], [12, 10]]]], 0],
+  ['Mon 12 Oct', 'Upper Body A', 50, [['Lat Pulldown', [[42.5, 10], [42.5, 9], [40, 10]]], ['DB Shoulder Press', [[14, 9], [14, 8], [12, 10]]], ['Seated Row', [[45, 12], [45, 11], [45, 10]]]], 1]
+];
+const PATTERNS = [['all', 'All', 'layers', 'var(--fg2)'], ['squat', 'Squat', 'train', 'var(--mint)'], ['hinge', 'Hinge', 'weight', 'var(--amber)'], ['push', 'Push', 'up', 'var(--coral)'],
+  ['pull', 'Pull', 'down', 'var(--sky)'], ['lunge', 'Lunge', 'body', 'var(--violet)'], ['core', 'Core', 'flame', 'var(--amber)']];
+// [id, name, pattern, kit, muscles, cues, swaps, filmed]
+const EXLIB = [
+  ['lp', 'Leg Press', 'squat', 'machine', 'Quads, glutes', ['Feet shoulder-width, mid-platform', 'Lower until knees reach about 90°', 'Push through the whole foot, don\'t lock out'], ['Hack Squat', 'Goblet Squat', 'Box Squat'], false],
+  ['gs', 'Goblet Squat', 'squat', 'dumbbell', 'Quads, glutes, core', ['Hold the dumbbell at your chest', 'Sit between your heels, chest tall', 'Drive up through mid-foot'], ['Box Squat', 'Leg Press'], false],
+  ['hs', 'Hack Squat', 'squat', 'machine', 'Quads', ['Back flat on the pad', 'Control the way down for 2 seconds', 'Stop just short of lockout'], ['Leg Press'], false],
+  ['rdl', 'Romanian Deadlift', 'hinge', 'dumbbell', 'Hamstrings, glutes', ['Soft knees, push your hips back', 'Bar stays close to your legs', 'Stop when your hamstrings are tight, not your back'], ['Dumbbell RDL', 'Cable Pull-through'], false],
+  ['ht', 'Hip Thrust', 'hinge', 'barbell', 'Glutes', ['Upper back on the bench edge', 'Chin tucked, ribs down', 'Squeeze at the top for a second'], ['Glute Bridge', 'Cable Kickback'], false],
+  ['sp', 'DB Shoulder Press', 'push', 'dumbbell', 'Shoulders, triceps', ['Sit tall, back against the pad', 'Press up and slightly in', 'Lower to ear height'], ['Machine Shoulder Press', 'Landmine Press'], false],
+  ['pu', 'Incline Push-up', 'push', 'body', 'Chest, triceps', ['Hands on a bench, body in one line', 'Lower your chest to the bench', 'Push the floor away'], ['Push-up', 'DB Bench Press'], false],
+  ['lpd', 'Lat Pulldown', 'pull', 'machine', 'Back, biceps', ['Grip just outside shoulder-width', 'Pull elbows down to your ribs', 'Control it back up'], ['Assisted Pull-up', 'Single-arm Pulldown'], false],
+  ['sr', 'Seated Row', 'pull', 'machine', 'Mid back', ['Chest up, shoulders down', 'Pull to your belly button', 'Pause, then let your shoulders reach forward'], ['DB Row', 'Chest-supported Row'], false],
+  ['wl', 'Walking Lunge', 'lunge', 'dumbbell', 'Quads, glutes', ['Long step, back knee towards the floor', 'Front knee follows your toes', 'Push through the front heel'], ['Split Squat', 'Step-up'], false],
+  ['ss', 'Split Squat', 'lunge', 'dumbbell', 'Quads, glutes', ['Stay in one place, feet hip-width apart', 'Drop straight down', 'Most weight through the front foot'], ['Step-up'], false],
+  ['dbg', 'Dead Bug', 'core', 'body', 'Deep core', ['Lower back pressed into the floor', 'Opposite arm and leg go out together', 'Breathe out as you reach'], ['Plank'], false],
+  ['pl', 'Plank', 'core', 'body', 'Core, shoulders', ['Elbows under shoulders', 'Squeeze glutes, ribs down', 'Stop when your hips drop'], ['Dead Bug'], false]
+];
+const KIT = { machine: ['Machine', 'machine'], dumbbell: ['Dumbbells', 'weight'], barbell: ['Barbell', 'train'], body: ['Bodyweight', 'body'] };
+const patOf = k => PATTERNS.find(p => p[0] === k);
+const topSet = sets => sets.reduce((b, s) => (e1rm(s[0], s[1]) > e1rm(b[0], b[1]) ? s : b));
+
+const subTop = (title, back = 'train') => `<div class="ntop"><button class="ib" data-go="${back}" aria-label="Back">${ic('back')}</button><h1>${title}</h1></div>`;
+const emptyState = (icon, col, title, body, cta = '') => `<div class="blank"><span class="li" style="color:${col}">${ic(icon)}</span><b>${title}</b><p>${body}</p>${cta}</div>`;
+
+function vHistory() {
+  if (S.demo.fresh) return `<div class="page fade">${subTop('History')}
+    ${emptyState('clock', 'var(--sky)', 'No sessions yet', 'Every workout you finish lands here, with every set, so you can see exactly what you lifted last time.', '<button class="pill-btn mint" data-go="workout">Start your first workout</button>')}</div>`;
+  const vol = r => r[3].reduce((t, [, sets]) => t + sets.reduce((a, [w, n]) => a + w * n, 0), 0);
+  return `<div class="page fade">${subTop('History')}
+    <div class="stats">
+      <div class="stat"><span style="color:var(--mint)">${ic('check')}</span><b class="num">23</b><small>Sessions since September</small></div>
+      <div class="stat"><span style="color:var(--amber)">${ic('trophy')}</span><b class="num">9</b><small>Personal records</small></div></div>
+    <div class="group" style="--inset:14px">${HISTORY.map((r, i) => { const open = S.histOpen === i; return `
+      <button class="hrow" data-hist="${i}" aria-expanded="${open}">
+        <span class="t"><b>${r[1]}</b><small class="num">${r[0]} · ${r[2]} min · ${Math.round(vol(r)).toLocaleString('en-GB')} kg lifted</small></span>
+        ${r[4] ? `<span class="pr" style="color:var(--amber)">${ic('trophy')}<span class="num">${r[4]}</span></span>` : ''}
+        <span class="chev" style="transform:rotate(${open ? 90 : 0}deg)">${ic('right')}</span></button>
+      ${open ? `<div class="hsets">${r[3].map(([n, sets]) => `<div><b>${n}</b><span class="num">${sets.map(([w, k]) => `${w} × ${k}`).join(' · ')}</span></div>`).join('')}</div>` : ''}`; }).join('')}</div>
+    <div class="explain">${ic('info')}<span>Tap a session to see every set. Your coach sees the same thing.</span></div>
+  </div>`;
+}
+
+function vLibrary() {
+  const q = (S.libq || '').toLowerCase();
+  const list = EXLIB.filter(e => (S.libPat === 'all' || e[2] === S.libPat) && e[1].toLowerCase().includes(q));
+  return `<div class="page fade">${subTop('Exercises')}
+    <label class="search">${ic('search')}<input id="libq" placeholder="Search ${EXLIB.length} exercises" value="${S.libq || ''}" aria-label="Search exercises"></label>
+    <div class="liftchips">${PATTERNS.map(([k, l]) => `<button class="${S.libPat === k ? 'on' : ''}" data-pat="${k}">${l}</button>`).join('')}</div>
+    <div id="libres">${libRows(list)}</div>
+  </div>`;
+}
+function libRows(list) {
+  if (!list.length) return emptyState('search', 'var(--fg2)', 'Nothing found', 'Try another name, or ask your coach to add it.', '<button class="pill-btn dark" data-go="chat">Message your coach</button>');
+  return `<div class="group" style="--inset:68px">${list.map(e => { const p = patOf(e[2]); return `
+    <button class="optrow" data-ex="${e[0]}"><span class="li" style="color:${p[3]}">${ic(p[2])}</span><span class="t"><b>${e[1]}</b><small>${p[1]} · ${KIT[e[3]][0]}</small></span><span class="chev">${ic('right')}</span></button>`; }).join('')}</div>`;
+}
+
+function vExercise() {
+  const e = EXLIB.find(x => x[0] === S.exId) || EXLIB[0], p = patOf(e[2]);
+  const rows = LIFTS[e[1]];
+  const mine = rows ? `<div class="card big-stat"><div class="eyebrow">Your best</div>
+      <div class="delta num">${rows[rows.length - 1][1]} kg × ${rows[rows.length - 1][2]}</div>
+      <div class="lbl num">Est. 1-rep max ${e1rm(rows[rows.length - 1][1], rows[rows.length - 1][2])} kg · up from ${rows[0][1]} kg in September</div>
+      <button class="pill-btn dark" style="margin-top:12px" data-progress-lift="${e[1]}">See every session</button></div>`
+    : `<div class="explain">${ic('info')}<span>You haven't done this one yet. Once you log it, your best set shows here.</span></div>`;
+  return `<div class="page fade">${subTop(e[1], 'library')}
+    <div class="demo" style="--c:${p[3]}"><span class="li" style="color:${p[3]}">${ic('film')}</span><b>Demo coming soon</b><small>Kyle is filming this one. For now, follow the steps below.</small></div>
+    <div class="exfacts">
+      <div><span class="li" style="color:${p[3]}">${ic(p[2])}</span><small>Pattern</small><b>${p[1]}</b></div>
+      <div><span class="li" style="color:var(--sky)">${ic(KIT[e[3]][1])}</span><small>Kit</small><b>${KIT[e[3]][0]}</b></div>
+      <div><span class="li" style="color:var(--coral)">${ic('heart')}</span><small>Works</small><b>${e[4]}</b></div></div>
+    <div><div class="eyebrow" style="margin-bottom:10px">How to do it</div>
+      <ol class="cues">${e[5].map(c => `<li>${c}</li>`).join('')}</ol></div>
+    ${mine}
+    <div><div class="eyebrow" style="margin-bottom:10px">Approved swaps</div><div class="group" style="--inset:68px">${e[6].map(n => { const x = EXLIB.find(y => y[1] === n); return `
+      <button class="optrow" ${x ? `data-ex="${x[0]}"` : `data-toast="${n}: your coach has approved this swap"`}><span class="li" style="color:var(--violet)">${ic('swap')}</span><span class="t"><b>${n}</b><small>Same sets and reps</small></span><span class="chev">${ic('right')}</span></button>`; }).join('')}</div></div>
+    <button class="pill-btn dark" data-go="coachai">Ask KAI about this exercise</button>
+  </div>`;
+}
+
+const vWorkout = () => {
+  const { plan: pl, minutes } = plan();
+  if (S.idx >= pl.length) S.idx = pl.length - 1;
+  const cur = pl[S.idx], ex = cur.ex, sw = S.swaps[ex.id], sug = suggestLoad(ex), sets = setsFor(ex, cur.sets);
+  const bw = ex.inc === 0;
+  const range = ex.reps[0] === ex.reps[1] ? ex.reps[0] : `${ex.reps[0]}–${ex.reps[1]}`;
+  return `<div class="fade">
+    <div class="media">
+      <img src="assets/gym.jpg" alt="Demo of ${sw || ex.name}">
+      <div class="ctl">
+        <button class="round glass" data-go="home" aria-label="Leave workout" style="color:#fff">${ic('back')}</button>
+        <div class="dots">${pl.map((_, i) => `<i class="${i === S.idx ? 'on' : i < S.idx ? 'done' : ''}"></i>`).join('')}</div>
+        <button class="timebtn num" data-sheet="time" aria-label="Change session length">${ic('clock')} ${minutes} MIN</button>
+      </div>
+      <span class="chip glass playing">${ic('play')} Kyle's demo</span>
+    </div>
+    <div class="page flush" style="padding-bottom:130px">
+      <div class="ex-title">
+        <h1>${sw || ex.name}</h1>
+        <div class="ex-meta num">
+          <span class="chip">${ic('layers')} ${cur.sets} × ${range}</span>
+          <span class="chip">${ic('clock')} ${Math.floor(ex.rest / 60)}:${String(ex.rest % 60).padStart(2, '0')}</span>
+          ${sw ? `<span class="chip" style="color:var(--sky)">${ic('swap')} Swapped</span>` : ''}
+        </div>
+      </div>
+      ${sw || bw ? '' : `
+      <button class="target ${sug.up ? 'up' : 'hold'}" data-why aria-expanded="${S.why}">
+        <span class="arrow">${ic(sug.up ? 'up' : 'equal')}</span>
+        <span><b class="num">${sug.load} kg</b><small>${sug.up ? `+${ex.inc} kg from last time` : 'Same as last time'}</small></span>
+        <span class="why">${ic('info')}</span>
+      </button>
+      ${S.why ? `<p class="why-text">${sug.why}</p>` : ''}`}
+      <div class="sets">${sets.map((s, i) => `
+        <div class="setrow ${s.done ? 'done' : ''}">
+          <span class="n">${i + 1}</span>
+          <label class="val"><input id="w-${ex.id}-${i}" inputmode="decimal" data-set="${i}" data-k="load" value="${bw ? 'BW' : s.load}" ${bw ? 'readonly' : ''} aria-label="Set ${i + 1} weight"><small class="num">${bw ? 'bodyweight' : `kg · last ${ex.last.load}`}</small></label>
+          <label class="val"><input id="r-${ex.id}-${i}" inputmode="numeric" data-set="${i}" data-k="reps" value="${s.reps}" placeholder="${range}" aria-label="Set ${i + 1} reps"><small class="num">reps · last ${ex.last.reps[i] ?? '–'}</small></label>
+          <button class="tick" data-tick="${i}" aria-label="Complete set ${i + 1}">${ic('check', 'ic', 2.4)}</button>
+        </div>`).join('')}</div>
+    </div>
+  </div>`;
+};
+
+const vFinish = () => {
+  const done = Object.values(S.logs).flat().filter(s => s.done);
+  const vol = done.reduce((v, s) => v + (+s.load || 0) * (+s.reps || 0), 0);
+  return `<div class="finish fade">
+    <svg viewBox="0 0 150 150" width="150" height="150">${ring(150, 14, 1, 'var(--mint)')}<g transform="translate(47 47)" color="var(--mint)">${ic('check', 'ic', 2.4).replace('class="ic"', 'width="56" height="56"')}</g></svg>
+    <div><div class="eyebrow">${WORKOUT.name}</div><h1>Workout done</h1></div>
+    <div class="stats num">
+      <div class="stat">${ic('clock').replace('class="ic"', 'style="color:var(--sky)"')}<b>47:12</b><small>Time</small></div>
+      <div class="stat">${ic('weight').replace('class="ic"', 'style="color:var(--amber)"')}<b>${(vol || 8420).toLocaleString('en-GB')}</b><small>kg lifted</small></div>
+      <div class="stat">${ic('layers').replace('class="ic"', 'style="color:var(--violet)"')}<b>${done.length || 16}</b><small>Sets</small></div>
+      <div class="stat">${ic('trophy').replace('class="ic"', 'style="color:var(--mint)"')}<b>1</b><small>New best · Leg Press</small></div>
+    </div>
+    <button class="pill-btn white" style="width:100%" data-go="home">Done</button>
+  </div>`;
+};
+
+// Food database sample. In the real app this is Open Food Facts (barcodes)
+// plus Kyle's own recipes; everything stores calories and macros per serving.
+const FOODS = [
+  { id: 'eggs', n: 'Eggs, scrambled', p: '2 large', kcal: 150, P: 13, C: 1, F: 11 },
+  { id: 'sourdough', n: 'Sourdough toast', p: '1 slice', kcal: 120, P: 4, C: 23, F: 1 },
+  { id: 'avo', n: 'Avocado', p: '½ medium', kcal: 120, P: 1.5, C: 6, F: 11 },
+  { id: 'wrap', n: 'High-Protein Breakfast Wrap', p: '1 wrap · KDPT recipe', kcal: 400, P: 41, C: 35, F: 10, img: 'wrap' },
+  { id: 'yog', n: 'Greek yoghurt 0%', p: '170 g pot', kcal: 100, P: 17, C: 6, F: 0 },
+  { id: 'berries', n: 'Blueberries', p: '80 g', kcal: 45, P: 0.5, C: 11, F: 0.3 },
+  { id: 'chicken', n: 'Chicken breast, grilled', p: '150 g', kcal: 165, P: 31, C: 0, F: 3.6 },
+  { id: 'rice', n: 'Basmati rice, cooked', p: '150 g', kcal: 195, P: 4, C: 43, F: 0.5 },
+  { id: 'whey', n: 'Whey protein shake', p: '30 g scoop', kcal: 120, P: 24, C: 3, F: 1.5 },
+  { id: 'oats', n: 'Porridge oats', p: '50 g', kcal: 190, P: 6.5, C: 33, F: 3.5 },
+  { id: 'salmon', n: 'Salmon fillet', p: '130 g', kcal: 270, P: 28, C: 0, F: 17 },
+  { id: 'pasta', n: 'Creamy Cajun Chicken Pasta', p: '1 portion · KDPT recipe', kcal: 480, P: 45, C: 52, F: 10, img: 'pasta' },
+  { id: 'bowl', n: 'Big Mac Loaded Potato Bowl', p: '1 bowl · KDPT recipe', kcal: 540, P: 42, C: 48, F: 18, img: 'potato-bowl' },
+  { id: 'turkey', n: 'Turkey & Pasta Tomato Bowl', p: '1 bowl · KDPT recipe', kcal: 500, P: 40, C: 55, F: 11, img: 'turkey-pasta' },
+  { id: 'banana', n: 'Banana', p: '1 medium', kcal: 105, P: 1.3, C: 27, F: 0.4 },
+  { id: 'almonds', n: 'Almonds', p: '25 g', kcal: 145, P: 5, C: 5, F: 12.5 }
+];
+const food = id => FOODS.find(f => f.id === id);
+const TARGET = { kcal: 2100, P: 140, C: 210, F: 70 };
+const MACROS = [['P', 'Protein', 'var(--amber)'], ['C', 'Carbs', 'var(--sky)'], ['F', 'Fat', 'var(--violet)']];
+const SLOTS = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
+const r0 = n => Math.round(n);
+function dayTotals() {
+  const t = { kcal: 0, P: 0, C: 0, F: 0 };
+  SLOTS.forEach(sl => S.log[sl].forEach(id => { const f = food(id); for (const k in t) t[k] += f[k]; }));
+  return t;
+}
+
+const vFuel = () => {
+  const t = dayTotals(), left = TARGET.kcal - t.kcal;
+  const days = [['M', 19], ['T', 20], ['W', 21], ['T', 22], ['F', 23], ['S', 24], ['S', 25]];
+  return `<div class="page fade">
+  <div class="greet" style="padding-top:6px"><div class="eyebrow">Nutrition</div><h1>Fuel</h1></div>
+  <div class="days7">${days.map(([d, n], i) => `<button class="${S.fuelDay === i ? 'on' : ''}" data-fday="${i}">${d}<b class="num">${n}</b><i class="${i < 3 ? '' : 'none'}"></i></button>`).join('')}</div>
+  <div class="card fsum">
+    <svg viewBox="0 0 132 132" width="132" height="132" aria-label="${r0(t.kcal)} of ${TARGET.kcal} calories">
+      ${ring(132, 12, t.kcal / TARGET.kcal, 'var(--fg)', 'var(--s3)')}
+      <text x="66" y="64" text-anchor="middle" fill="var(--fg)" font-family="Montserrat" font-weight="800" font-size="26">${r0(Math.abs(left)).toLocaleString('en-GB')}</text>
+      <text x="66" y="84" text-anchor="middle" fill="var(--fg3)" font-family="Poppins" font-size="11">${left >= 0 ? 'kcal left' : 'kcal over'}</text>
+    </svg>
+    <div style="display:grid;gap:12px">
+      <div class="mrow"><div class="top"><span>Calories</span><b class="num">${r0(t.kcal).toLocaleString('en-GB')} <span>/ ${TARGET.kcal.toLocaleString('en-GB')}</span></b></div></div>
+      ${MACROS.map(([k, l, c]) => `<div class="mrow"><div class="top"><span>${l}</span><b class="num">${r0(t[k])} <span>/ ${TARGET[k]} g</span></b></div><div class="mbar"><i style="width:${Math.min(100, t[k] / TARGET[k] * 100)}%;background:${c}"></i></div></div>`).join('')}
+    </div>
+  </div>
+  ${SLOTS.map(sl => { const items = S.log[sl].map(food), kc = items.reduce((a, f) => a + f.kcal, 0); return `
+  <div class="group" style="--inset:14px">
+    <div class="slot-head"><b>${sl}</b><span class="num">${kc ? kc + ' kcal' : ''}</span><button class="addbtn" data-addfood="${sl}" aria-label="Add food to ${sl}">${ic('plus')}</button></div>
+    ${items.length ? items.map((f, i) => `<div class="food">${f.img ? `<img src="assets/${f.img}.jpg" alt="">` : ''}<span class="t"><b>${f.n}</b><small>${f.p}</small></span><span class="kc num">${f.kcal}<small>${f.P}g protein</small></span></div>`).join('')
+      : `<div class="empty">Nothing logged yet. Tap + to add food, scan a barcode or pick one of Kyle's recipes.</div>`}
+  </div>`; }).join('')}
+  <div class="group"><div class="water"><span class="li" style="color:var(--sky)">${ic('drop')}</span><span class="cups">${Array.from({ length: 10 }, (_, i) => `<i class="${i < S.water ? 'on' : ''}"></i>`).join('')}</span><span class="num" style="font:700 14px var(--display)">${(S.water * 0.25).toFixed(2).replace(/0$/, '')} L</span><button class="addbtn" style="color:var(--sky);background:rgba(110,198,255,.1);box-shadow:inset 0 0 0 1px rgba(110,198,255,.45)" data-water aria-label="Add a glass">${ic('plus')}</button></div></div>
+  <button class="card note" data-go="chat">
+    <img class="mark" src="assets/kd-mark.png" alt="">
+    <span><small>Kyle · weekly review</small><p>Protein's up to 128g on average, nice. Dinners are light on veg, so add a side salad or frozen veg.</p></span>
+  </button>
+</div>`;
+};
+
+function addFoodHTML() {
+  const a = S.add, q = (a.q || '').toLowerCase();
+  const list = FOODS.filter(f => (a.tab === 'recipes' ? f.img : true) && f.n.toLowerCase().includes(q));
+  const tabs = [['search', 'Search'], ['scan', 'Scan'], ['recipes', 'Recipes'], ['quick', 'Quick add']];
+  let body = '';
+  if (a.tab === 'search' || a.tab === 'recipes') body = `
+    ${a.tab === 'search' ? `<label class="search">${ic('search')}<input id="fq" placeholder="Search foods" value="${a.q || ''}" aria-label="Search foods"></label>` : ''}
+    <div class="group" style="--inset:14px" id="fres">${foodResults(list)}</div>`;
+  if (a.tab === 'scan') body = `<div class="scanbox"><span>Point the camera at a barcode<br><small style="color:var(--fg3)">Uses your phone's camera in the installed app</small></span></div>`;
+  if (a.tab === 'quick') body = `<div class="qa">${[['qk', 'Calories', 'kcal'], ['qp', 'Protein', 'g'], ['qc', 'Carbs', 'g'], ['qf', 'Fat', 'g']].map(([id, l, u]) => `<label>${l} (${u})<input id="${id}" inputmode="decimal" placeholder="0"></label>`).join('')}</div>
+    <button class="pill-btn mint" data-quickadd>Add to ${a.slot}</button>`;
+  return `<div><h3>Add to ${a.slot}</h3></div>
+    <div class="tabs4">${tabs.map(([k, l]) => `<button class="${a.tab === k ? 'on' : ''}" data-ftab="${k}">${l}</button>`).join('')}</div>${body}`;
+}
+function foodResults(list) {
+  return list.map(f => `<div class="food">${f.img ? `<img src="assets/${f.img}.jpg" alt="">` : ''}<span class="t"><b>${f.n}</b><small class="num">${f.p} · ${f.kcal} kcal · P ${f.P} C ${f.C} F ${f.F}</small></span><button class="addbtn" data-pickfood="${f.id}" aria-label="Add ${f.n}">${ic('plus')}</button></div>`).join('')
+    || `<div class="empty">No matches. Try Quick add to enter the numbers yourself.</div>`;
+}
+
+function lineChart(pts, color, w = 320, h = 120) {
+  const min = Math.min(...pts), max = Math.max(...pts), pad = 8;
+  const xy = pts.map((v, i) => [pad + i * (w - 2 * pad) / (pts.length - 1), h - pad - (v - min) / (max - min || 1) * (h - 2 * pad - 14)]);
+  const d = xy.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const last = xy[xy.length - 1];
+  const id = 'g' + color.replace(/\W/g, '');
+  return `<svg class="chart" viewBox="0 0 ${w} ${h}" aria-hidden="true">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".35"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    ${[0.25, 0.5, 0.75].map(f => `<line x1="0" x2="${w}" y1="${h * f}" y2="${h * f}" stroke="rgba(255,255,255,.05)"/>`).join('')}
+    <path d="${d} L${last[0]} ${h} L${xy[0][0]} ${h} Z" fill="url(#${id})"/>
+    <path d="${d}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${last[0]}" cy="${last[1]}" r="6" fill="${color}" stroke="#151716" stroke-width="3"/>
+  </svg>`;
+}
+
+// Every logged top set for the main lifts. Est. 1-rep max uses the Epley formula.
+const LIFTS = {
+  'Leg Press': [['1 Sep', 100, 12], ['8 Sep', 100, 12], ['15 Sep', 110, 10], ['22 Sep', 110, 12], ['29 Sep', 110, 12], ['6 Oct', 120, 11], ['13 Oct', 120, 12], ['19 Oct', 130, 10]],
+  'Romanian Deadlift': [['1 Sep', 45, 10], ['8 Sep', 47.5, 10], ['15 Sep', 50, 9], ['22 Sep', 50, 10], ['29 Sep', 52.5, 10], ['6 Oct', 55, 9], ['13 Oct', 57.5, 10], ['19 Oct', 60, 10]],
+  'Hip Thrust': [['3 Sep', 60, 10], ['10 Sep', 65, 10], ['17 Sep', 70, 10], ['24 Sep', 70, 10], ['1 Oct', 75, 10], ['8 Oct', 75, 10], ['15 Oct', 80, 10], ['20 Oct', 80, 12]],
+  'Lat Pulldown': [['2 Sep', 35, 12], ['9 Sep', 35, 12], ['16 Sep', 37.5, 10], ['23 Sep', 37.5, 12], ['30 Sep', 40, 10], ['7 Oct', 40, 11], ['14 Oct', 42.5, 10], ['20 Oct', 42.5, 12]]
+};
+const e1rm = (w, r) => Math.round(w * (1 + r / 30));
+const TOTALS = [[7, 5200], [14, 5650], [21, 6100], [28, 6300], [5, 6900], [12, 7350], [19, 7900], [26, 8420]];
+
+function liftChart(rows) {
+  const W = 320, H = 180, L = 34, B = 24, T = 26, R = 16;
+  const v = rows.map(x => x[1]), lo = Math.floor(Math.min(...v) / 10) * 10, hi = Math.ceil(Math.max(...v) / 10) * 10 || lo + 10;
+  const X = i => L + i * (W - L - R) / (rows.length - 1), Y = n => T + (hi - n) / (hi - lo || 1) * (H - T - B);
+  const ticks = [lo, (lo + hi) / 2, hi];
+  const d = rows.map((x, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)} ${Y(x[1]).toFixed(1)}`).join(' ');
+  return `<svg class="chart2" viewBox="0 0 ${W} ${H}" role="img" aria-label="Top set weight each session">
+    ${ticks.map(t => `<line x1="${L}" x2="${W - R}" y1="${Y(t)}" y2="${Y(t)}" stroke="rgba(255,255,255,.07)"/><text x="${L - 6}" y="${Y(t) + 4}" text-anchor="end" fill="var(--fg3)" font-size="10" font-family="Poppins">${t}</text>`).join('')}
+    <path d="${d}" fill="none" stroke="var(--mint)" stroke-width="2.5" stroke-linejoin="round"/>
+    ${rows.map((x, i) => `<circle cx="${X(i)}" cy="${Y(x[1])}" r="${i === rows.length - 1 ? 5.5 : 3.5}" fill="${i === rows.length - 1 ? 'var(--mint)' : '#151716'}" stroke="var(--mint)" stroke-width="2"/>`).join('')}
+    ${[rows.length - 1].map(i => `<text x="${X(i)}" y="${Y(rows[i][1]) - 11}" text-anchor="middle" fill="var(--fg)" font-size="11" font-weight="700" font-family="Montserrat">${rows[i][1]}</text>`).join('')}
+    ${[0, Math.floor((rows.length - 1) / 2), rows.length - 1].map(i => `<text x="${X(i)}" y="${H - 6}" text-anchor="${i === 0 ? 'start' : i === rows.length - 1 ? 'end' : 'middle'}" fill="var(--fg3)" font-size="10" font-family="Poppins">${rows[i][0]}</text>`).join('')}
+  </svg>`;
+}
+
+const vProgress = () => {
+  const tabs = ['Strength', 'Records', 'Body', 'Consistency'];
+  let body = '';
+  if (S.progTab === 0) {
+    const rows = LIFTS[S.lift], f = rows[0], l = rows[rows.length - 1];
+    body = `
+    <div class="liftchips">${Object.keys(LIFTS).map(k => `<button class="${S.lift === k ? 'on' : ''}" data-lift="${k}">${k}</button>`).join('')}</div>
+    <div class="card big-stat"><div class="eyebrow">${S.lift} · top set each session, kg</div>
+      <div class="delta num">+${l[1] - f[1]} kg</div>
+      <div class="lbl num">${f[1]} kg × ${f[2]} on ${f[0]} → ${l[1]} kg × ${l[2]} on ${l[0]}</div>
+      ${liftChart(rows)}</div>
+    <div><div class="sec-head" style="margin-bottom:10px"><h2>Every session</h2></div>
+    <div class="group" style="--inset:14px">${rows.slice().reverse().map((x, i, arr) => { const prev = arr[i + 1]; const ch = prev ? x[1] - prev[1] : 0; const rc = prev && ch === 0 ? x[2] - prev[2] : 0; return `
+      <div class="sess"><time>${x[0]}</time><span><b class="num">${x[1]} kg × ${x[2]}</b><small class="num">Est. 1-rep max ${e1rm(x[1], x[2])} kg</small></span>
+      <span class="chg num" style="color:${ch > 0 || rc > 0 ? 'var(--mint)' : 'var(--fg3)'}">${!prev ? 'Start' : ch > 0 ? `+${ch} kg` : rc > 0 ? `+${rc} rep${rc > 1 ? 's' : ''}` : 'Same'}</span></div>`; }).join('')}</div></div>
+    <div class="card big-stat"><div class="eyebrow">Total lifted this week</div><div class="delta num" style="color:var(--sky);font-size:40px">${TOTALS[7][1].toLocaleString('en-GB')} kg</div>
+      <div class="vbars">${TOTALS.map(([d, v]) => `<div><i style="height:${Math.round(v / 8420 * 70)}px"></i>${d}</div>`).join('')}</div>
+      <div class="explain" style="margin-top:12px">${ic('info')}<span>Every set's weight × reps, added up. If it climbs week to week you're doing more work, and that's what builds strength and muscle.</span></div></div>`;
+  } else if (S.progTab === 1) {
+    const R = [['Leg Press', 'Heaviest weight', '130 kg × 10', '19 Oct', '+10 kg'], ['Leg Press', 'Est. 1-rep max', '173 kg', '19 Oct', '+13 kg'],
+      ['Hip Thrust', 'Most reps at 80 kg', '80 kg × 12', '20 Oct', '+2 reps'], ['Lat Pulldown', 'Most reps at 42.5 kg', '42.5 kg × 12', '20 Oct', '+2 reps'],
+      ['Lower Body A', 'Best session total', '8,420 kg', '19 Oct', '+520 kg']];
+    body = `
+    <div class="card big-stat"><div class="eyebrow">Records set in October</div><div class="delta num">5</div><div class="lbl">Your own personal bests, compared only with you.</div></div>
+    <div class="group">${R.map(([lift, type, v, d, ch]) => `<div class="rec"><span class="li" style="color:var(--amber)">${ic('trophy')}</span><span class="t"><b>${lift}</b><small>${type} · ${d}</small></span><span class="v num">${v}<small>${ch}</small></span></div>`).join('')}</div>
+    <div><div class="eyebrow" style="margin-bottom:10px">What counts as a record?</div>
+    <div class="group" style="--inset:14px">${[['Heaviest weight', 'The most you\'ve lifted for your planned reps.'], ['Est. 1-rep max', 'The most you could lift once, worked out from your sets. You never have to test it.'],
+      ['Most reps', 'More reps than ever at the same weight.'], ['Best session total', 'Your biggest total lifted (weight × reps) in one workout.']].map(([t, d]) => `<div class="rec"><span class="t"><b>${t}</b><small style="font-size:13px">${d}</small></span></div>`).join('')}</div></div>`;
+  } else if (S.progTab === 2) {
+    const M = [['Waist', '78 cm', '−5 cm'], ['Hips', '96 cm', '−3 cm'], ['Chest', '90 cm', '−1 cm'], ['Upper arm', '29 cm', '+0.5 cm'], ['Thigh', '55 cm', '−2 cm']];
+    const G = { measure: ['How to measure', ['Measure first thing in the morning, before eating or drinking.', 'Use a soft tape, snug but not pulling the skin in.', 'Waist: level with your belly button, relaxed, after breathing out.', 'Hips: the widest point around your bum.', 'Arm and thigh: the widest point, always on the same side.', 'Every 2–4 weeks is plenty.']],
+      photo: ['How to take progress photos', ['Same place, same light, same time of day.', 'Phone at chest height, about 2 metres away, or use a timer.', 'Front, side and back, standing relaxed.', 'Wear the same fitted clothes each time.', 'Once a month. Only you and your coach ever see them.']] };
+    body = `
+    <div class="explain">${ic('info')}<span>Measurements and photos pick up changes the scales miss. Everything here is optional and private to you and your coach.</span></div>
+    <div><div class="sec-head" style="margin-bottom:10px"><h2>Measurements</h2><button data-toast="Add today's measurements">+ Add</button></div>
+    <div class="group">${M.map(([n, v, ch]) => `<div class="rec"><span class="li" style="color:var(--violet)">${ic('body')}</span><span class="t"><b>${n}</b><small>Since 1 September</small></span><span class="v num">${v}<small>${ch}</small></span></div>`).join('')}</div></div>
+    <div><div class="sec-head" style="margin-bottom:10px"><h2>Photos</h2></div>
+    <div class="photos3">${['Front', 'Side', 'Back'].map(x => `<button data-toast="Camera opens · photos stay private">${ic('camera')}${x}</button>`).join('')}</div></div>
+    <div class="group">${Object.entries(G).map(([k, [t, steps]]) => `<div><button class="optrow" data-guide="${k}"><span class="li" style="color:var(--sky)">${ic(k === 'measure' ? 'clip' : 'camera')}</span><span class="t"><b>${t}</b><small>${steps.length} quick steps</small></span><span class="chev">${ic(S.guide[k] ? 'down' : 'right')}</span></button>
+      ${S.guide[k] ? `<ol class="guide">${steps.map(x => `<li>${x}</li>`).join('')}</ol>` : ''}</div>`).join('')}</div>
+    <div class="group"><div class="optrow"><span class="li" style="color:#c9cfcb">${ic('weight')}</span><span class="t"><b>Show my weight</b><small>Off by default. It's one number among many</small></span><button class="sw" role="switch" aria-checked="${S.showWeight}" data-showweight aria-label="Show my weight"></button></div>
+      ${S.showWeight ? `<div style="padding:0 14px 14px">${lineChart([71.2, 71.0, 70.6, 70.3, 70.1, 69.6, 69.2, 69.0, 68.6, 68.3, 68.1, 67.8], '#a99bff')}<div class="lbl num" style="color:var(--fg2);font-size:13px">7-day average: 71.2 → 67.8 kg</div></div>` : ''}</div>`;
+  } else {
+    const W = [['7 Sep', 'w,,w,,w,pt,'], ['14 Sep', 'w,,w,,w,pt,'], ['21 Sep', 'w,,x,,w,pt,'], ['28 Sep', 'w,pt,w,,w,,'], ['5 Oct', 'w,,w,,w,pt,'], ['12 Oct', 'w,pt,w,,w,pt,'], ['19 Oct', 'w,pt,w,,,,']];
+    body = `
+    <div class="explain">${ic('info')}<span>Each square is one day, each row is one week. It shows what you planned with your coach and what you did.</span></div>
+    <div class="card"><div class="cal8"><span></span>${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<span class="h">${d}</span>`).join('')}
+      ${W.map(([wk, days]) => `<span class="num">${wk}</span>${days.split(',').map(v => `<i class="${v}" title="${v === 'w' ? 'Workout done' : v === 'pt' ? 'PT session' : v === 'x' ? 'Missed' : 'Rest day'}"></i>`).join('')}`).join('')}</div>
+      <div class="legend2"><span><i style="background:var(--mint)"></i>Workout done</span><span><i style="background:var(--sky)"></i>PT session</span><span><i style="box-shadow:inset 0 0 0 1.5px var(--coral)"></i>Missed</span><span><i style="background:var(--s3)"></i>Rest day</span></div></div>
+    <div class="group">${[['train', 'var(--mint)', 'Workouts done', '19 of 20 planned', '95%'], ['cal', 'var(--sky)', 'PT sessions', '9 of 9 attended', '100%'],
+      ['clip', 'var(--violet)', 'Check-ins', '6 of 7 sent', '86%'], ['flame', 'var(--amber)', 'Streak', 'Weeks with every planned workout done', '4 wks']].map(([i, c, t, d, v]) => `<div class="rec"><span class="li" style="color:${c}">${ic(i)}</span><span class="t"><b>${t}</b><small>${d}</small></span><span class="v num">${v}</span></div>`).join('')}</div>`;
+  }
+  return `<div class="page fade">
+    <div class="greet" style="padding-top:6px"><div class="eyebrow">Since 1 September</div><h1>Progress</h1><p class="headline">Stronger on every main lift, and 5 cm off your waist.</p></div>
+    <div class="seg four" role="tablist">${tabs.map((t, i) => `<button role="tab" class="${S.progTab === i ? 'on' : ''}" data-ptab="${i}">${t}</button>`).join('')}</div>
+    ${body}
+  </div>`;
+};
+
+const vChat = () => `<div class="page fade" style="padding-bottom:110px">
+  <div class="convo-head"><button class="round" style="background:var(--s2);width:40px;height:40px" data-go="home" aria-label="Back">${ic('back')}</button>
+    <span class="kd-av" style="width:44px;height:44px"><img src="assets/kd-mark.png" alt=""><span class="dot"></span></span>
+    <span class="t"><b>Kyle</b><small style="color:var(--mint)">Your coach · replies within a few hours</small></span></div>
+  <button class="handoff" style="background:rgba(169,155,255,.07);border-color:rgba(169,155,255,.22)" data-go="coachai"><span class="orb sm">${ic('spark')}</span><span class="t"><b>Need an answer now?</b><small>Ask KAI, your AI assistant</small></span><span class="chev">${ic('right')}</span></button>
+  <div class="msgs">
+    <div class="stamp">Yesterday</div>
+    <div class="msg them">Great session Monday. Leg press goes up today 💪</div>
+    <div class="msg me">Thanks! Knee felt a bit tight on the lunges though</div>
+    <div class="msg them">Noted. Keep the lunges short-stride and tell me if it's worse.</div>
+    ${S.handed ? `<div class="sysnote"><span class="orb sm">${ic('spark')}</span>KAI passed this to your coach</div>
+    <div class="msg me"><div class="quote">My knee aches during lunges</div>Asked KAI about this. Can you take a look?</div>` : ''}
+    ${S.chat.map(m => `<div class="msg me">${m}</div>`).join('')}
+  </div>
+</div>`;
+
+function chatDock() {
+  return `<div class="dock" style="display:grid;grid-template-columns:minmax(0,1fr);gap:10px">
+    <div class="composer"><label><input id="msg" placeholder="Message Kyle" aria-label="Message Kyle"></label><button class="round" data-sendkyle aria-label="Send">${ic('send')}</button></div>
+  </div>`;
+}
+
+// ---------------------------------------------------------------------------
+// KAI (AI). Answers from the client's own plan; hands anything about
+// pain, injury or changes to the plan to the client's coach.
+// ---------------------------------------------------------------------------
+const AI = {
+  swap: { q: 'Can I swap leg press today?', a: 'Yes. Your coach has approved two swaps for Leg Press: Hack Squat (start around 70 kg) or Goblet Squat with a 24 kg dumbbell. Keep the same sets and reps.', src: 'Lower Body A · your coach\'s approved swaps', go: ['Start workout', 'workout'] },
+  eat: { q: 'What should I eat before a 7am session?', a: 'Keep it light: a banana and a coffee, or a yoghurt 45 minutes before. Have your 30 g protein breakfast afterwards.', src: 'Your nutrition targets · PT Saturday 9:00', go: ['See this week\'s meals', 'community'] },
+  knee: { q: 'My knee aches during lunges', handoff: true, a: 'Pain is something your coach needs to look at, so I\'ve passed this on instead of guessing. Until they reply, skip the lunges and use "I have pain" in your workout if it flares up.', src: 'Pain always goes to your coach' }
+};
+const vAI = () => {
+  const asked = S.ai, rest = Object.keys(AI).filter(k => !asked.includes(k));
+  return `<div class="page fade" style="padding-bottom:150px">
+  <div class="convo-head"><button class="round" style="background:var(--s2);width:40px;height:40px" data-go="home" aria-label="Back">${ic('back')}</button>
+    <span class="orb">${ic('spark')}</span><span class="t"><b>KAI</b><small style="color:var(--violet)">Your AI assistant</small></span>
+    <button class="switchto" style="color:var(--mint)" data-go="chat"><span class="kd-av" style="width:30px;height:30px;border-width:1px"><img src="assets/kd-mark.png" alt="" style="width:18px"></span>Coach</button></div>
+  ${asked.length ? '' : `<div class="ai-empty"><span class="orb lg">${ic('spark')}</span><h2>Ask me anything</h2><p>Training, food or recovery. I answer from your plan, and pass anything I shouldn't answer to your coach.</p></div>`}
+  <div class="ai-thread">${asked.map(k => { const x = AI[k]; return `<div class="q">${x.q}</div>
+    <div class="a"><span class="who"><span class="orb sm">${ic('spark')}</span>KAI</span><p>${x.a}</p><span class="src">${ic('clip')}${x.src}</span>
+    ${x.handoff ? `<button class="handoff" data-go="chat"><span class="kd-av"><img src="assets/kd-mark.png" alt=""></span><span class="t"><b>Passed to your coach</b><small>Kyle will reply in your messages</small></span><span class="chev">${ic('right')}</span></button>` : `<button class="go" data-go="${x.go[1]}">${x.go[0]}</button>`}</div>`; }).join('')}</div>
+  ${rest.length ? `<div><div class="eyebrow" style="margin-bottom:10px">${asked.length ? 'Ask something else' : 'Try asking'}</div><div class="group" style="--inset:46px">${rest.map(k => `<button class="prompt" data-ai="${k}">${ic('spark')}<span>${AI[k].q}</span>${ic('right').replace('class="ic"', 'class="ic" style="color:var(--fg3)"')}</button>`).join('')}</div></div>` : ''}
+</div>`;
+};
+function aiDock() {
+  return `<div class="dock" style="display:grid;grid-template-columns:minmax(0,1fr);gap:8px">
+    <div class="composer ai"><label><input id="aimsg" placeholder="Ask KAI" aria-label="Ask KAI"></label><button class="round" data-toast="KAI is thinking…" aria-label="Ask">${ic('send')}</button></div>
+    <p class="disclaimer">KAI is AI, not a medical professional. Your coach can see every conversation.</p>
+  </div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Onboarding, notifications, community
+// ---------------------------------------------------------------------------
+const GOALS = [['strength', 'trophy', 'var(--mint)', 'Get stronger'], ['fat', 'flame', 'var(--amber)', 'Lose fat'], ['fit', 'bolt', 'var(--sky)', 'Feel fitter'], ['pain', 'body', 'var(--violet)', 'Move pain-free']];
+const FREQ = [['weekly', 'Weekly', 3, 'High', 'Most accurate Momentum'], ['fortnightly', 'Every 2 weeks', 2, 'Good', 'A good balance'], ['monthly', 'Monthly', 1, 'Basic', 'The lightest touch']];
+const NOTIF_TYPES = [['workout', 'train', 'var(--mint)', 'rgba(126,213,151,.14)', 'Workout reminders', 'On your training days'], ['booking', 'cal', 'var(--sky)', 'rgba(110,198,255,.14)', 'Bookings open', 'On the 20th, for next month'],
+  ['session', 'clock', 'var(--sky)', 'rgba(110,198,255,.14)', 'Session reminders', 'The evening before'], ['payment', 'card', 'var(--amber)', 'rgba(255,180,94,.14)', 'Payment reminders', '3 days before it\'s due'],
+  ['drop', 'community', 'var(--violet)', 'rgba(169,155,255,.14)', 'Community', 'Wednesday tips, meals and replies to you'], ['checkin', 'clip', 'var(--violet)', 'rgba(169,155,255,.14)', 'Check-in due', 'On your check-in day']];
+const freqInfo = () => { const f = FREQ.find(x => x[0] === S.onb.freq); return { label: f[1], n: f[2], acc: f[3] }; };
+const accBars = n => [1, 2, 3].map(i => `<i class="${i <= n ? 'on' : ''}"></i>`).join('');
+const toggleList = () => `<div class="toggles">${NOTIF_TYPES.map(([k, i, c, bg, l, sub]) => `<div class="tg"><span class="li" style="background:${bg};color:${c}">${ic(i)}</span><span class="t"><b>${l}</b><small>${sub}</small></span>
+  <button class="sw" role="switch" aria-checked="${S.notifs[k]}" data-notif="${k}" aria-label="${l}"></button></div>`).join('')}</div>`;
+
+function vOnboard() {
+  const o = S.onb;
+  if (o.step === 0) return `<div class="onb">
+    <div class="onb-photo"><img src="assets/coaching.jpg" alt=""></div>
+    <div class="onb-body"><img class="onb-mark" src="assets/kd-mark.png" alt="KD Personal Training">
+      <span class="eyebrow" style="color:var(--mint)">Invited by Kyle</span>
+      <h1>Welcome, Sarah</h1><p class="lead">Kyle has set up your coaching. A few quick questions and you're in.</p>
+      <button class="pill-btn mint" data-onb="next">Let's go ${ic('right')}</button></div></div>`;
+  if (o.step === 9) return `<div class="onb-done fade">
+    <svg viewBox="0 0 150 150" width="150" height="150">${MOM.map((m, i) => `<g transform="translate(${i * 17} ${i * 17})">${ring(150 - 34 * i, 13, 0.08, m.col, m.tr)}</g>`).join('')}</svg>
+    <div><h1>You're all set</h1><p class="lead" style="margin-top:8px">Your rings fill up as you train, eat well and check in.</p></div>
+    <div class="summary"><span class="chip">${ic(GOALS.find(g => g[0] === o.goal)[1])} ${GOALS.find(g => g[0] === o.goal)[3]}</span><span class="chip">${ic('train')} ${o.days} days a week</span><span class="chip">${ic('clip')} ${freqInfo().label}${o.freq === 'monthly' ? '' : ' · ' + o.day}</span></div>
+    <button class="pill-btn white" style="width:100%" data-onb="finish">Open my app</button></div>`;
+  const titles = ['', 'Check your email', 'A few health questions', 'Your privacy', 'What matters most to you?', 'How many days a week can you train?', 'How often should we check in?', 'What should we tell you about?', 'Put KDPT on your home screen'];
+  let body = '';
+  if (o.step === 1) body = `<p class="lead" style="margin-top:-10px">We've sent a 6-digit code to <b style="color:var(--fg)">sarah.m@email.com</b>, the address Kyle invited. No password to remember.</p>
+    <div class="code6">${[0, 1, 2, 3, 4, 5].map(i => `<input id="code${i}" inputmode="numeric" maxlength="1" aria-label="Digit ${i + 1}" value="${'482915'[i]}">`).join('')}</div>
+    <button class="switchto" style="color:var(--fg2)" data-toast="New code sent">Send a new code</button>`;
+  if (o.step === 2) body = `<p class="lead" style="margin-top:-10px">So Kyle can keep your training safe. Only Kyle sees your answers.</p>
+    <div class="group" style="--inset:14px">${PARQ.map((q, i) => `<div class="yn"><span>${q}</span><span class="ynb"><button aria-pressed="${o.parq[i] === true}" data-parq="${i}" data-v="1">Yes</button><button aria-pressed="${o.parq[i] === false}" data-parq="${i}" data-v="0">No</button></span></div>`).join('')}</div>
+    ${o.parq.some(x => x) ? `<div class="explain" style="border:1px solid rgba(255,180,94,.3)">${ic('info')}<span>Thanks for telling us. Kyle will talk this through with you before your first session, and may ask you to check with your GP.</span></div>` : ''}
+    <div><div class="eyebrow" style="margin-bottom:10px">Injuries or anything else Kyle should know?</div><textarea class="words" id="onbinj" placeholder="e.g. Left knee gets sore on deep squats">${o.injuries}</textarea></div>`;
+  if (o.step === 3) body = `<p class="lead" style="margin-top:-10px">Your data stays between you and Kyle. You can change these any time in Settings.</p>
+    <div class="group" style="--inset:14px">${CONSENTS.map(([k, t, d, req]) => `<div class="cons"><span class="t"><b>${t}${req ? ' <small style="color:var(--coral)">Required</small>' : ''}</b><small>${d}</small></span><button class="sw" role="switch" aria-checked="${!!o.consent[k]}" data-consent="${k}" aria-label="${t}"></button></div>`).join('')}</div>
+    <button class="switchto" style="color:var(--fg2)" data-toast="Opens the privacy notice and terms">Read the privacy notice and terms</button>`;
+  if (o.step === 8) body = `<p class="lead" style="margin-top:-10px">It opens full screen like any other app, and lets Kyle send you notifications.</p>
+    <div class="seg" style="grid-template-columns:1fr 1fr">${[['ios', 'iPhone'], ['android', 'Android']].map(([k, l]) => `<button class="${o.os === k ? 'on' : ''}" data-os="${k}">${l}</button>`).join('')}</div>
+    <div class="group" style="--inset:68px">${(o.os === 'ios'
+      ? [['share', 'Tap the Share button', 'At the bottom of Safari'], ['plus', 'Choose "Add to Home Screen"', 'Scroll down the list if you can\'t see it'], ['home', 'Open KDPT from your home screen', 'Then turn on notifications when asked']]
+      : [['more', 'Tap the menu (⋮) in Chrome', 'Top right of the screen'], ['plus', 'Choose "Install app"', 'Or "Add to Home screen"'], ['home', 'Open KDPT from your home screen', 'Then allow notifications when asked']])
+      .map(([i, t, d], n) => `<div class="optrow"><span class="li" style="color:var(--mint)">${i === 'share' ? SHARE_ICON : i === 'more' ? '<b style="font:800 18px var(--display)">⋮</b>' : ic(i)}</span><span class="t"><b>${n + 1}. ${t}</b><small>${d}</small></span></div>`).join('')}</div>`;
+  if (o.step === 4) body = `<div class="goal-grid">${GOALS.map(([k, i, c, l]) => `<button class="goal" aria-pressed="${o.goal === k}" data-goal="${k}"><span class="gi" style="background:color-mix(in srgb, ${c} 16%, transparent);color:${c}">${ic(i)}</span>${l}</button>`).join('')}</div>`;
+  if (o.step === 5) body = `<div class="days-pick">${[2, 3, 4, 5, 6].map(n => `<button class="num" aria-pressed="${o.days === n}" data-days="${n}">${n}</button>`).join('')}</div>
+    <p class="lead" style="color:var(--fg3);font-size:14px">Kyle builds your programme around this. You can change it any time.</p>`;
+  if (o.step === 6) body = `<p class="lead" style="margin-top:-10px">Two minutes: sleep, energy, stress and weight. The more often you check in, the more accurate your Momentum.</p>
+    <div class="freq">${FREQ.map(([k, l, n, a, sub]) => `<button class="fopt" aria-pressed="${o.freq === k}" data-freq="${k}"><span class="t"><b>${l}</b><small>${sub}</small></span><span class="acc">${accBars(n)}</span></button>`).join('')}</div>
+    ${o.freq === 'monthly' ? '' : `<div><div class="eyebrow" style="margin-bottom:10px">Which day?</div><div class="daychips">${['Fri', 'Sat', 'Sun', 'Mon'].map(d => `<button aria-pressed="${o.day === d}" data-cday="${d}">${d}</button>`).join('')}</div></div>`}
+    <div class="preview">${rings(56, 6)}<span><b>Momentum accuracy: ${freqInfo().acc}</b><small>${o.freq === 'weekly' ? 'Kyle can adjust your plan week by week' : o.freq === 'fortnightly' ? 'Trends show up within a month' : 'Best if you also log meals and workouts'}</small></span></div>`;
+  if (o.step === 7) body = toggleList();
+  return `<div class="onb fade">
+    <div class="onb-top"><button class="round" style="background:var(--s2)" data-onb="back" aria-label="Back">${ic('back')}</button><div class="onb-prog" style="grid-template-columns:repeat(8,1fr)">${[1, 2, 3, 4, 5, 6, 7, 8].map(i => `<i class="${i <= o.step ? 'on' : ''}"></i>`).join('')}</div></div>
+    <div class="onb-step"><h1>${titles[o.step]}</h1>${body}</div></div>`;
+}
+// Standard pre-exercise health questions (PAR-Q style).
+const PARQ = ['Has a doctor ever said you have a heart condition?', 'Do you get chest pain when you\'re active, or at rest?', 'Do you ever lose balance from dizziness, or pass out?',
+  'Do you have a bone, joint or soft-tissue problem that exercise could make worse?', 'Are you taking medication for blood pressure or a heart condition?',
+  'Are you pregnant or have you given birth in the last 6 months?', 'Is there any other reason you shouldn\'t exercise?'];
+const CONSENTS = [['terms', 'Terms and 24-hour cancellation policy', 'Cancel at least 24 hours before a session, or it counts as used.', true],
+  ['health', 'Kyle can store my health information', 'Your answers, injuries, pain reports and check-ins. Only Kyle sees them.', true],
+  ['photos', 'Progress photos', 'Private to you and Kyle. You can delete them any time.', false],
+  ['kai', 'KAI can use my plan to answer questions', 'Your programme and logs, never your photos.', false],
+  ['email', 'Tips and news by email', 'About twice a month.', false]];
+const SHARE_ICON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5"/><path d="M8 10H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-2"/></svg>';
+
+const NOTES = [
+  { id: 'pay', icon: 'card', c: 'var(--amber)', bg: 'rgba(255,180,94,.14)', t: 'November payment due Sunday', b: '£260.00 · 8 PT sessions', when: '9:00', cta: ['Pay now', 'pay'], unread: true, group: 'Today' },
+  { id: 'book', icon: 'cal', c: 'var(--sky)', bg: 'rgba(110,198,255,.14)', t: 'Your November sessions are ready to review', b: 'Kyle has proposed 8 sessions on your usual Mon & Thu. Send them back and he\'ll confirm each one.', when: '8:00', cta: ['Review sessions', 'book'], unread: true, group: 'Today' },
+  { id: 'drop', icon: 'community', c: 'var(--violet)', bg: 'rgba(169,155,255,.14)', t: 'Wednesday tip and 3 new meals', b: 'Front-load your protein, plus 3 high-protein recipes.', when: 'Mon', cta: ['Open', 'go:community'], unread: true, group: 'Earlier' },
+  { id: 'sess', icon: 'clock', c: 'var(--sky)', bg: 'rgba(110,198,255,.14)', t: 'PT with Kyle on Thursday', b: '7:00 at the Studio. Free to change until Wednesday 7:00.', when: 'Mon', group: 'Earlier' },
+  { id: 'ci', icon: 'clip', c: 'var(--violet)', bg: 'rgba(169,155,255,.14)', t: 'Check-in done', b: 'Momentum updated. Kyle replied to your note.', when: 'Sun', group: 'Earlier' }
+];
+function vNotifs() {
+  const row = n => `<div class="nrow ${n.unread && !S.read ? 'unread' : ''}"><span class="li" style="background:${n.bg};color:${n.c}">${ic(n.icon)}</span><span><b>${n.t}</b><p>${n.id === 'pay' && S.paid ? 'Paid · thank you' : n.b}</p><time>${n.when}</time>
+    ${n.cta && !(n.id === 'pay' && S.paid) && !(n.id === 'book' && S.book.done) ? `<button class="cta" style="background:${n.bg};color:${n.c}" ${n.cta[1].startsWith('go:') ? `data-go="${n.cta[1].slice(3)}"` : `data-sheet="${n.cta[1]}"`}>${n.cta[0]}</button>` : ''}</span></div>`;
+  return `<div class="page fade">
+    <div class="ntop"><button class="ib" data-go="home" aria-label="Back">${ic('back')}</button><h1>Notifications</h1><button class="ib" data-sheet="notifset" aria-label="Notification settings">${ic('gear')}</button></div>
+    ${['Today', 'Earlier'].map(g => `<div class="ngroup"><div class="eyebrow">${g}</div><div class="group">${NOTES.filter(n => n.group === g).map(row).join('')}</div></div>`).join('')}
+  </div>`;
+}
+
+// The group: Kyle and clients post, like and comment. Everything Kyle sends
+// (meals, Wednesday tips, questions, announcements, challenges) is also filed
+// in the Library by category.
+const PEOPLE = { kyle: ['Kyle', 'KD', 145], sarah: ['Sarah', 'SM', 145], priya: ['Priya', 'PS', 260], mark: ['Mark', 'MH', 100], tom: ['Tom', 'TR', 30], ellie: ['Ellie', 'EB', 330] };
+const avatarP = id => id === 'kyle' ? `<span class="kd-av"><img src="assets/kd-mark.png" alt=""></span>`
+  : `<span class="av" style="background:hsl(${PEOPLE[id][2]} 30% 18%);color:hsl(${PEOPLE[id][2]} 70% 72%)">${PEOPLE[id][1]}</span>`;
+const CATS = [['meals', 'Meals', 'fuel', 'var(--amber)', 'Every recipe Kyle has shared'], ['tips', 'Weekly tips', 'bolt', 'var(--mint)', 'Every Wednesday'],
+  ['questions', 'Question of the week', 'chat', 'var(--sky)', 'Every Monday'], ['news', 'Announcements', 'megaphone', 'var(--violet)', 'Studio news and updates'],
+  ['other', 'Challenges & more', 'trophy', 'var(--coral)', 'Challenge walls, events, anything else']];
+const LIB = {
+  meals: [['pasta', 'Creamy Cajun Chicken Pasta', 'Week 43'], ['potato-bowl', 'Big Mac Loaded Potato Bowl', 'Week 43'], ['wrap', 'High-Protein Breakfast Wrap', 'Week 43'], ['turkey-pasta', 'Turkey & Pasta Tomato Bowl', 'Week 42'], ['breakfast', 'Eggs, Veg & Sourdough', 'Week 42']],
+  tips: [['Week 43', 'Front-load your protein'], ['Week 42', 'Sleep: the free recovery tool'], ['Week 41', 'Warm up properly in 5 minutes'], ['Week 40', 'How to read a food label']],
+  questions: [['Week 43', 'What\'s made training easier this month?', '6 replies'], ['Week 42', 'Favourite high-protein snack?', '11 replies'], ['Week 41', 'What are you proudest of this year?', '9 replies']],
+  news: [['19 Oct', 'Studio closed Monday 3 November'], ['12 Oct', 'November sessions are scheduled on the 20th'], ['1 Oct', 'Welcome to the new KDPT app']],
+  other: [['November', '10k steps a day', '12 joined · live'], ['October', 'Protein target every day', 'Finished · 9 completed it'], ['September', '30-day plank', 'Finished · 14 completed it']]
+};
+function seedPosts() {
+  return [
+    { id: 'q1', by: 'kyle', when: 'Mon', cat: 'questions', pinned: true, title: 'Question of the week', body: 'What\'s one thing that has made training easier for you this month?', likes: 8,
+      cmts: [['priya', 'Laying my gym kit out the night before!'], ['mark', 'Training with Jen. No skipping when someone\'s waiting for you 😂'], ['ellie', 'Shorter 30 minute sessions on busy days']] },
+    { id: 'p1', by: 'kyle', when: '2 h', title: 'Shout-out to Priya 🎉', body: '10k this morning in 52:40, a new PB and 3 minutes faster than June. The strength work is paying off.', likes: 21, cmts: [['priya', 'Thank you! Legs held up so much better this time'], ['sarah', 'Amazing, well done!']] },
+    { id: 't1', by: 'kyle', when: 'Wed', cat: 'tips', title: 'Front-load your protein', body: 'Aim for 30g at breakfast. It keeps you full until lunch and makes your daily target far easier to hit.', likes: 14, cmts: [] },
+    { id: 'm1', by: 'kyle', when: 'Wed', cat: 'meals', title: 'This week\'s 3 high-protein meals', body: 'All under 550 kcal with 40g+ protein. Tap one in the Library to add it to Fuel.', imgs: ['pasta', 'potato-bowl', 'wrap'], likes: 17, cmts: [['tom', 'Made the Big Mac bowl twice already']] },
+    { id: 'c1', by: 'kyle', when: 'Sun', cat: 'other', title: 'November challenge: 10k steps a day', body: 'Leaderboard updates every evening from your phone\'s step count.', board: [['Mark', '14,210'], ['Sarah', '12,880'], ['Tom', '11,040']], likes: 12, cmts: [] }
+  ];
+}
+function postHTML(p) {
+  const c = S.comm, cat = p.cat && CATS.find(x => x[0] === p.cat), open = c.open[p.id], liked = c.liked[p.id];
+  return `<article class="post ${p.pinned ? 'pinned' : ''}">
+    <div class="by">${avatarP(p.by)}<span class="t"><b>${PEOPLE[p.by][0]}</b>${p.by === 'kyle' ? '<span class="coachtag">Coach</span>' : ''}<small>${p.when}${p.pinned ? ' · Pinned' : ''}</small></span>
+      ${cat ? `<span class="label-dot" style="color:${cat[3]}">${cat[1]}</span>` : ''}</div>
+    ${p.title ? `<h3>${p.title}</h3>` : ''}<p>${p.body}</p>
+    ${p.imgs ? `<div class="strip3">${p.imgs.map(i => `<img src="assets/${i}.jpg" alt="">`).join('')}</div>` : ''}
+    ${p.board ? `<div class="board">${p.board.map(([n, v], i) => `<div><span>${i + 1}. ${n}</span><b class="num">${v} avg</b></div>`).join('')}</div><button class="pill-btn dark" data-toast="You've joined. Steps count from Sunday">Join the challenge</button>` : ''}
+    <div class="acts"><button class="${liked ? 'on' : ''}" data-plike="${p.id}">${ic('heart')}<span class="num">${p.likes + (liked ? 1 : 0)}</span></button>
+      <button data-popen="${p.id}">${ic('chat')}<span class="num">${p.cmts.length}</span> ${p.cat === 'questions' ? 'Answers' : 'Comments'}</button></div>
+    ${open ? `<div class="cmts">${p.cmts.map(([w, t]) => `<div class="cmt">${avatarP(w).replace('class="av"', 'class="av"').replace('class="kd-av"', 'class="kd-av" style="width:28px;height:28px"')}<span><b>${PEOPLE[w][0]}</b>${t}</span></div>`).join('')}
+      <div class="reply"><input id="rp-${p.id}" placeholder="${p.cat === 'questions' ? 'Add your answer' : 'Write a comment'}" aria-label="Reply"><button class="addbtn" style="color:var(--mint);background:rgba(126,213,151,.1);box-shadow:inset 0 0 0 1px rgba(126,213,151,.45)" data-preply="${p.id}" aria-label="Send">${ic('send')}</button></div></div>` : ''}
+  </article>`;
+}
+function vCommunity() {
+  const c = S.comm;
+  if (!c.posts) c.posts = seedPosts();
+  const head = `<div class="greet" style="padding-top:6px"><div class="eyebrow">KDPT group · 35 members</div><h1>Community</h1></div>
+    <div class="seg" style="grid-template-columns:1fr 1fr" role="tablist">${[['feed', 'Feed'], ['library', 'Library']].map(([k, l]) => `<button role="tab" class="${c.tab === k ? 'on' : ''}" data-ctab="${k}">${l}</button>`).join('')}</div>`;
+  if (c.tab === 'feed') return `<div class="page fade">${head}
+    <div class="explain">${ic('info')}<span>Like and comment on anything here. New posts come from Kyle for now.</span></div>
+    ${c.posts.map(postHTML).join('')}
+  </div>`;
+  if (!c.cat) return `<div class="page fade">${head}
+    <div class="cats">${CATS.map(([k, l, i, col, sub], n) => `<button class="cat ${n === 4 ? 'wide' : ''}" data-cat="${k}"><span class="li" style="color:${col}">${ic(i)}</span><span><b>${l}</b><small>${LIB[k].length} · ${sub}</small></span></button>`).join('')}</div>
+  </div>`;
+  const [k, l, i, col] = CATS.find(x => x[0] === c.cat);
+  const rows = c.cat === 'meals'
+    ? LIB.meals.map(([img, n, w]) => { const f = FOODS.find(x => x.img === img); return `<div class="food"><img src="assets/${img}.jpg" alt=""><span class="t"><b>${n}</b><small class="num">${w}${f ? ` · ${f.kcal} kcal · ${f.P}g protein` : ''}</small></span>${f ? `<button class="addbtn" data-libfood="${f.id}" aria-label="Add to Fuel">${ic('plus')}</button>` : ''}</div>`; }).join('')
+    : LIB[c.cat].map(r => `<button class="optrow" data-toast="${r[1]}"><span class="li" style="color:${col}">${ic(i)}</span><span class="t"><b>${r[1]}</b><small>${r[0]}${r[2] ? ' · ' + r[2] : ''}</small></span><span class="chev">${ic('right')}</span></button>`).join('');
+  return `<div class="page fade">${head}
+    <button class="switchto" style="color:var(--fg2)" data-cat="">${ic('back').replace('class="ic"', 'class="ic" style="width:16px;height:16px"')} All categories</button>
+    <div style="display:flex;gap:12px;align-items:center"><span class="li" style="color:${col}">${ic(i)}</span><h2 style="font-size:22px;font-weight:800">${l}</h2></div>
+    <div class="group" style="--inset:${c.cat === 'meals' ? 66 : 68}px">${rows}</div>
+  </div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Check-in: four short steps. How you feel comes first; the scale is optional.
+// ---------------------------------------------------------------------------
+const MOODS = [['Rough', 'var(--coral)'], ['Low', 'var(--amber)'], ['Okay', '#c9cfcb'], ['Good', 'var(--sky)'], ['Great', 'var(--mint)']];
+const WEEK = [['sleep', 'Sleep', 'moon', 'var(--violet)', 'Poor', 'Great'], ['energy', 'Energy', 'bolt', 'var(--mint)', 'Flat', 'Buzzing'],
+  ['stress', 'Stress', 'flame', 'var(--coral)', 'Calm', 'Maxed out'], ['food', 'Food', 'fuel', 'var(--amber)', 'Off track', 'Spot on'],
+  ['motivation', 'Motivation', 'trophy', 'var(--sky)', 'Low', 'Fired up']];
+const WINS = [['clothes', 'Clothes fit better', 'shirt', 'var(--mint)'], ['energy', 'More energy', 'bolt', 'var(--amber)'], ['sleep', 'Sleeping better', 'moon', 'var(--violet)'],
+  ['strength', 'Lifting heavier', 'train', 'var(--mint)'], ['confident', 'Feeling confident', 'heart', 'var(--coral)'], ['bloat', 'Less bloated', 'drop', 'var(--sky)'],
+  ['mood', 'Better mood', 'sun', 'var(--amber)'], ['plan', 'Stuck to my plan', 'clip', 'var(--violet)']];
+const SUPPORT = [['same', 'Keep things as they are', 'check', 'var(--mint)'], ['accountability', 'More accountability', 'bell', 'var(--amber)'],
+  ['food', 'Help with food', 'fuel', 'var(--amber)'], ['training', 'Change my training', 'train', 'var(--mint)'],
+  ['call', 'A call with my coach', 'chat', 'var(--sky)'], ['pep', 'Just a bit of encouragement', 'heart', 'var(--coral)']];
+
+function vCheckin() {
+  const c = S.ci;
+  if (c.step === 5) {
+    const wins = WINS.filter(w => c.wins[w[0]]), sup = SUPPORT.filter(x => c.support[x[0]]);
+    return `<div class="ci-done fade"><span class="orbok">${ic('check')}</span>
+      <div><h1>Check-in sent</h1><p class="lead" style="margin-top:8px">Your coach will reply before your next session. Momentum updated.</p></div>
+      <div class="group ci-sum" style="--inset:62px">
+        <div class="optrow"><span class="li" style="color:${MOODS[c.mood][1]}!important">${ic('sun')}</span><span class="t"><b>Feeling ${MOODS[c.mood][0].toLowerCase()}</b><small>${c.words ? c.words.slice(0, 60) : 'No note this week'}</small></span></div>
+        <div class="optrow"><span class="li" style="color:var(--mint)">${ic('trophy')}</span><span class="t"><b>${wins.length} win${wins.length === 1 ? '' : 's'} beyond the scale</b><small>${wins.map(w => w[1]).join(' · ') || 'Next week'}</small></span></div>
+        <div class="optrow"><span class="li" style="color:var(--sky)">${ic('chat')}</span><span class="t"><b>Support</b><small>${sup.map(x => x[1]).join(' · ') || 'Nothing extra'}</small></span></div>
+      </div>
+      <button class="pill-btn white" style="width:100%" data-go="home">Done</button></div>`;
+  }
+  const titles = ['', 'How are you feeling?', 'How was your week?', 'Wins beyond the scale', 'How can your coach help?'];
+  let body = '';
+  if (c.step === 1) body = `
+    <div><div class="mind" id="mind" style="--c:${MOODS[c.mood][1]}"></div><b class="mindword" id="mindword">${MOODS[c.mood][0]}</b></div>
+    <div><input type="range" class="moodrange" id="moodr" min="0" max="4" step="1" value="${c.mood}" aria-label="How you're feeling"><div class="moodlabels">${MOODS.map(m => `<span>${m[0]}</span>`).join('')}</div></div>
+    <div><div class="eyebrow" style="margin-bottom:10px">In your own words</div>
+      <textarea class="words" id="ciwords" placeholder="What's been going on? Work, family, how training felt…">${c.words}</textarea></div>`;
+  if (c.step === 2) body = `
+    ${WEEK.map(([k, l, icon, col, lo, hi]) => `<div class="cimetric"><div class="lab"><b style="display:flex;align-items:center;gap:10px"><span class="li" style="color:${col};width:32px!important;height:32px!important;border-radius:9px!important">${ic(icon)}</span>${l}</b><small>${lo} → ${hi}</small></div>
+      <div class="scale5">${[1, 2, 3, 4, 5].map(v => `<button class="num ${v < c[k] ? 'lit' : ''}" style="--c:${col}" aria-pressed="${c[k] === v}" data-cim="${k}" data-v="${v}">${v}</button>`).join('')}</div></div>`).join('')}
+    <div><div class="eyebrow" style="margin-bottom:10px">Any aches or niggles?</div><div class="daychips">${['None', 'Knee', 'Back', 'Shoulder', 'Hip', 'Other'].map(a => `<button aria-pressed="${c.aches === a}" data-ache="${a}">${a}</button>`).join('')}</div></div>`;
+  if (c.step === 3) body = `
+    <div class="quotecard"><p>Would you rather lose 5 lbs, or look like you've lost 5 lbs?</p><small><img src="assets/kd-mark.png" alt="">It's not about the number on the scales</small></div>
+    <div><div class="eyebrow" style="margin-bottom:10px">What's better this week?</div>
+      <div class="wins">${WINS.map(([k, l, icon, col]) => `<button class="win" aria-pressed="${!!c.wins[k]}" data-win="${k}"><span class="wintile" style="color:${col}">${ic(icon)}</span>${l}</button>`).join('')}</div></div>
+    <div><div class="eyebrow" style="margin-bottom:10px">Optional</div>
+      <div class="group" style="--inset:68px">
+        <button class="optrow" data-photo><span class="li" style="color:#c9cfcb">${ic('camera')}</span><span class="t"><b>Progress photo</b><small>Private to you and your coach</small></span><span class="add">${c.photo ? 'Added ✓' : 'Add'}</span></button>
+        <div><button class="optrow" data-measure><span class="li" style="color:#c9cfcb">${ic('weight')}</span><span class="t"><b>Measurements or weight</b><small>Only if you want to. Once a month is plenty</small></span><span class="add">${c.measure ? 'Hide' : 'Add'}</span></button>
+          ${c.measure ? `<div class="meas"><label>Waist<input id="ciwaist" inputmode="decimal" placeholder="– cm" value="${c.waist}"></label><label>Weight<input id="ciweight" inputmode="decimal" placeholder="– kg" value="${c.weight}"></label></div>` : ''}</div>
+      </div></div>`;
+  if (c.step === 4) body = `
+    <div class="group" style="--inset:64px">${SUPPORT.map(([k, l, icon, col]) => `<button class="sup" aria-pressed="${!!c.support[k]}" data-sup="${k}"><span class="suptile" style="color:${col}">${ic(icon)}</span><span class="t">${l}</span><span class="tick">${ic('check')}</span></button>`).join('')}</div>
+    <div><div class="eyebrow" style="margin-bottom:10px">Anything else your coach should know?</div>
+      <textarea class="words" id="cinote" placeholder="Holidays coming up, a new job, a niggle you're unsure about…">${c.note}</textarea></div>`;
+  return `<div class="onb fade ci-wrap">
+    <div class="onb-top"><button class="round" style="background:var(--s2)" data-ci="${c.step === 1 ? 'close' : 'back'}" aria-label="${c.step === 1 ? 'Close' : 'Back'}">${ic(c.step === 1 ? 'close' : 'back')}</button><div class="onb-prog">${[1, 2, 3, 4].map(i => `<i class="${i <= c.step ? 'on' : ''}"></i>`).join('')}</div></div>
+    <div class="onb-step"><div><div class="eyebrow" style="color:var(--violet)">${freqInfo().label} check-in</div><h1 style="margin-top:6px">${titles[c.step]}</h1></div>${body}</div></div>`;
+}
+
+function vProfile() {
+  const c = S.onb.consent;
+  const row = (icon, col, t, d, extra = '', attrs = '') => `<${attrs ? 'button' : 'div'} class="optrow" ${attrs}><span class="li" style="color:${col}">${ic(icon)}</span><span class="t"><b>${t}</b>${d ? `<small>${d}</small>` : ''}</span>${extra || (attrs ? `<span class="chev">${ic('right')}</span>` : '')}</${attrs ? 'button' : 'div'}>`;
+  return `<div class="page fade">
+    <div class="ntop"><button class="ib" data-go="home" aria-label="Back">${ic('back')}</button><h1>You</h1></div>
+    <div style="display:flex;gap:14px;align-items:center"><span class="avatar" style="width:64px;height:64px;font-size:20px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#2c3a31,#1a201c);color:var(--mint);font-family:var(--display);font-weight:700">SM</span>
+      <span><b style="font:800 22px var(--display);display:block">Sarah Mitchell</b><small style="color:var(--fg3)">Client since September 2026</small></span></div>
+    <div><div class="eyebrow" style="margin-bottom:10px">Coaching</div><div class="group">
+      ${row('card', 'var(--amber)', '8 PT sessions a month', '£260 · paid automatically on the 1st', '', 'data-sheet="pay"')}
+      ${row('cal', 'var(--sky)', `${S.sessionsLeft} of 8 sessions left in October`, '24-hour cancellation policy', '', 'data-sheet="book"')}
+      ${row('clip', 'var(--violet)', 'Check-ins', `${freqInfo().label}${S.onb.freq === 'monthly' ? '' : ' · ' + S.onb.day}`, '', 'data-toast="Change how often you check in"')}
+    </div></div>
+    <div><div class="eyebrow" style="margin-bottom:10px">App</div><div class="group">
+      <div class="optrow"><span class="li" style="color:var(--fg)">${ic('info')}</span><span class="t"><b>Text size</b></span>
+        <span class="tsize">${[[1, 'A'], [1.12, 'A'], [1.25, 'A']].map(([z, l], i) => `<button aria-pressed="${S.scale === z}" data-textsize="${z}" style="font-size:${13 + i * 4}px" aria-label="Text size ${i + 1}">${l}</button>`).join('')}</span></div>
+      ${row('bell', 'var(--amber)', 'Notifications', 'Choose what reaches your phone', '', 'data-sheet="notifset"')}
+    </div></div>
+    <div><div class="eyebrow" style="margin-bottom:10px">Privacy and data</div><div class="group">
+      ${CONSENTS.filter(x => !x[3]).map(([k, t, d]) => `<div class="cons" style="padding:12px 14px"><span class="t"><b>${t}</b><small>${d}</small></span><button class="sw" role="switch" aria-checked="${!!c[k]}" data-consent="${k}" aria-label="${t}"></button></div>`).join('')}
+      ${row('clip', 'var(--sky)', 'Health questions', 'Update your answers or injuries', '', 'data-toast="Opens your health questions"')}
+      ${row('down', 'var(--sky)', 'Download my data', 'Everything we hold about you, by email', '', 'data-toast="We&#39;ll email you a copy within 24 hours"')}
+      ${row('trash', 'var(--coral)', 'Delete my account', 'Removes your data. Kyle is told.', '', 'data-delask')}
+    </div></div>
+    ${S.delAsk ? `<div class="explain" style="border:1px solid rgba(255,107,94,.35);display:grid;gap:12px">
+      <span><b style="color:var(--fg)">Delete your account?</b><br>Your workouts, check-ins, food logs and photos are deleted within 30 days. Payment records are kept for 6 years because the law requires it. Your subscription is cancelled at the end of the month.</span>
+      <button class="pill-btn" style="background:var(--coral);color:#2a0703" data-toast="Account scheduled for deletion. Kyle has been told">Delete my account</button>
+      <button class="pill-btn dark" data-delask>Keep my account</button></div>` : ''}
+    <div><div class="eyebrow" style="margin-bottom:10px">Prototype only · preview states</div><div class="group">
+      ${[['offline', 'wifi', 'var(--amber)', 'No signal', 'Banner in the gym when the Wi-Fi drops'], ['payFail', 'card', 'var(--coral)', 'Payment failed', 'Alert on Home and in the payment sheet'], ['fresh', 'clock', 'var(--sky)', 'Brand-new client', 'Empty History, before the first workout']].map(([k, i, col, t, d]) => `<div class="cons" style="padding:12px 14px"><span class="li" style="color:${col}">${ic(i)}</span><span class="t"><b>${t}</b><small>${d}</small></span><button class="sw" role="switch" aria-checked="${S.demo[k]}" data-demo="${k}" aria-label="${t}"></button></div>`).join('')}
+    </div></div>
+    <button class="pill-btn dark" data-toast="Logged out">Log out</button>
+  </div>`;
+}
+
+// Sarah's regular slots for November: Mondays and Thursdays at 7:00.
+const NOV = [['MON', 2, '7:00'], ['THU', 5, '7:00'], ['MON', 9, '7:00'], ['THU', 12, '7:00'], ['MON', 16, '7:00'], ['THU', 19, '7:00'], ['MON', 23, '7:00'], ['THU', 26, '7:00']];
+
+// Kyle's working hours: the gym opens at 6:30, Wednesday is a half day, no
+// weekends. Clients can only offer times inside these.
+const HOURS = { Mon: [6.5, 19.5], Tue: [6.5, 19.5], Wed: [6.5, 13], Thu: [6.5, 19.5], Fri: [6.5, 19.5], Sat: null, Sun: null };
+const hm = h => `${Math.floor(h)}:${h % 1 ? '30' : '00'}`;
+function availHTML() {
+  const a = S.avail;
+  if (a.sent) return `<div class="sent"><span class="ok" style="background:var(--sky);color:#03121f">${ic('check')}</span><h3>Sent to Kyle</h3><p>Kyle will fit your sessions into these times and confirm them. You'll get the exact days and times in a notification.</p></div><button class="pill-btn white" data-close>Done</button>`;
+  const steps = (lo, hi) => { const o = []; for (let h = lo; h <= hi; h += 0.5) o.push(h); return o; };
+  return `<div><h3>When can you train in November?</h3><div class="sub">Tick the days that work and give a rough window. Kyle places your 8 sessions and confirms them.</div></div>
+    <div class="group" style="--inset:14px">${Object.entries(HOURS).map(([d, hrs]) => { const w = a.days[d]; return !hrs
+      ? `<div class="avrow off"><b>${d}</b><span class="t">Kyle doesn't work ${d === 'Sat' ? 'Saturdays' : 'Sundays'}</span></div>`
+      : `<div class="avrow"><b>${d}</b><span class="t">${w ? `<select id="avf-${d}" data-avk="${d}" data-ix="0" aria-label="${d} from">${steps(hrs[0], hrs[1] - 1).map(h => `<option value="${h}" ${h === w[0] ? 'selected' : ''}>${hm(h)}</option>`).join('')}</select> to
+          <select id="avt-${d}" data-avk="${d}" data-ix="1" aria-label="${d} until">${steps(hrs[0] + 1, hrs[1]).map(h => `<option value="${h}" ${h === w[1] ? 'selected' : ''}>${hm(h)}</option>`).join('')}</select>`
+        : `<small>Kyle's hours ${hm(hrs[0])}–${hm(hrs[1])}</small>`}</span>
+        <button class="sw" role="switch" aria-checked="${!!w}" data-avday="${d}" aria-label="${d}"></button></div>`; }).join('')}</div>
+    <label class="search" style="height:auto;padding:12px 14px"><input id="avnote" placeholder="Anything else? e.g. not the week of the 16th" value="${a.note || ''}" aria-label="Note for Kyle"></label>
+    <button class="pill-btn mint" data-availsend>Send to Kyle</button>`;
+}
+
+// ---------------------------------------------------------------------------
+// Sheets
+// ---------------------------------------------------------------------------
+function sheetHTML() {
+  if (S.sheet === 'notifset') return `<div><h3>Notifications</h3><div class="sub">Choose what reaches your phone</div></div>${toggleList()}<button class="pill-btn white" data-close>Done</button>`;
+  if (S.sheet === 'addfood') return addFoodHTML();
+  if (S.sheet === 'avail') return availHTML();
+  if (S.sheet === 'session') {
+    const ss = S.session;
+    if (ss.cancelled) return `<div class="sent"><span class="ok" style="background:var(--coral);color:#2a0703">${ic('close')}</span><h3>Session cancelled</h3>
+      <p>Thursday 7:00 is cancelled and Kyle has been told. Because it was within 24 hours, it counts as used: ${S.sessionsLeft - 1} of 8 left in October.</p></div>
+      <button class="pill-btn dark" data-go="chat">Message Kyle</button><button class="pill-btn white" data-close>Done</button>`;
+    if (ss.step === 'confirm') return `<div><h3>Cancel Thursday 7:00?</h3><div class="sub">It's less than 24 hours away.</div></div>
+      <div class="explain" style="border:1px solid rgba(255,107,94,.35)">${ic('pain')}<span>Cancelling within 24 hours counts as one of your sessions, so you'd have ${S.sessionsLeft - 1} of 8 left in October. If something urgent has come up, message Kyle first.</span></div>
+      <button class="pill-btn dark" data-go="chat">Message Kyle</button>
+      <button class="pill-btn" style="background:var(--coral);color:#2a0703" data-sesscancel="done">Cancel anyway · counts as used</button>
+      <button class="pill-btn white" data-sesscancel="view">Keep my session</button>`;
+    return `<div><span class="eyebrow">PT with Kyle</span><h3 style="margin-top:4px">Thursday 22 October</h3></div>
+      <div class="group" style="--inset:68px">
+        <div class="optrow"><span class="li" style="color:var(--sky)">${ic('clock')}</span><span class="t"><b class="num">7:00 – 8:00</b><small>Confirmed by Kyle</small></span></div>
+        <button class="optrow" data-toast="Opens directions in Maps"><span class="li" style="color:var(--sky)">${ic('pin')}</span><span class="t"><b>The Studio</b><small>Tap for directions</small></span><span class="chev">${ic('right')}</span></button>
+        <div class="optrow"><span class="li" style="color:var(--mint)">${ic('train')}</span><span class="t"><b>Lower Body B</b><small>Bring water and trainers</small></span></div>
+        <div class="optrow"><span class="li" style="color:var(--amber)">${ic('cal')}</span><span class="t"><b class="num">${S.sessionsLeft} of 8 sessions left</b><small>October · this one included</small></span></div>
+      </div>
+      <button class="pill-btn dark" data-toast="Added to your phone's calendar">${ic('cal')} Add to my calendar</button>
+      <button class="pill-btn dark" data-sheet="book">Ask to move it</button>
+      <button class="pill-btn" style="background:none;color:var(--coral);box-shadow:inset 0 0 0 1px rgba(255,107,94,.4)" data-sesscancel="confirm">Cancel session</button>
+      <p class="foot">Free to cancel up to 24 hours before. After that it counts as used.</p>`;
+  }
+  if (S.sheet === 'book') {
+    const bk = S.book, reqs = Object.keys(bk.req).length;
+    if (bk.pick !== null) {
+      const [d, day, t] = NOV[bk.pick];
+      const alts = d === 'MON' ? [['MON', day, '17:30'], ['TUE', day + 1, '18:00'], ['WED', day + 2, '9:00']] : [['THU', day, '18:00'], ['FRI', day + 1, '7:00'], ['WED', day - 1, '9:00']];
+      return `<div><h3>Ask to move ${d.charAt(0) + d.slice(1).toLowerCase()} ${day} Nov</h3><div class="sub">These are times Kyle has free that week. He'll approve or suggest another.</div></div>
+        <div class="group">${alts.map(([dd, nn, tt]) => `<button class="optrow" data-alttime="${dd.charAt(0) + dd.slice(1).toLowerCase()} ${nn} Nov · ${tt}"><span class="datebox sm"><small>${dd}</small><b class="num">${nn}</b></span><span class="t"><b class="num">${tt}</b><small>Studio</small></span><span class="chev">${ic('right')}</span></button>`).join('')}</div>
+        <button class="pill-btn dark" data-keeptime>Keep ${t} on the ${day}th</button>`;
+    }
+    if (bk.done) return `<div class="sent"><span class="ok" style="background:var(--sky);color:#03121f">${ic('check')}</span><h3>Sent to Kyle</h3><p>Your sessions show as pending until Kyle confirms them${reqs ? `, including your ${reqs} change request${reqs > 1 ? 's' : ''}` : ''}. You'll get a notification as soon as he does.</p></div><button class="pill-btn white" data-close>Done</button>`;
+    return `<div><h3>Your November sessions</h3><div class="sub">Kyle has proposed these. Check them, ask to move any that don't work, then send them back. Nothing is booked until Kyle confirms.</div></div>
+      <button class="optrow" style="background:var(--s2);border-radius:14px" data-sheet="avail"><span class="li" style="color:var(--sky)">${ic('clock')}</span><span class="t"><b>My times change each month</b><small>Send Kyle your availability instead</small></span><span class="chev">${ic('right')}</span></button>
+      <div class="group">${NOV.map(([d, day, t], i) => `<div class="optrow"><span class="datebox sm"><small>${d}</small><b class="num">${day}</b></span><span class="t"><b class="num">${t} · Studio</b><small>${bk.req[i] ? `<span style="color:var(--amber)">Asked for ${bk.req[i]}</span>` : 'PT with Kyle · 60 min'}</small></span><button class="add" style="color:var(--sky)" data-move="${i}">${bk.req[i] ? 'Change' : 'Move'}</button></div>`).join('')}</div>
+      <p class="foot">Free to change up to 24 hours before. Later cancellations count as used.</p>
+      <button class="pill-btn mint" data-bookok>Send to Kyle${reqs ? ` · ${reqs} change${reqs > 1 ? 's' : ''}` : ''}</button>`;
+  }
+  if (S.sheet === 'pay') {
+    if (S.paid) return `<div class="sent"><span class="ok" style="background:var(--amber);color:#2a1600">${ic('check', 'ic', 2.6)}</span><h3>Paid · thank you</h3><p>Receipt sent to your email. ${S.autopay ? 'December will be taken automatically.' : ''}</p></div><button class="pill-btn white" data-close>Done</button>`;
+    const fail = S.demo.payFail ? `<div class="failbox">${ic('pain')}<span><b>Your bank declined this payment.</b> Usually it's an expired card or a security check. Update your card or try again. Sessions stay booked for 7 days while you sort it.</span></div>` : '';
+    return `<div><h3>November payment</h3><div class="sub">${S.demo.payFail ? 'Failed on Sunday 1 November' : 'Due Sunday 1 November'}</div></div>${fail}
+      <div class="paycard"><div class="line"><span>8 PT sessions</span><span class="num">£260.00</span></div><div class="line"><span>1–30 November</span><span></span></div><div class="line total"><span>Total</span><span class="num">£260.00</span></div></div>
+      <div class="cardrow"><span class="brand">VISA</span><span class="t"><b>•••• 4242</b><small>Expires 08/28</small></span><button data-toast="Change card in Stripe" style="color:var(--fg2);font-size:14px">Change</button></div>
+      <div class="tg"><span class="li" style="background:rgba(255,180,94,.14);color:var(--amber)">${ic('card')}</span><span class="t"><b>Pay automatically each month</b><small>Reminder 3 days before, cancel any time</small></span><button class="sw" role="switch" aria-checked="${S.autopay}" data-autopay aria-label="Pay automatically"></button></div>
+      <button class="pill-btn mint" data-payok>${S.demo.payFail ? 'Try again · £260.00' : 'Pay £260.00'}</button>`;
+  }
+  if (S.sheet === 'momentum') {
+    const week = [['M', 70, 'on'], ['T', 78, 'on'], ['W', 84, 'now'], ['T', 0, ''], ['F', 0, ''], ['S', 0, ''], ['S', 0, '']];
+    return `<div class="mom-big">
+        <div class="wrap">${rings(184, 14)}<div class="c">${ic('bolt').replace('class="ic"', 'width="30" height="30" style="color:var(--fg)"')}</div></div>
+        <div><b class="word" style="font:800 30px var(--display);color:var(--mint);letter-spacing:-.02em">Strong</b><div class="eyebrow" style="margin-top:2px">Week 6 of 8</div></div>
+        <p>Your best week of the block so far. One more workout and a protein snack closes the rings.</p>
+      </div>
+      <div class="contrib group">${MOM.map(m => `<div class="crow">
+        <span class="li" style="--k:${m.col}">${ic(m.icon)}</span>
+        <span><b>${m.k}</b><small>${m.val}</small><div class="bar"><i style="width:${Math.round(m.pct * 100)}%;background:${m.col}"></i></div></span>
+        <span class="st" style="background:${m.st[1]};color:${m.st[2]}">${m.st[0]}</span></div>`).join('')}</div>
+      <div><div class="eyebrow" style="margin-bottom:10px">This week</div>
+        <div class="trend">${week.map(([d, v, c]) => `<div class="${c}"><i style="height:${Math.round((v || 8) * 0.85)}px"></i>${d}</div>`).join('')}</div></div>
+      <div class="preview"><span class="acc">${accBars(freqInfo().n)}</span><span><b>Accuracy: ${freqInfo().acc}</b><small>From your workouts, meals and ${freqInfo().label.toLowerCase()} check-ins. Your coach sees the same view.</small></span></div>
+      <button class="pill-btn white" data-go="progress">See all progress</button>`;
+  }
+  const { plan: pl } = plan(); const ex = pl[S.idx]?.ex;
+  if (S.sheet === 'time') {
+    const full = fitToTime(999).plan, fit = fitToTime(S.duration).plan;
+    return `<h3>How long have you got?</h3>
+      <div class="durs">${[30, 45, 60, 90].map(m => `<button class="dur" aria-pressed="${S.duration === m}" data-dur="${m}"><b class="num">${m}</b><small>min</small></button>`).join('')}</div>
+      <div class="cutlist">${full.map(f => { const k = fit.find(x => x.ex.id === f.ex.id);
+        return `<div class="${!k ? 'cut' : k.sets < f.sets ? 'trim' : ''}">${f.ex.name}<span class="num">${k ? `${k.sets} sets` : 'skipped'}</span></div>`; }).join('')}</div>
+      <button class="pill-btn white" data-close>Done</button>`;
+  }
+  if (S.sheet === 'swap') {
+    return ex.alts.length ? `<div><h3>Swap ${ex.name}</h3><div class="sub">Your coach's approved options · today only</div></div>
+      <div class="opts">${ex.alts.map(([n, w, k]) => `<button class="opt" data-alt="${n}"><span class="tile">${ic(k)}</span><span><b>${n}</b><span>${w}</span></span></button>`).join('')}</div>`
+      : `<div><h3>No swaps yet</h3><div class="sub">Skip this one or ask your coach.</div></div><button class="pill-btn dark" data-go="coachai">Ask KAI</button>`;
+  }
+  if (S.sheet === 'pain') {
+    const p = S.pain;
+    if (p.sent) return `<div class="sent"><span class="ok">${ic('check', 'ic', 2.6)}</span><h3>Your coach has been told</h3>
+      <p>If the pain is sharp or sudden, stop and get it checked. The app can't diagnose injuries.</p></div>
+      <button class="pill-btn white" data-close>${p.act === 'swap' ? 'Choose a swap' : 'Done'}</button>`;
+    const ready = p.area && p.act;
+    return `<h3>Where does it hurt?</h3>
+      <div class="areas">${['Knee', 'Lower back', 'Hip', 'Shoulder', 'Ankle', 'Other'].map(a => `<button class="area" aria-pressed="${p.area === a}" data-area="${a}">${a}</button>`).join('')}</div>
+      <div class="sev"><div class="big"><b class="num" id="sevnum">${p.sev}</b><span>out of 10</span></div>
+        <input type="range" id="sev" min="0" max="10" value="${p.sev}" aria-label="Pain level"></div>
+      <div class="tri">
+        <button aria-pressed="${p.act === 'swap'}" data-act="swap">${ic('swap')}Swap it</button>
+        <button aria-pressed="${p.act === 'skip'}" data-act="skip">${ic('skip')}Skip it</button>
+        <button aria-pressed="${p.act === 'stop'}" data-act="stop">${ic('stop')}Stop today</button>
+      </div>
+      <button class="pill-btn ${ready ? 'mint' : 'dark'}" data-sendpain ${ready ? '' : 'disabled style="opacity:.5"'}>Send to your coach</button>`;
+  }
+  return '';
+}
+
+function restHTML() {
+  const { plan: pl } = plan(); const cur = pl[S.idx]; const ex = cur.ex;
+  const next = S.logs[ex.id].findIndex(s => !s.done);
+  const pct = S.rest.left / S.rest.total;
+  return `<div class="rest" role="timer">
+    <div class="eyebrow">Rest</div>
+    <div class="ringwrap"><svg viewBox="0 0 240 240" width="240" height="240" id="restring">${ring(240, 12, pct, 'var(--mint)', 'rgba(255,255,255,.08)')}</svg>
+      <div class="c"><b id="restnum">${fmt(S.rest.left)}</b></div></div>
+    <div class="nextup">Next · <b>Set ${next + 1}</b> · <b class="num">${ex.inc ? S.logs[ex.id][next].load + ' kg' : 'BW'}</b></div>
+    <div class="btns"><button class="pill-btn dark" data-rest="+30">+30s</button><button class="pill-btn white" data-rest="skip">Skip</button></div>
+  </div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Render
+// ---------------------------------------------------------------------------
+const $ = id => document.getElementById(id);
+const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+const TABS = [['home', 'Home'], ['train', 'Train'], ['fuel', 'Fuel'], ['progress', 'Progress'], ['community', 'Community']];
+
+function render(keepScroll) {
+  const sc = $('screen'), top = sc.scrollTop;
+  const v = S.view;
+  const net = S.demo.offline && v !== 'onboard' ? `<div class="netbar" role="status">${ic('wifi')}<span>${v === 'workout' ? "<b>You're offline.</b> Keep going: your sets are saved on this phone and sync when you're back." : "<b>You're offline.</b> Showing what was last saved. Messages send when you reconnect."}</span></div>` : '';
+  $('view').innerHTML = net + (v === 'home' ? vHome() : v === 'train' ? vTrain() : v === 'workout' ? vWorkout() : v === 'finish' ? vFinish()
+    : v === 'fuel' ? vFuel() : v === 'progress' ? vProgress() : v === 'onboard' ? vOnboard() : v === 'notifs' ? vNotifs() : v === 'community' ? vCommunity() : v === 'coachai' ? vAI() : v === 'checkin' ? vCheckin() : v === 'profile' ? vProfile() : v === 'history' ? vHistory() : v === 'library' ? vLibrary() : v === 'exercise' ? vExercise() : vChat());
+  const tb = $('tabbar');
+  tb.hidden = ['workout', 'finish', 'onboard', 'chat', 'coachai', 'checkin', 'profile'].includes(v);
+  const active = ['workout', 'history', 'library', 'exercise'].includes(v) ? 'train' : v === 'chat' || v === 'notifs' ? 'home' : v;
+  tb.innerHTML = TABS.map(([k, l]) => `<button class="${k === active ? 'on' : ''}" data-go="${k}" aria-label="${l}">${ic(k)}<span>${l}</span>${k === 'community' ? '<i class="pip" style="background:var(--violet)"></i>' : ''}</button>`).join('');
+
+  let layer = '';
+  if (v === 'workout') {
+    const last = S.idx === plan().plan.length - 1;
+    layer += `<div class="dock">
+      <button class="round" data-sheet="swap" aria-label="Swap exercise">${ic('swap')}</button>
+      <button class="round pain" data-sheet="pain" aria-label="Report pain">${ic('pain')}</button>
+      <button class="pill-btn mint" data-next>${last ? 'Finish' : 'Next'} ${ic('right')}</button></div>`;
+  }
+  if (v === 'chat') layer += chatDock();
+  if (v === 'coachai') layer += aiDock();
+  if (v === 'checkin' && S.ci.step <= 4) layer += `<div class="dock"><button class="pill-btn ${S.ci.step === 4 ? 'mint' : 'white'}" data-ci="next">${S.ci.step === 4 ? 'Send to your coach' : 'Continue'}</button></div>`;
+  if (v === 'onboard' && S.onb.step >= 1 && S.onb.step <= 8) layer += `<div class="dock"><button class="pill-btn white" data-onb="next">${['', 'Verify', 'Continue', 'I agree', 'Continue', 'Continue', 'Continue', 'Allow notifications', 'Done, it\'s on my home screen'][S.onb.step]}</button></div>`;
+  if (S.rest) layer += restHTML();
+  if (S.sheet) layer += `<div class="scrim" data-scrim><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${sheetHTML()}</div></div>`;
+  $('layer').innerHTML = layer;
+  sc.scrollTop = keepScroll ? top : 0;
+}
+
+function go(v) {
+  if (S.view === 'notifs') S.read = true;
+  S.view = v; S.sheet = null; stopRest();
+  try { history.replaceState(null, '', '#' + v); } catch (e) {}
+  render(false);
+}
+function showPush(title, body, sheet) {
+  const el = $('push');
+  el.innerHTML = `<img src="assets/kd-mark.png" alt=""><span class="t"><span class="row"><span>KDPT</span><span>now</span></span><b>${title}</b><p>${body}</p></span>`;
+  el.dataset.sheet = sheet; el.hidden = false;
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  clearTimeout(showPush.t); showPush.t = setTimeout(hidePush, 6500);
+}
+function hidePush() { const el = $('push'); el.classList.remove('show'); }
+function saveCheckinText() {
+  if (!S.ci) return;
+  for (const [id, k] of [['ciwords', 'words'], ['cinote', 'note'], ['ciwaist', 'waist'], ['ciweight', 'weight']]) { const el = $(id); if (el) S.ci[k] = el.value; }
+}
+function toast(m) { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2200); }
+
+function startRest(sec) {
+  stopRest();
+  S.rest = { left: sec, total: sec };
+  S.rest.timer = setInterval(() => {
+    S.rest.left--;
+    if (S.rest.left <= 0) { stopRest(); render(true); toast('Rest done · next set'); return; }
+    const n = $('restnum'), r = $('restring');
+    if (n) n.textContent = fmt(S.rest.left);
+    if (r) r.innerHTML = ring(240, 12, S.rest.left / S.rest.total, 'var(--mint)', 'rgba(255,255,255,.08)');
+  }, 1000);
+}
+function stopRest() { if (S.rest) clearInterval(S.rest.timer); S.rest = null; }
+
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button, [data-scrim]');
+  if (!t) return;
+  const d = t.dataset;
+  if (d.scrim !== undefined && e.target !== t) return;
+
+  if (t.id === 'push') { hidePush(); if (S.view !== 'home') S.view = 'home'; S.sheet = t.dataset.sheet; return render(true); }
+  if (d.go) return go(d.go);
+  if (d.toast) return toast(d.toast);
+  if (d.hist) { S.histOpen = S.histOpen === +d.hist ? null : +d.hist; return render(true); }
+  if (d.pat) { S.libPat = d.pat; return render(true); }
+  if (d.ex) { S.exId = d.ex; return go('exercise'); }
+  if (d.progressLift) { S.lift = d.progressLift; S.progTab = 0; return go('progress'); }
+  if (d.demo) { S.demo[d.demo] = !S.demo[d.demo]; if (d.demo === 'payFail') S.paid = false; return render(true); }
+  if (d.onb) {
+    const o = S.onb;
+    if (d.onb === 'finish') { go('home'); setTimeout(() => showPush('Your November sessions are ready', 'Kyle has proposed 8 sessions on your usual days. Tap to review.', 'book'), 1400); return; }
+    const inj = $('onbinj'); if (inj) o.injuries = inj.value;
+    if (d.onb === 'next' && o.step === 3 && !(o.consent.terms && o.consent.health)) { toast('The two required items are needed to coach you'); return; }
+    o.step = Math.max(0, Math.min(9, o.step + (d.onb === 'back' ? -1 : 1))); return render(false);
+  }
+  if (d.goal) { S.onb.goal = d.goal; return render(true); }
+  if (d.parq) { const inj = $('onbinj'); if (inj) S.onb.injuries = inj.value; S.onb.parq[+d.parq] = d.v === '1'; return render(true); }
+  if (d.consent) { S.onb.consent[d.consent] = !S.onb.consent[d.consent]; return render(true); }
+  if (d.os) { S.onb.os = d.os; return render(true); }
+  if (d.textsize) { S.scale = +d.textsize; $('screen').style.zoom = S.scale; return render(true); }
+  if (d.session !== undefined) { S.session = { cancelled: S.session.cancelled, step: 'view' }; S.sheet = 'session'; return render(true); }
+  if (d.sesscancel) { S.session.step = d.sesscancel; if (d.sesscancel === 'done') { S.session.cancelled = true; } return render(true); }
+  if (d.delask !== undefined) { S.delAsk = !S.delAsk; return render(true); }
+  if (d.days) { S.onb.days = +d.days; return render(true); }
+  if (d.freq) { S.onb.freq = d.freq; return render(true); }
+  if (d.cday) { S.onb.day = d.cday; return render(true); }
+  if (d.notif) { S.notifs[d.notif] = !S.notifs[d.notif]; return render(true); }
+  if (d.bookok !== undefined) { S.book.done = true; return render(true); }
+  if (d.move) { S.book.pick = +d.move; return render(true); }
+  if (d.avday) { const k = d.avday, a = S.avail.days; a[k] = a[k] ? null : HOURS[k].slice(); return render(true); }
+  if (d.availsend !== undefined) { S.avail.note = ($('avnote') || {}).value || ''; S.avail.sent = true; return render(true); }
+  if (d.alttime) { S.book.req[S.book.pick] = d.alttime; S.book.pick = null; return render(true); }
+  if (d.keeptime !== undefined) { delete S.book.req[S.book.pick]; S.book.pick = null; return render(true); }
+  if (d.fday) { S.fuelDay = +d.fday; return render(true); }
+  if (d.addfood) { S.add = { slot: d.addfood, tab: 'search', q: '' }; S.sheet = 'addfood'; return render(true); }
+  if (d.ftab) { S.add.tab = d.ftab; return render(true); }
+  if (d.pickfood) { S.log[S.add.slot].push(d.pickfood); toast(`Added to ${S.add.slot}`); S.sheet = null; return render(true); }
+  if (d.quickadd !== undefined) {
+    const v = id => parseFloat(($(id) || {}).value) || 0;
+    const f = { id: 'q' + Date.now(), n: 'Quick add', p: 'Entered by you', kcal: v('qk'), P: v('qp'), C: v('qc'), F: v('qf') };
+    FOODS.push(f); S.log[S.add.slot].push(f.id); S.sheet = null; toast(`Added to ${S.add.slot}`); return render(true);
+  }
+  if (d.water !== undefined) { S.water = Math.min(10, S.water + 1); return render(true); }
+  if (d.lift) { S.lift = d.lift; return render(true); }
+  if (d.guide) { S.guide[d.guide] = !S.guide[d.guide]; return render(true); }
+  if (d.showweight !== undefined) { S.showWeight = !S.showWeight; return render(true); }
+  if (d.ctab) { S.comm.tab = d.ctab; S.comm.cat = null; return render(true); }
+  if (d.cat !== undefined) { S.comm.cat = d.cat || null; return render(true); }
+  if (d.plike) { S.comm.liked[d.plike] = !S.comm.liked[d.plike]; return render(true); }
+  if (d.popen) { S.comm.open[d.popen] = !S.comm.open[d.popen]; return render(true); }
+  if (d.preply) {
+    const el = $('rp-' + d.preply), v = el && el.value.trim(); if (!v) return;
+    S.comm.posts.find(x => x.id === d.preply).cmts.push(['sarah', v.replace(/</g, '&lt;')]); return render(true);
+  }
+  if (d.newpost !== undefined) {
+    const el = $('newpost'), v = el && el.value.trim(); if (!v) return;
+    S.comm.posts.splice(1, 0, { id: 'n' + Date.now(), by: 'sarah', when: 'Now', body: v.replace(/</g, '&lt;'), likes: 0, cmts: [] }); return render(true);
+  }
+  if (d.libfood) { S.log.Dinner.push(d.libfood); toast('Added to today\'s dinner in Fuel'); return; }
+  if (d.autopay !== undefined) { S.autopay = !S.autopay; return render(true); }
+  if (d.payok !== undefined) { S.paid = true; return render(true); }
+  if (d.checkin !== undefined) { S.ci = newCheckin(); return go('checkin'); }
+  if (d.ci) {
+    saveCheckinText();
+    if (d.ci === 'close') return go('home');
+    S.ci.step = Math.max(1, Math.min(5, S.ci.step + (d.ci === 'back' ? -1 : 1))); return render(false);
+  }
+  if (d.cim) { S.ci[d.cim] = +d.v; return render(true); }
+  if (d.ache) { S.ci.aches = d.ache; return render(true); }
+  if (d.win) { S.ci.wins[d.win] = !S.ci.wins[d.win]; return render(true); }
+  if (d.photo !== undefined) { S.ci.photo = !S.ci.photo; if (S.ci.photo) toast('Photo added · private'); return render(true); }
+  if (d.measure !== undefined) { saveCheckinText(); S.ci.measure = !S.ci.measure; return render(true); }
+  if (d.sup) { saveCheckinText(); S.ci.support[d.sup] = !S.ci.support[d.sup]; return render(true); }
+  if (d.ptab) { S.progTab = +d.ptab; return render(true); }
+  if (d.why !== undefined) { S.why = !S.why; return render(true); }
+  if (d.dur) { S.duration = +d.dur; S.idx = 0; return render(true); }
+  if (d.tick !== undefined) {
+    const ex = plan().plan[S.idx].ex, s = S.logs[ex.id][+d.tick];
+    if (!s.reps) s.reps = ex.reps[1];
+    s.done = !s.done;
+    if (s.done && S.logs[ex.id].some(x => !x.done)) startRest(ex.rest); else stopRest();
+    return render(true);
+  }
+  if (d.rest === '+30') { S.rest.left += 30; S.rest.total += 30; $('restnum').textContent = fmt(S.rest.left); return; }
+  if (d.rest === 'skip') { stopRest(); return render(true); }
+  if (d.next !== undefined) {
+    if (S.idx < plan().plan.length - 1) { S.idx++; S.why = false; return render(false); }
+    S.view = 'finish'; return render(false);
+  }
+  if (d.sheet) { if (S.view === 'notifs') S.read = true; S.sheet = d.sheet; if (d.sheet === 'pain') S.pain = { area: null, sev: 3, act: null, sent: false }; return render(true); }
+  if (d.scrim !== undefined || d.close !== undefined) {
+    S.sheet = S.sheet === 'pain' && S.pain.sent && S.pain.act === 'swap' ? 'swap' : null; return render(true);
+  }
+  if (d.alt) { S.swaps[plan().plan[S.idx].ex.id] = d.alt; S.sheet = null; toast(`Swapped to ${d.alt}`); return render(true); }
+  if (d.area) { S.pain.area = d.area; return render(true); }
+  if (d.act) { S.pain.act = d.act; return render(true); }
+  if (d.sendpain !== undefined) { S.pain.sent = true; return render(true); }
+  if (d.ai) {
+    if (!S.ai.includes(d.ai)) S.ai.push(d.ai);
+    if (AI[d.ai].handoff) S.handed = true;
+    render(true); const sc = $('screen'); sc.scrollTop = sc.scrollHeight; return;
+  }
+  if (d.sendkyle !== undefined) {
+    const v = $('msg').value.trim(); if (!v) return;
+    S.chat.push(v.replace(/</g, '&lt;')); render(true); const sc = $('screen'); sc.scrollTop = sc.scrollHeight; return;
+  }
+});
+document.addEventListener('input', e => {
+  const i = e.target;
+  if (i.dataset.avk) { S.avail.days[i.dataset.avk][+i.dataset.ix] = +i.value; return; }
+  if (i.id === 'libq') { S.libq = i.value; const q = i.value.toLowerCase(); $('libres').innerHTML = libRows(EXLIB.filter(x => (S.libPat === 'all' || x[2] === S.libPat) && x[1].toLowerCase().includes(q))); return; }
+  if (i.id === 'fq') { S.add.q = i.value; const q = i.value.toLowerCase(); $('fres').innerHTML = foodResults(FOODS.filter(f => f.n.toLowerCase().includes(q))); return; }
+  if (i.id === 'moodr') { const m = MOODS[+i.value]; S.ci.mood = +i.value; $('mind').style.setProperty('--c', m[1]); $('mindword').textContent = m[0]; return; }
+  if (i.id === 'sev') { S.pain.sev = +i.value; $('sevnum').textContent = i.value; return; }
+  if (!i.dataset.set) return;
+  const ex = plan().plan[S.idx].ex; S.logs[ex.id][+i.dataset.set][i.dataset.k] = i.value;
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.sheet) { S.sheet = null; render(true); } });
+
+const h = (location.hash || '').slice(1);
+if (['home', 'train', 'workout', 'fuel', 'progress', 'chat', 'community', 'notifs', 'coachai', 'profile', 'history', 'library', 'exercise'].includes(h)) S.view = h;
+else if (h === 'checkin') { S.ci = newCheckin(); S.view = 'checkin'; }
+else if (h !== 'checkin') S.view = 'onboard';
+render(false);
+if (S.view === 'home') setTimeout(() => showPush('Your November sessions are ready', 'Kyle has proposed 8 sessions on your usual days. Tap to review.', 'book'), 2500);
+</script>
