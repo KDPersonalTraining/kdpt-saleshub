@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icon';
 import { tint, type Tint } from '@/lib/coach/sample-data';
-import { signOut } from '@/app/actions';
+import { SignOutButton } from '@/components/sign-out';
 
 const Ctx = createContext<{ toast: (m: string) => void }>({ toast: () => {} });
 export const useToast = () => useContext(Ctx).toast;
@@ -33,11 +33,11 @@ export function CoachShell({ me, children }: { me: { name: string; role: string;
               <Icon name={icon} />{l}{n ? <span className="count" style={{ background: t![0], color: t![1] }}>{n}</span> : null}
             </Link>
           ); })}
-          <form action={signOut} className="me" style={{ marginTop: 'auto' }}>
+          <div className="me" style={{ marginTop: 'auto' }}>
             <img src="/kd-mark.png" alt="" style={{ width: 34, height: 34, borderRadius: '50%', background: '#000', objectFit: 'contain', padding: '8px 5px', border: '1px solid var(--hair)' }} />
             <span style={{ flex: 1 }}><b>{me.name}</b><small>{me.role === 'coach' ? 'Head coach' : 'Assistant coach'}</small></span>
-            <button className="iconbtn" aria-label={me.demo ? 'Switch person' : 'Log out'} title={me.demo ? 'Switch person' : 'Log out'}><Icon name="open" className="sm" /></button>
-          </form>
+            <SignOutButton className="iconbtn" label={me.demo ? 'Switch person' : 'Log out'}><Icon name="open" className="sm" /></SignOutButton>
+          </div>
         </aside>
         <main className="main"><div className="wrap"><div className="fade" style={{ display: 'grid', gap: 24 }}>{children}</div></div></main>
       </div>

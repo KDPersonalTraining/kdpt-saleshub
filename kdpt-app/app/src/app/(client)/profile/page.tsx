@@ -7,7 +7,7 @@ import { freqInfo } from '@/components/client/sheets';
 import { Chev, Eyebrow, Li, SubTop, Switch } from '@/components/client/ui';
 import { CONSENTS } from '@/lib/client/sample-data';
 import { resetStore, setState, useClient } from '@/lib/client/store';
-import { signOut } from '@/app/actions';
+import { SignOutButton } from '@/components/sign-out';
 
 export default function Profile() {
   const s = useClient(), { openSheet, toast, me } = useUI();
@@ -58,7 +58,7 @@ export default function Profile() {
           <button className="optrow" onClick={() => { resetStore(me.id, me.isNew); toast('Demo reset'); }}><Li icon="swap" color="var(--fg2)" /><span className="t"><b>Reset the demo</b><small>Clears everything you&apos;ve logged on this device</small></span></button>
         </div></div>
       )}
-      <form action={signOut}><button className="pill-btn dark" style={{ width: '100%' }}>{me.demo ? 'Switch person' : 'Log out'}</button></form>
+      <SignOutButton className="pill-btn dark" style={{ width: '100%' }} label={me.demo ? 'Switch person' : 'Log out'} />
     </div>
   );
 }
