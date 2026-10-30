@@ -1,6 +1,8 @@
 'use server';
 
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { DEMO_COOKIE, isDemo, isPersona, type DemoPersona } from '@/lib/demo';
 import { createClient } from '@/lib/supabase/server';
 import { homeFor, type Role } from '@/lib/auth/roles';
 
@@ -32,4 +34,11 @@ export async function verifyCode(prev: SignInState, form: FormData): Promise<Sig
     return { step: 'email', email: prev.email, error: 'Your account isn\'t set up yet. Ask your coach to resend your invite.' };
   }
   redirect(homeFor(profile.role as Role));
+}
+
+// Demo mode only: remember who the visitor is trying out.
+export async function enterDemo(persona: DemoPersona) {
+  if (!isDemo() || !isPersona(persona)) redirect('/sign-in');
+  (await cookies()).set(DEMO_COOKIE, persona, { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 60 * 60 * 24 * 30 });
+  redirect(persona === 'coach' ? '/coach' : persona === 'new_client' ? '/welcome' : '/home');
 }

@@ -1,12 +1,18 @@
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { DEMO_COOKIE, DEMO_PEOPLE, isDemo, isPersona } from '@/lib/demo';
 import { canAccess, homeFor, type Area, type Role } from './roles';
 
-export type Me = { id: string; role: Role; name: string };
+export type Me = { id: string; role: Role; name: string; demo?: boolean; isNew?: boolean };
 
 // The signed-in user's profile, or null. Claims are verified, not just read
 // from the cookie.
 export async function getMe(): Promise<Me | null> {
+  if (isDemo()) {
+    const p = (await cookies()).get(DEMO_COOKIE)?.value;
+    return isPersona(p) ? { ...DEMO_PEOPLE[p], demo: true, isNew: p === 'new_client' } : null;
+  }
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   const id = data?.claims?.sub;

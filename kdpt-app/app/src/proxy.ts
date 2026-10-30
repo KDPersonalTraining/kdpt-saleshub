@@ -8,7 +8,11 @@ import { isPublicPath } from '@/lib/auth/roles';
 export async function proxy(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key) return NextResponse.next();
+  // Demo mode: no database, sign-in is a cookie saying who you're trying out.
+  if (!url || !key) {
+    if (request.cookies.has('kdpt_demo') || isPublicPath(request.nextUrl.pathname)) return NextResponse.next();
+    return NextResponse.redirect(new URL('/sign-in', request.url));
+  }
 
   let response = NextResponse.next({ request });
   const supabase = createServerClient(url, key, {
@@ -37,5 +41,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|kd-mark.png|.*\\.(?:svg|png|jpg|jpeg|webp)$).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|kd-mark.png|assets/|.*\\.(?:svg|png|jpg|jpeg|webp)$).*)'],
 };
