@@ -66,5 +66,6 @@ const P: Record<string, string> = {
   search: '<circle cx="10.5" cy="10.5" r="6.5" opacity=".3"/>' + st('M10.5 4a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM20 20l-4.6-4.6')
 };
 P.checkins = P.clip;
+P.payments = P.card;
 export const ICONS = P;
 export type IconName = keyof typeof P;
