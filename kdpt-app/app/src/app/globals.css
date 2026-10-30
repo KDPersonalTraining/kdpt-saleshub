@@ -1,0 +1,30 @@
+:root {
+  --bg: #000; --s1: #0d0f0e; --s2: #161817; --s3: #1f2321; --hair: rgba(255,255,255,.08);
+  --fg: #f4f6f5; --fg2: #b9c0bc; --fg3: #7d8681;
+  --mint: #7ed597; --mint-ink: #06210f; --amber: #ffb45e; --violet: #a99bff; --sky: #6ec6ff; --coral: #ff6b5e;
+  --display: 'Montserrat', system-ui, sans-serif; --body: 'Poppins', system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; }
+h1, h2, b { font-family: var(--display); }
+h1 { font-size: 30px; font-weight: 800; letter-spacing: -.02em; margin: 0; }
+.page { max-width: 480px; margin: 0 auto; padding: 24px max(20px, env(safe-area-inset-right)) 40px max(20px, env(safe-area-inset-left)); display: grid; gap: 20px; }
+.eyebrow { color: var(--fg3); font: 600 11px var(--display); letter-spacing: .12em; text-transform: uppercase; }
+.card { background: var(--s2); border: 1px solid var(--hair); border-radius: 22px; padding: 18px; display: grid; gap: 6px; }
+.card small, .muted { color: var(--fg3); font-size: 13px; }
+.btn { height: 54px; border-radius: 16px; font: 700 14px var(--display); letter-spacing: .06em; text-transform: uppercase; width: 100%; }
+.btn.mint { background: var(--mint); color: var(--mint-ink); }
+.btn.dark { background: var(--s2); color: var(--fg); border: 1px solid var(--hair); }
+.btn[disabled] { opacity: .5; cursor: default; }
+.field { display: grid; gap: 8px; font-size: 13px; color: var(--fg3); }
+.field input { height: 54px; border-radius: 16px; background: var(--s2); border: 1px solid var(--hair); padding: 0 16px; font-size: 17px; }
+.field input:focus { outline: 2px solid var(--mint); outline-offset: 1px; }
+.code input { letter-spacing: .5em; text-align: center; font: 700 24px var(--display); }
+.error { color: var(--coral); font-size: 14px; margin: 0; }
+.tile { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; border: 1px solid; font: 700 16px var(--display); }
+.row { display: flex; gap: 14px; align-items: center; }
+.top { display: flex; justify-content: space-between; align-items: center; }
+.top img { height: 22px; width: auto; }
