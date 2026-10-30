@@ -14,8 +14,9 @@ screen works on sample data, and the sign-in page lets you pick who to be:
 
 Anything you do is kept in that browser only. In Sarah's profile, "Demo only ·
 preview states" turns on the no-signal, payment-failed and new-client screens,
-and "Reset the demo" clears what you've logged. Adding the two Supabase values
-switches demo mode off automatically.
+and "Reset the demo" clears what you've logged. Demo mode stays on even after
+Supabase is connected; set `KDPT_LIVE=1` in Vercel once the database is set up
+and Kyle's coach account exists.
 
 ## What's here
 

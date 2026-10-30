@@ -1,10 +1,11 @@
 import { hasSupabaseEnv } from './supabase/env';
 import type { Role } from './auth/roles';
 
-// Demo mode runs the whole app on sample data, with no database. It switches
-// on automatically when the Supabase settings are missing, so the app can be
-// tried before Supabase is set up. Sign-in becomes "pick who to be".
-export const isDemo = () => !hasSupabaseEnv();
+// Demo mode runs the whole app on sample data, with no database, and sign-in
+// becomes "pick who to be". It stays on until KDPT_LIVE=1 is set, so
+// connecting Supabase (which adds its settings automatically) doesn't switch
+// clients onto an empty database before it's ready.
+export const isDemo = () => process.env.KDPT_LIVE !== '1' || !hasSupabaseEnv();
 
 export const DEMO_COOKIE = 'kdpt_demo';
 export type DemoPersona = 'client' | 'new_client' | 'coach';
