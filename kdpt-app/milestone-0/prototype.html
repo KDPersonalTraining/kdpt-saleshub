@@ -806,6 +806,51 @@ svg { display: block; }
 .tsize button { width: 40px; height: 36px; border-radius: 9px; background: var(--s3); font-family: var(--display); font-weight: 700; color: var(--fg2); }
 .tsize button[aria-pressed="true"] { background: var(--fg); color: #000; }
 .quote { border-left: 2px solid var(--violet); padding: 2px 0 2px 10px; margin-bottom: 6px; font-size: 13px; opacity: .85; }
+/* History, exercise library, offline and error states */
+.hrow { display: flex; align-items: center; gap: 12px; padding: 14px; width: 100%; text-align: left; }
+.hrow .t { flex: 1; min-width: 0; }
+.hrow .t b { font: 700 16px var(--display); display: block; }
+.hrow .t small { color: var(--fg3); font-size: 13px; }
+.hrow .chev { transition: transform .2s; }
+.hrow .pr { display: flex; align-items: center; gap: 4px; font-weight: 700; font-size: 14px; }
+.hrow .pr svg { width: 18px; height: 18px; }
+.hsets { display: grid; gap: 10px; padding: 0 14px 16px; }
+.hsets div { display: grid; gap: 2px; padding-left: 12px; border-left: 2px solid var(--s3); }
+.hsets b { font-size: 14px; font-weight: 600; }
+.hsets span { font-size: 13px; color: var(--fg3); }
+.blank { display: grid; justify-items: center; text-align: center; gap: 10px; padding: 40px 12px; }
+.blank .li { width: 64px !important; height: 64px !important; border-radius: 20px !important; }
+.blank .li svg { width: 30px !important; height: 30px !important; }
+.blank b { font: 800 20px var(--display); }
+.blank p { color: var(--fg3); font-size: 14px; max-width: 290px; line-height: 1.45; }
+.blank .pill-btn { margin-top: 8px; width: 100%; }
+.demo { aspect-ratio: 16 / 10; border-radius: 22px; border: 1px dashed color-mix(in srgb, var(--c) 40%, transparent);
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--c) 14%, transparent), transparent 70%), var(--s1);
+  display: grid; place-content: center; justify-items: center; gap: 8px; text-align: center; padding: 16px; }
+.demo b { font: 700 17px var(--display); }
+.demo small { color: var(--fg3); font-size: 13px; max-width: 250px; }
+.exfacts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.exfacts div { background: var(--s2); border-radius: 18px; padding: 12px; display: grid; gap: 4px; align-content: start; }
+.exfacts .li { width: 34px !important; height: 34px !important; margin-bottom: 4px; }
+.exfacts .li svg { width: 18px !important; height: 18px !important; }
+.exfacts small { color: var(--fg3); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+.exfacts b { font-size: 14px; font-weight: 600; line-height: 1.25; }
+.cues { counter-reset: c; list-style: none; display: grid; gap: 8px; padding: 0; margin: 0; }
+.cues li { counter-increment: c; display: flex; gap: 12px; align-items: flex-start; background: var(--s2); border-radius: 16px; padding: 14px; font-size: 15px; line-height: 1.4; }
+.cues li::before { content: counter(c); flex: none; width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center;
+  border: 1px solid rgba(126,213,151,.4); color: var(--mint); font: 700 13px var(--display); }
+.netbar { position: sticky; top: 8px; margin: 8px var(--gut-r, 16px) 0 var(--gut, 16px); z-index: 15; display: flex; gap: 10px; align-items: center;
+  padding: 10px 14px; border-radius: 16px; background: rgba(40,30,12,.92); border: 1px solid rgba(255,180,94,.35); backdrop-filter: blur(18px); font-size: 13px; color: var(--fg2); }
+.netbar svg { width: 20px; height: 20px; color: var(--amber); flex: none; }
+.netbar b { color: var(--fg); font-weight: 600; }
+.alert { display: flex; gap: 12px; align-items: center; width: 100%; text-align: left; padding: 14px; border-radius: 20px;
+  background: rgba(255,107,94,.08); border: 1px solid rgba(255,107,94,.35); }
+.alert .t { flex: 1; min-width: 0; }
+.alert b { display: block; font: 700 15px var(--display); }
+.alert small { color: var(--fg3); font-size: 13px; }
+.failbox { display: flex; gap: 12px; padding: 14px; border-radius: 16px; background: rgba(255,107,94,.08); border: 1px solid rgba(255,107,94,.35); font-size: 14px; color: var(--fg2); line-height: 1.4; }
+.failbox svg { width: 22px; height: 22px; color: var(--coral); flex: none; }
+.failbox b { color: var(--fg); }
 </style>
 
 <div class="device" id="device">
@@ -884,6 +929,7 @@ const P = {
   reply: st('M10 7 5 12l5 5M5 12h9.5a5 5 0 0 1 5 5v1.5'),
   open: st('M14 4h6v6M20 4l-8.5 8.5') + '<path opacity=".4" d="M5 6h6v2H6v10h10v-5h2v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/>',
   trash: '<path opacity=".45" d="M6 7.5h12l-.9 12a2 2 0 0 1-2 1.8H8.9a2 2 0 0 1-2-1.8z"/><path d="M9.5 3.5h5a1 1 0 0 1 1 1V6H20a1 1 0 0 1 0 2H4a1 1 0 0 1 0-2h4.5V4.5a1 1 0 0 1 1-1z"/>',
+  wifi: st('M2.5 9a14 14 0 0 1 19 0M5.8 12.6a9.2 9.2 0 0 1 12.4 0M9 16.1a4.5 4.5 0 0 1 6 0') + '<circle cx="12" cy="19.5" r="1.6"/>' + '<g opacity=".9">' + st('M3 3l18 18', 2.4) + '</g>',
   search: '<circle cx="10.5" cy="10.5" r="6.5" opacity=".3"/>' + st('M10.5 4a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM20 20l-4.6-4.6')
 };
 const ic = (n, cls = 'ic') => `<svg class="${cls}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${P[n]}</svg>`;
@@ -971,7 +1017,8 @@ const S = { onb: { step: 0, goal: 'strength', days: 3, freq: 'weekly', day: 'Sun
   pain: { area: null, sev: 3, act: null, sent: false }, rest: null, progTab: 0, chat: [],
   fuelDay: 2, log: { Breakfast: ['eggs', 'sourdough', 'avo'], Lunch: ['wrap'], Snacks: ['yog', 'berries'], Dinner: [] }, water: 6,
   add: null, lift: 'Leg Press', guide: {}, showWeight: false,
-  comm: { tab: 'feed', cat: null, open: { q1: true }, liked: {}, posts: null } };
+  comm: { tab: 'feed', cat: null, open: { q1: true }, liked: {}, posts: null },
+  libq: '', libPat: 'all', exId: 'lp', histOpen: 0, demo: { offline: false, payFail: false, fresh: false } };
 const plan = () => fitToTime(S.duration);
 const newCheckin = () => ({ step: 1, mood: 3, words: '', sleep: 4, energy: 3, stress: 3, food: 4, motivation: 4, aches: 'None',
   wins: {}, photo: false, measure: false, waist: '', weight: '', support: {}, note: '' });
@@ -996,6 +1043,7 @@ const vHome = () => {
       <button class="kd-av" data-go="chat" aria-label="Messages from Kyle"><img src="assets/kd-mark.png" alt=""><span class="dot"></span></button>
       <button class="avatar" data-go="profile" aria-label="Profile and settings">SM</button></div></div>
     <div class="greet"><div class="eyebrow">Wednesday 21 October</div><h1>Morning, Sarah</h1></div>
+    ${S.demo.payFail && !S.paid ? `<button class="alert" data-sheet="pay"><span class="li" style="color:var(--coral)">${ic('card')}</span><span class="t"><b>November payment didn't go through</b><small>Your bank declined £260. Update your card to keep your sessions.</small></span><span class="chev">${ic('right')}</span></button>` : ''}
 
     <button class="card mom" data-sheet="momentum" aria-label="Momentum: strong. See the breakdown">
       ${rings(96, 9)}
@@ -1052,12 +1100,104 @@ const vTrain = () => {
         <span class="chev">${ic('right')}</span>
       </button>`).join('')}</div>
     <div class="actions" style="grid-template-columns:repeat(3,1fr)">
-      <button class="act" data-toast="Exercise library with Kyle's demos"><i style="background:var(--s2)">${ic('layers')}</i>Library</button>
-      <button class="act" data-toast="Every session you've logged"><i style="background:var(--s2)">${ic('clock')}</i>History</button>
+      <button class="act" data-go="library"><i style="background:var(--s2)">${ic('layers')}</i>Library</button>
+      <button class="act" data-go="history"><i style="background:var(--s2)">${ic('clock')}</i>History</button>
       <button class="act" data-go="progress"><i style="background:var(--s2)">${ic('trophy')}</i>Records</button>
     </div>
   </div>`;
 };
+
+// ---------------------------------------------------------------------------
+// Train: history, exercise library, exercise detail
+// ---------------------------------------------------------------------------
+// [date, workout, minutes, [[exercise, [[kg, reps], ...]], ...], records]
+const HISTORY = [
+  ['Mon 19 Oct', 'Lower Body A', 58, [['Leg Press', [[130, 10], [130, 10], [130, 9]]], ['Romanian Deadlift', [[60, 10], [60, 9], [60, 8]]], ['Walking Lunge', [[12, 10], [12, 10], [12, 10]]], ['Seated Leg Curl', [[40, 15], [40, 14], [40, 13]]]], 2],
+  ['Tue 20 Oct', 'Upper Body A', 52, [['Lat Pulldown', [[42.5, 12], [42.5, 11], [42.5, 10]]], ['Hip Thrust', [[80, 12], [80, 11], [80, 10]]], ['DB Shoulder Press', [[14, 10], [14, 9], [14, 8]]], ['Seated Row', [[45, 12], [45, 12], [45, 11]]]], 2],
+  ['Thu 15 Oct', 'Lower Body B', 47, [['Hip Thrust', [[80, 10], [80, 10], [80, 9]]], ['Goblet Squat', [[24, 12], [24, 12], [24, 10]]], ['Leg Extension', [[35, 15], [35, 14]]]], 1],
+  ['Tue 13 Oct', 'Lower Body A', 61, [['Leg Press', [[120, 12], [120, 12], [120, 12]]], ['Romanian Deadlift', [[57.5, 10], [57.5, 10], [57.5, 9]]], ['Walking Lunge', [[12, 10], [12, 10], [12, 10]]]], 0],
+  ['Mon 12 Oct', 'Upper Body A', 50, [['Lat Pulldown', [[42.5, 10], [42.5, 9], [40, 10]]], ['DB Shoulder Press', [[14, 9], [14, 8], [12, 10]]], ['Seated Row', [[45, 12], [45, 11], [45, 10]]]], 1]
+];
+const PATTERNS = [['all', 'All', 'layers', 'var(--fg2)'], ['squat', 'Squat', 'train', 'var(--mint)'], ['hinge', 'Hinge', 'weight', 'var(--amber)'], ['push', 'Push', 'up', 'var(--coral)'],
+  ['pull', 'Pull', 'down', 'var(--sky)'], ['lunge', 'Lunge', 'body', 'var(--violet)'], ['core', 'Core', 'flame', 'var(--amber)']];
+// [id, name, pattern, kit, muscles, cues, swaps, filmed]
+const EXLIB = [
+  ['lp', 'Leg Press', 'squat', 'machine', 'Quads, glutes', ['Feet shoulder-width, mid-platform', 'Lower until knees reach about 90°', 'Push through the whole foot, don\'t lock out'], ['Hack Squat', 'Goblet Squat', 'Box Squat'], false],
+  ['gs', 'Goblet Squat', 'squat', 'dumbbell', 'Quads, glutes, core', ['Hold the dumbbell at your chest', 'Sit between your heels, chest tall', 'Drive up through mid-foot'], ['Box Squat', 'Leg Press'], false],
+  ['hs', 'Hack Squat', 'squat', 'machine', 'Quads', ['Back flat on the pad', 'Control the way down for 2 seconds', 'Stop just short of lockout'], ['Leg Press'], false],
+  ['rdl', 'Romanian Deadlift', 'hinge', 'dumbbell', 'Hamstrings, glutes', ['Soft knees, push your hips back', 'Bar stays close to your legs', 'Stop when your hamstrings are tight, not your back'], ['Dumbbell RDL', 'Cable Pull-through'], false],
+  ['ht', 'Hip Thrust', 'hinge', 'barbell', 'Glutes', ['Upper back on the bench edge', 'Chin tucked, ribs down', 'Squeeze at the top for a second'], ['Glute Bridge', 'Cable Kickback'], false],
+  ['sp', 'DB Shoulder Press', 'push', 'dumbbell', 'Shoulders, triceps', ['Sit tall, back against the pad', 'Press up and slightly in', 'Lower to ear height'], ['Machine Shoulder Press', 'Landmine Press'], false],
+  ['pu', 'Incline Push-up', 'push', 'body', 'Chest, triceps', ['Hands on a bench, body in one line', 'Lower your chest to the bench', 'Push the floor away'], ['Push-up', 'DB Bench Press'], false],
+  ['lpd', 'Lat Pulldown', 'pull', 'machine', 'Back, biceps', ['Grip just outside shoulder-width', 'Pull elbows down to your ribs', 'Control it back up'], ['Assisted Pull-up', 'Single-arm Pulldown'], false],
+  ['sr', 'Seated Row', 'pull', 'machine', 'Mid back', ['Chest up, shoulders down', 'Pull to your belly button', 'Pause, then let your shoulders reach forward'], ['DB Row', 'Chest-supported Row'], false],
+  ['wl', 'Walking Lunge', 'lunge', 'dumbbell', 'Quads, glutes', ['Long step, back knee towards the floor', 'Front knee follows your toes', 'Push through the front heel'], ['Split Squat', 'Step-up'], false],
+  ['ss', 'Split Squat', 'lunge', 'dumbbell', 'Quads, glutes', ['Stay in one place, feet hip-width apart', 'Drop straight down', 'Most weight through the front foot'], ['Step-up'], false],
+  ['dbg', 'Dead Bug', 'core', 'body', 'Deep core', ['Lower back pressed into the floor', 'Opposite arm and leg go out together', 'Breathe out as you reach'], ['Plank'], false],
+  ['pl', 'Plank', 'core', 'body', 'Core, shoulders', ['Elbows under shoulders', 'Squeeze glutes, ribs down', 'Stop when your hips drop'], ['Dead Bug'], false]
+];
+const KIT = { machine: ['Machine', 'machine'], dumbbell: ['Dumbbells', 'weight'], barbell: ['Barbell', 'train'], body: ['Bodyweight', 'body'] };
+const patOf = k => PATTERNS.find(p => p[0] === k);
+const topSet = sets => sets.reduce((b, s) => (e1rm(s[0], s[1]) > e1rm(b[0], b[1]) ? s : b));
+
+const subTop = (title, back = 'train') => `<div class="ntop"><button class="ib" data-go="${back}" aria-label="Back">${ic('back')}</button><h1>${title}</h1></div>`;
+const emptyState = (icon, col, title, body, cta = '') => `<div class="blank"><span class="li" style="color:${col}">${ic(icon)}</span><b>${title}</b><p>${body}</p>${cta}</div>`;
+
+function vHistory() {
+  if (S.demo.fresh) return `<div class="page fade">${subTop('History')}
+    ${emptyState('clock', 'var(--sky)', 'No sessions yet', 'Every workout you finish lands here, with every set, so you can see exactly what you lifted last time.', '<button class="pill-btn mint" data-go="workout">Start your first workout</button>')}</div>`;
+  const vol = r => r[3].reduce((t, [, sets]) => t + sets.reduce((a, [w, n]) => a + w * n, 0), 0);
+  return `<div class="page fade">${subTop('History')}
+    <div class="stats">
+      <div class="stat"><span style="color:var(--mint)">${ic('check')}</span><b class="num">23</b><small>Sessions since September</small></div>
+      <div class="stat"><span style="color:var(--amber)">${ic('trophy')}</span><b class="num">9</b><small>Personal records</small></div></div>
+    <div class="group" style="--inset:14px">${HISTORY.map((r, i) => { const open = S.histOpen === i; return `
+      <button class="hrow" data-hist="${i}" aria-expanded="${open}">
+        <span class="t"><b>${r[1]}</b><small class="num">${r[0]} · ${r[2]} min · ${Math.round(vol(r)).toLocaleString('en-GB')} kg lifted</small></span>
+        ${r[4] ? `<span class="pr" style="color:var(--amber)">${ic('trophy')}<span class="num">${r[4]}</span></span>` : ''}
+        <span class="chev" style="transform:rotate(${open ? 90 : 0}deg)">${ic('right')}</span></button>
+      ${open ? `<div class="hsets">${r[3].map(([n, sets]) => `<div><b>${n}</b><span class="num">${sets.map(([w, k]) => `${w} × ${k}`).join(' · ')}</span></div>`).join('')}</div>` : ''}`; }).join('')}</div>
+    <div class="explain">${ic('info')}<span>Tap a session to see every set. Your coach sees the same thing.</span></div>
+  </div>`;
+}
+
+function vLibrary() {
+  const q = (S.libq || '').toLowerCase();
+  const list = EXLIB.filter(e => (S.libPat === 'all' || e[2] === S.libPat) && e[1].toLowerCase().includes(q));
+  return `<div class="page fade">${subTop('Exercises')}
+    <label class="search">${ic('search')}<input id="libq" placeholder="Search ${EXLIB.length} exercises" value="${S.libq || ''}" aria-label="Search exercises"></label>
+    <div class="liftchips">${PATTERNS.map(([k, l]) => `<button class="${S.libPat === k ? 'on' : ''}" data-pat="${k}">${l}</button>`).join('')}</div>
+    <div id="libres">${libRows(list)}</div>
+  </div>`;
+}
+function libRows(list) {
+  if (!list.length) return emptyState('search', 'var(--fg2)', 'Nothing found', 'Try another name, or ask your coach to add it.', '<button class="pill-btn dark" data-go="chat">Message your coach</button>');
+  return `<div class="group" style="--inset:68px">${list.map(e => { const p = patOf(e[2]); return `
+    <button class="optrow" data-ex="${e[0]}"><span class="li" style="color:${p[3]}">${ic(p[2])}</span><span class="t"><b>${e[1]}</b><small>${p[1]} · ${KIT[e[3]][0]}</small></span><span class="chev">${ic('right')}</span></button>`; }).join('')}</div>`;
+}
+
+function vExercise() {
+  const e = EXLIB.find(x => x[0] === S.exId) || EXLIB[0], p = patOf(e[2]);
+  const rows = LIFTS[e[1]];
+  const mine = rows ? `<div class="card big-stat"><div class="eyebrow">Your best</div>
+      <div class="delta num">${rows[rows.length - 1][1]} kg × ${rows[rows.length - 1][2]}</div>
+      <div class="lbl num">Est. 1-rep max ${e1rm(rows[rows.length - 1][1], rows[rows.length - 1][2])} kg · up from ${rows[0][1]} kg in September</div>
+      <button class="pill-btn dark" style="margin-top:12px" data-progress-lift="${e[1]}">See every session</button></div>`
+    : `<div class="explain">${ic('info')}<span>You haven't done this one yet. Once you log it, your best set shows here.</span></div>`;
+  return `<div class="page fade">${subTop(e[1], 'library')}
+    <div class="demo" style="--c:${p[3]}"><span class="li" style="color:${p[3]}">${ic('film')}</span><b>Demo coming soon</b><small>Kyle is filming this one. For now, follow the steps below.</small></div>
+    <div class="exfacts">
+      <div><span class="li" style="color:${p[3]}">${ic(p[2])}</span><small>Pattern</small><b>${p[1]}</b></div>
+      <div><span class="li" style="color:var(--sky)">${ic(KIT[e[3]][1])}</span><small>Kit</small><b>${KIT[e[3]][0]}</b></div>
+      <div><span class="li" style="color:var(--coral)">${ic('heart')}</span><small>Works</small><b>${e[4]}</b></div></div>
+    <div><div class="eyebrow" style="margin-bottom:10px">How to do it</div>
+      <ol class="cues">${e[5].map(c => `<li>${c}</li>`).join('')}</ol></div>
+    ${mine}
+    <div><div class="eyebrow" style="margin-bottom:10px">Approved swaps</div><div class="group" style="--inset:68px">${e[6].map(n => { const x = EXLIB.find(y => y[1] === n); return `
+      <button class="optrow" ${x ? `data-ex="${x[0]}"` : `data-toast="${n}: your coach has approved this swap"`}><span class="li" style="color:var(--violet)">${ic('swap')}</span><span class="t"><b>${n}</b><small>Same sets and reps</small></span><span class="chev">${ic('right')}</span></button>`; }).join('')}</div></div>
+    <button class="pill-btn dark" data-go="coachai">Ask KAI about this exercise</button>
+  </div>`;
+}
 
 const vWorkout = () => {
   const { plan: pl, minutes } = plan();
@@ -1579,6 +1719,9 @@ function vProfile() {
       <span><b style="color:var(--fg)">Delete your account?</b><br>Your workouts, check-ins, food logs and photos are deleted within 30 days. Payment records are kept for 6 years because the law requires it. Your subscription is cancelled at the end of the month.</span>
       <button class="pill-btn" style="background:var(--coral);color:#2a0703" data-toast="Account scheduled for deletion. Kyle has been told">Delete my account</button>
       <button class="pill-btn dark" data-delask>Keep my account</button></div>` : ''}
+    <div><div class="eyebrow" style="margin-bottom:10px">Prototype only · preview states</div><div class="group">
+      ${[['offline', 'wifi', 'var(--amber)', 'No signal', 'Banner in the gym when the Wi-Fi drops'], ['payFail', 'card', 'var(--coral)', 'Payment failed', 'Alert on Home and in the payment sheet'], ['fresh', 'clock', 'var(--sky)', 'Brand-new client', 'Empty History, before the first workout']].map(([k, i, col, t, d]) => `<div class="cons" style="padding:12px 14px"><span class="li" style="color:${col}">${ic(i)}</span><span class="t"><b>${t}</b><small>${d}</small></span><button class="sw" role="switch" aria-checked="${S.demo[k]}" data-demo="${k}" aria-label="${t}"></button></div>`).join('')}
+    </div></div>
     <button class="pill-btn dark" data-toast="Logged out">Log out</button>
   </div>`;
 }
@@ -1652,11 +1795,12 @@ function sheetHTML() {
   }
   if (S.sheet === 'pay') {
     if (S.paid) return `<div class="sent"><span class="ok" style="background:var(--amber);color:#2a1600">${ic('check', 'ic', 2.6)}</span><h3>Paid · thank you</h3><p>Receipt sent to your email. ${S.autopay ? 'December will be taken automatically.' : ''}</p></div><button class="pill-btn white" data-close>Done</button>`;
-    return `<div><h3>November payment</h3><div class="sub">Due Sunday 1 November</div></div>
+    const fail = S.demo.payFail ? `<div class="failbox">${ic('pain')}<span><b>Your bank declined this payment.</b> Usually it's an expired card or a security check. Update your card or try again. Sessions stay booked for 7 days while you sort it.</span></div>` : '';
+    return `<div><h3>November payment</h3><div class="sub">${S.demo.payFail ? 'Failed on Sunday 1 November' : 'Due Sunday 1 November'}</div></div>${fail}
       <div class="paycard"><div class="line"><span>8 PT sessions</span><span class="num">£260.00</span></div><div class="line"><span>1–30 November</span><span></span></div><div class="line total"><span>Total</span><span class="num">£260.00</span></div></div>
       <div class="cardrow"><span class="brand">VISA</span><span class="t"><b>•••• 4242</b><small>Expires 08/28</small></span><button data-toast="Change card in Stripe" style="color:var(--fg2);font-size:14px">Change</button></div>
       <div class="tg"><span class="li" style="background:rgba(255,180,94,.14);color:var(--amber)">${ic('card')}</span><span class="t"><b>Pay automatically each month</b><small>Reminder 3 days before, cancel any time</small></span><button class="sw" role="switch" aria-checked="${S.autopay}" data-autopay aria-label="Pay automatically"></button></div>
-      <button class="pill-btn mint" data-payok>Pay £260.00</button>`;
+      <button class="pill-btn mint" data-payok>${S.demo.payFail ? 'Try again · £260.00' : 'Pay £260.00'}</button>`;
   }
   if (S.sheet === 'momentum') {
     const week = [['M', 70, 'on'], ['T', 78, 'on'], ['W', 84, 'now'], ['T', 0, ''], ['F', 0, ''], ['S', 0, ''], ['S', 0, '']];
@@ -1731,11 +1875,12 @@ const TABS = [['home', 'Home'], ['train', 'Train'], ['fuel', 'Fuel'], ['progress
 function render(keepScroll) {
   const sc = $('screen'), top = sc.scrollTop;
   const v = S.view;
-  $('view').innerHTML = v === 'home' ? vHome() : v === 'train' ? vTrain() : v === 'workout' ? vWorkout() : v === 'finish' ? vFinish()
-    : v === 'fuel' ? vFuel() : v === 'progress' ? vProgress() : v === 'onboard' ? vOnboard() : v === 'notifs' ? vNotifs() : v === 'community' ? vCommunity() : v === 'coachai' ? vAI() : v === 'checkin' ? vCheckin() : v === 'profile' ? vProfile() : vChat();
+  const net = S.demo.offline && v !== 'onboard' ? `<div class="netbar" role="status">${ic('wifi')}<span>${v === 'workout' ? "<b>You're offline.</b> Keep going: your sets are saved on this phone and sync when you're back." : "<b>You're offline.</b> Showing what was last saved. Messages send when you reconnect."}</span></div>` : '';
+  $('view').innerHTML = net + (v === 'home' ? vHome() : v === 'train' ? vTrain() : v === 'workout' ? vWorkout() : v === 'finish' ? vFinish()
+    : v === 'fuel' ? vFuel() : v === 'progress' ? vProgress() : v === 'onboard' ? vOnboard() : v === 'notifs' ? vNotifs() : v === 'community' ? vCommunity() : v === 'coachai' ? vAI() : v === 'checkin' ? vCheckin() : v === 'profile' ? vProfile() : v === 'history' ? vHistory() : v === 'library' ? vLibrary() : v === 'exercise' ? vExercise() : vChat());
   const tb = $('tabbar');
   tb.hidden = ['workout', 'finish', 'onboard', 'chat', 'coachai', 'checkin', 'profile'].includes(v);
-  const active = v === 'workout' ? 'train' : v === 'chat' || v === 'notifs' ? 'home' : v;
+  const active = ['workout', 'history', 'library', 'exercise'].includes(v) ? 'train' : v === 'chat' || v === 'notifs' ? 'home' : v;
   tb.innerHTML = TABS.map(([k, l]) => `<button class="${k === active ? 'on' : ''}" data-go="${k}" aria-label="${l}">${ic(k)}<span>${l}</span>${k === 'community' ? '<i class="pip" style="background:var(--violet)"></i>' : ''}</button>`).join('');
 
   let layer = '';
@@ -1799,6 +1944,11 @@ document.addEventListener('click', e => {
   if (t.id === 'push') { hidePush(); if (S.view !== 'home') S.view = 'home'; S.sheet = t.dataset.sheet; return render(true); }
   if (d.go) return go(d.go);
   if (d.toast) return toast(d.toast);
+  if (d.hist) { S.histOpen = S.histOpen === +d.hist ? null : +d.hist; return render(true); }
+  if (d.pat) { S.libPat = d.pat; return render(true); }
+  if (d.ex) { S.exId = d.ex; return go('exercise'); }
+  if (d.progressLift) { S.lift = d.progressLift; S.progTab = 0; return go('progress'); }
+  if (d.demo) { S.demo[d.demo] = !S.demo[d.demo]; if (d.demo === 'payFail') S.paid = false; return render(true); }
   if (d.onb) {
     const o = S.onb;
     if (d.onb === 'finish') { go('home'); setTimeout(() => showPush('Your November sessions are ready', 'Kyle has proposed 8 sessions on your usual days. Tap to review.', 'book'), 1400); return; }
@@ -1901,6 +2051,7 @@ document.addEventListener('click', e => {
 document.addEventListener('input', e => {
   const i = e.target;
   if (i.dataset.avk) { S.avail.days[i.dataset.avk][+i.dataset.ix] = +i.value; return; }
+  if (i.id === 'libq') { S.libq = i.value; const q = i.value.toLowerCase(); $('libres').innerHTML = libRows(EXLIB.filter(x => (S.libPat === 'all' || x[2] === S.libPat) && x[1].toLowerCase().includes(q))); return; }
   if (i.id === 'fq') { S.add.q = i.value; const q = i.value.toLowerCase(); $('fres').innerHTML = foodResults(FOODS.filter(f => f.n.toLowerCase().includes(q))); return; }
   if (i.id === 'moodr') { const m = MOODS[+i.value]; S.ci.mood = +i.value; $('mind').style.setProperty('--c', m[1]); $('mindword').textContent = m[0]; return; }
   if (i.id === 'sev') { S.pain.sev = +i.value; $('sevnum').textContent = i.value; return; }
@@ -1910,7 +2061,7 @@ document.addEventListener('input', e => {
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.sheet) { S.sheet = null; render(true); } });
 
 const h = (location.hash || '').slice(1);
-if (['home', 'train', 'workout', 'fuel', 'progress', 'chat', 'community', 'notifs', 'coachai', 'profile'].includes(h)) S.view = h;
+if (['home', 'train', 'workout', 'fuel', 'progress', 'chat', 'community', 'notifs', 'coachai', 'profile', 'history', 'library', 'exercise'].includes(h)) S.view = h;
 else if (h === 'checkin') { S.ci = newCheckin(); S.view = 'checkin'; }
 else if (h !== 'checkin') S.view = 'onboard';
 render(false);

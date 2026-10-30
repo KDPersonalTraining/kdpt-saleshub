@@ -153,6 +153,41 @@ Momentum is a word, not a score out of 100, as the blueprint recommended.
   wording about keeping payment records for 6 years needs checking alongside
   the privacy notice.
 
+### Remaining screens (30 Oct)
+
+Client app:
+
+- **History** (Train → History): every finished session with time, total kg
+  and records set. Tap a session to see every set.
+- **Exercise library** (Train → Library): search, filter by movement pattern.
+  Each exercise shows the demo (or "Demo coming soon" until filmed), pattern,
+  kit, muscles, numbered cues, the client's best set and their coach-approved
+  swaps.
+- **Offline and error states.** Profile → "Prototype only · preview states"
+  turns them on:
+  - No signal: a banner pinned at the top. During a workout it says sets are
+    saved on the phone and sync later.
+  - Payment failed: an alert on Home and a failed payment sheet with
+    "Try again". Sessions stay booked for 7 days.
+  - Brand-new client: History shows an empty state that points to the first
+    workout. Library search with no results suggests messaging the coach.
+
+Coach portal:
+
+- **Template editor** (Programmes → Edit or New template): name, length, goal,
+  progression rule, deload, days, and the same exercise rows as a client's
+  plan. Saving a template never changes a client's live plan.
+- **Exercise editor** (Library → any exercise, or Add): video upload, name,
+  pattern, kit, load jump, muscles, three cues, and approved swaps from the
+  same pattern. Swaps are the only options KAI and clients can switch to.
+- **Check-in builder** (new Check-ins page): questions grouped by the four
+  steps the client sees, with type, required switch, reorder, delete, add,
+  and a live client preview. Weight and photos are never required.
+- **Add client** (Clients → Add client): name, email, coaching type, package
+  (with the price), programme or "decide after health questions", and regular
+  slots inside working hours. Sending shows what happens next: sign-up,
+  plan, sessions.
+
 ### Prices and cancellation (23 Oct)
 
 - **Cancellation:** 24 hours. Later cancellations count as a used session.
