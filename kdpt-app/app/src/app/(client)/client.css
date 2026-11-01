@@ -916,3 +916,6 @@ button.food { width: 100%; text-align: left; }
 .macros4 span { display: grid; gap: 2px; }
 .macros4 b { font: 700 18px var(--display); color: inherit; }
 .macros4 span:first-child b { color: var(--fg); }
+.periods { display: flex; gap: 6px; }
+.periods button { height: 34px; padding: 0 12px; border-radius: 10px; background: var(--s2); font-size: 13px; font-weight: 500; color: var(--fg2); }
+.periods button[aria-pressed="true"] { background: var(--fg); color: #000; }
