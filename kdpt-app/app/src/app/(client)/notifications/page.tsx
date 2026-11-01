@@ -24,7 +24,8 @@ export default function Notifications() {
   return (
     <div className="page fade">
       <SubTop title="Notifications" back="/home" right={<button className="ib" onClick={() => openSheet('notifset')} aria-label="Notification settings"><Icon name="gear" /></button>} />
-      {(['Today', 'Earlier'] as const).map(g => <div className="ngroup" key={g}><div className="eyebrow">{g}</div><div className="group">{NOTES.filter(n => n.group === g).map(row)}</div></div>)}
+      {s.preview.fresh ? <div className="group"><div className="nrow"><span className="li" style={{ background: 'rgba(126,213,151,.14)', color: 'var(--mint)' }}><Icon name="spark" /></span><span><b>Welcome to KDPT</b><p>Kyle has your answers and is building your programme.</p><time>Now</time></span></div></div>
+      : (['Today', 'Earlier'] as const).map(g => <div className="ngroup" key={g}><div className="eyebrow">{g}</div><div className="group">{NOTES.filter(n => n.group === g).map(row)}</div></div>)}
     </div>
   );
 }

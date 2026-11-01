@@ -25,8 +25,9 @@ export default function Profile() {
         <span className="avatar" style={{ width: 64, height: 64, fontSize: 20, borderRadius: '50%', display: 'grid', placeItems: 'center', background: 'linear-gradient(135deg,#2c3a31,#1a201c)', color: 'var(--mint)', fontFamily: 'var(--display)', fontWeight: 700 }}>{me.initials}</span>
         <span><b style={{ font: '800 22px var(--display)', display: 'block' }}>{me.name}</b><small style={{ color: 'var(--fg3)' }}>Client since {me.isNew ? 'today' : 'September 2026'}</small></span></div>
       <div><Eyebrow>Coaching</Eyebrow><div className="group">
-        <Row icon="card" col="var(--amber)" t="8 PT sessions a month" d="£260 · paid automatically on the 1st" sheet="pay" />
-        <Row icon="cal" col="var(--sky)" t={`${s.sessionsLeft} of 8 sessions left in October`} d="24-hour cancellation policy" sheet="book" />
+        <Row icon="card" col="var(--amber)" t="8 PT sessions a month" d="£260 a month · due on the 1st" sheet="pay" />
+        {me.isNew ? <Row icon="cal" col="var(--sky)" t="Sessions" d="Kyle will send your first times" onClick={() => toast('Kyle will send your first session times')} />
+          : <Row icon="cal" col="var(--sky)" t={`${s.sessionsLeft} of 8 sessions left in October`} d="24-hour cancellation policy" sheet="book" />}
         <Row icon="clip" col="var(--violet)" t="Check-ins" d={`${f.label}${s.onb.freq === 'monthly' ? '' : ' · ' + s.onb.day}`} onClick={() => toast('Change how often you check in')} />
       </div></div>
       <div><Eyebrow>App</Eyebrow><div className="group">

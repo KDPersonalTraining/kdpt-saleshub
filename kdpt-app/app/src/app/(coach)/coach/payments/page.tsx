@@ -8,7 +8,7 @@ import { BILLING, PACKAGES, PARTNER, byId, gbp, pkgById, type Tint } from '@/lib
 
 type Change = { price: number; scope: 'new' | 'all'; from: string | null };
 type Adj = { kind: 'discount'; value: number; unit: string; len: string; reason: string } | { kind: 'price'; value: number; from: string };
-const STATUS: Record<string, [Tint, string]> = { paid: ['mint', 'Paid'], due: ['grey', 'Due 1 Nov'], overdue: ['coral', 'Overdue 5 days'] };
+const STATUS: Record<string, Tint> = { paid: 'mint', due: 'grey', overdue: 'coral' };
 
 // Every price, rise and discount is set here. A package price change reaches
 // existing clients only when Kyle chooses, with 30 days' notice.
@@ -29,9 +29,10 @@ export default function Payments() {
   };
   return (
     <>
-      <Head title="Payments" sub="Cards are charged through Stripe on the 1st. Every price, rise and discount is set here, and nothing changes for a client unless you change it." />
-      <div className="kpis"><Kpi n={gbp(tot())} label="Expected for November" icon="card" c="grey" /><Kpi n={gbp(tot('paid'))} label="Paid" icon="check" c="mint" />
-        <Kpi n={gbp(tot('due'))} label="Due on the 1st" icon="clock" c="sky" /><Kpi n={gbp(tot('overdue'))} label="Overdue" icon="pain" c="coral" /></div>
+      <Head title="Payments" sub="Prices, discounts and due dates for each client. Nothing changes for a client unless you change it.">
+        <Tag c="grey" icon="card">Card payments not connected</Tag></Head>
+      <div className="kpis"><Kpi n={gbp(tot())} label="Expected this month" icon="card" c="grey" /><Kpi n={gbp(tot('paid'))} label="Paid" icon="check" c="mint" />
+        <Kpi n={gbp(tot('due'))} label="Still due" icon="clock" c="sky" /><Kpi n={gbp(tot('overdue'))} label="Overdue" icon="pain" c="coral" /></div>
       <div><Sec title="Packages" right="Changing a price never surprises anyone: you choose who it applies to" />
         <div className="pkgs">{PACKAGES.map(p => { const on = BILLING.filter(b => b[1] === p.id), legacy = on.filter(b => b[2] !== p.price).length, ch = changes[p.id];
           const shown = ch && ch.scope === 'new' ? ch.price : p.price; return (
@@ -41,10 +42,10 @@ export default function Payments() {
             {ch && <Tag c={ch.scope === 'new' ? 'mint' : 'amber'}>{ch.scope === 'new' ? `New clients only · existing stay on ${p.price == null ? 'no price' : gbp(p.price)}` : `Everyone to ${gbp(ch.price)} from ${ch.from} · ${on.length} notified`}</Tag>}
             <button className="btn line" style={{ justifySelf: 'start' }} onClick={() => setPriceFor(p.id)}>{p.price == null && !ch ? 'Set price' : 'Change price'}</button></div>
         ); })}</div></div>
-      <div><Sec title="November" right="Each client keeps the price they signed up at until you move them" />
+      <div><Sec title="Clients" right="Each client keeps their price until you change it" />
         <div className="card btable">
-          <div className="br th"><span>Client</span><span>Package</span><span>They pay</span><span>Status</span><span>Card</span><span /></div>
-          {BILLING.map(([id, pk, price, st, card]) => { const c = byId(id), p = pkgById(pk), ch = changes[pk]; const [col, lab] = STATUS[st]; return (
+          <div className="br th"><span>Client</span><span>Package</span><span>They pay</span><span>Status</span><span>How they pay</span><span /></div>
+          {BILLING.map(([id, pk, price, st, card, lab]) => { const c = byId(id), p = pkgById(pk), ch = changes[pk]; const col = STATUS[st]; return (
             <div className="br" key={id}>
               <span className="nm"><Avatar c={c} size={32} /><b style={{ fontWeight: 600 }}>{c.name}</b></span>
               <span>{p.name}</span>
@@ -55,13 +56,13 @@ export default function Payments() {
               <span><Tag c={col}>{lab}</Tag></span>
               <span style={{ color: 'var(--fg2)' }}>{card}</span>
               <span style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>{st === 'overdue' && (reminded[id] ? <Tag c="mint" icon="check">Reminder sent</Tag>
-                : <button className="btn ghost" onClick={() => { setReminded({ ...reminded, [id]: true }); toast('Reminder sent with a payment link'); }}>Remind</button>)}
+                : <button className="btn ghost" onClick={() => { setReminded({ ...reminded, [id]: true }); toast('Reminder sent'); }}>Remind</button>)}
                 <button className="btn line" onClick={() => setAdjustFor(id)}>Adjust</button></span>
             </div>
           ); })}
         </div></div>
       {priceFor && <PriceModal pkg={priceFor} onClose={() => setPriceFor(null)} onSave={c => { setChanges({ ...changes, [priceFor]: c }); setPriceFor(null); toast(c.scope === 'new' ? 'Saved · new clients see the new price' : 'Saved · clients notified with 30 days\' notice'); }} />}
-      {adjustFor && <AdjustModal client={adjustFor} onClose={() => setAdjustFor(null)} onSave={a => { setAdj({ ...adj, [adjustFor]: a }); setAdjustFor(null); toast('Saved · Stripe updated for this client'); }} />}
+      {adjustFor && <AdjustModal client={adjustFor} onClose={() => setAdjustFor(null)} onSave={a => { setAdj({ ...adj, [adjustFor]: a }); setAdjustFor(null); toast('Saved for this client'); }} />}
     </>
   );
 }

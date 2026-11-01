@@ -25,6 +25,8 @@ export default function Home() {
     return () => clearTimeout(t);
   }, [push, fresh, s.book.done]);
 
+  if (fresh) return <NewClientHome />;
+
   return (
     <div className="page fade">
       <div className="topbar"><img src="/kd-mark.png" alt="KD Personal Training" /><div className="right">
@@ -46,7 +48,7 @@ export default function Home() {
 
       <Link className="hero" href="/workout" aria-label={`Start ${WORKOUT.name}`}>
         <img src="/assets/gym.jpg" alt="" />
-        <span className="tag label-dot" style={{ color: 'var(--mint)' }}>Today</span>
+        <span className="tag label-dot" style={{ color: s.startedAt ? 'var(--amber)' : 'var(--mint)' }}>{s.startedAt ? 'In progress · tap to carry on' : 'Today'}</span>
         <div className="in">
           <div><h2>{WORKOUT.name}</h2>
             <div className="meta num"><span><Icon name="clock" /> {p.minutes} min</span><span><Icon name="layers" /> {p.items.length} exercises</span></div></div>
@@ -72,6 +74,39 @@ export default function Home() {
       <Link className="card note" href="/chat">
         <img className="mark" src="/kd-mark.png" alt="" />
         <span><small>Kyle · {fresh ? 'just now' : 'yesterday'}</small><p>{fresh ? `Welcome ${me.first}! I'll have your programme ready before our first session.` : 'Leg press goes up today. Take the first set steady 💪'}</p></span>
+      </Link>
+    </div>
+  );
+}
+
+// A brand-new client has no programme, sessions or history yet. Show what
+// happens next instead of empty versions of an established client's screen.
+function NewClientHome() {
+  const s = useClient(), { me } = useUI();
+  const steps: [string, string, string, 'done' | 'now' | 'next'][] = [
+    ['clip', 'Health questions', 'Done. Kyle reads them before you start', 'done'],
+    ['programmes', 'Your programme', 'Kyle builds it around your goal', 'now'],
+    ['cal', 'First session', 'Kyle will send you a time to accept', 'next'],
+  ];
+  return (
+    <div className="page fade">
+      <div className="topbar"><img src="/kd-mark.png" alt="KD Personal Training" /><div className="right">
+        <Link className="ib" href="/notifications" aria-label="Notifications"><Icon name="bell" />{!s.read && <span className="badge">1</span>}</Link>
+        <Link className="kd-av" href="/chat" aria-label="Messages from Kyle"><img src="/kd-mark.png" alt="" /><span className="dot" /></Link>
+        <Link className="avatar" href="/profile" aria-label="Profile and settings">{me.initials}</Link></div></div>
+      <div className="greet"><div className="eyebrow">Getting started</div><h1>Hi, {me.first}</h1></div>
+      <div className="group">{steps.map(([i, t, d, st]) => (
+        <div className="optrow" key={t}><Li icon={st === 'done' ? 'check' : i} color={st === 'done' ? 'var(--mint)' : st === 'now' ? 'var(--amber)' : 'var(--fg2)'} />
+          <span className="t"><b>{t}</b><small>{d}</small></span>{st === 'now' && <span className="state await">In progress</span>}</div>
+      ))}</div>
+      <div className="actions" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
+        <Link className="act" href="/fuel"><i style={{ color: 'var(--amber)' }}><Icon name="fuel" /></i>Log food</Link>
+        <Link className="act" href="/chat"><i style={{ color: 'var(--mint)' }}><Icon name="chat" /></i>Message Kyle</Link>
+        <Link className="act" href="/library"><i style={{ color: 'var(--sky)' }}><Icon name="layers" /></i>Exercises</Link>
+      </div>
+      <Link className="card note" href="/chat">
+        <img className="mark" src="/kd-mark.png" alt="" />
+        <span><small>Kyle · just now</small><p>Welcome {me.first}! I&apos;ll have your programme ready before our first session.</p></span>
       </Link>
     </div>
   );

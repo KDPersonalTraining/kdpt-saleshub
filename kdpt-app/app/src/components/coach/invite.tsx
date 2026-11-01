@@ -51,7 +51,7 @@ export function InviteModal({ onClose }: { onClose: () => void }) {
           ))}</div>
           <small className="hint">Leave empty if their times change month to month. They&apos;ll send rough availability instead.</small></div>
       )}
-      <div className="sumline"><Icon name="card" className="sm" /><span>{p.price ? `${gbp(p.price)} a month from the 1st, paid by card in the app.` : 'They pay once you set the duo price.'} You can add a discount in Payments.</span></div>
+      <div className="sumline"><Icon name="card" className="sm" /><span>{p.price ? `${gbp(p.price)} a month.` : 'Set the duo price in Payments first.'} Due date, payment method and discounts are set in Payments.</span></div>
       <button className="btn mint" style={{ justifySelf: 'start' }} onClick={() => {
         if (!/.+@.+\..+/.test(v.email) || !v.first.trim()) { toast('Add a first name and email'); return; }
         setSent(true);

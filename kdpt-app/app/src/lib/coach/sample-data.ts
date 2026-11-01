@@ -105,11 +105,11 @@ export const DAYS: [string, number][] = [['Mon', 19], ['Tue', 20], ['Wed', 21], 
 export const CAL_START = 6, CAL_END = 20, HOUR = 44;
 export type CalEvent = [number, number, number, string, string, string];
 export const EVENTS: CalEvent[] = [
-  [0, 7, 1, 'studio', 'Sarah M', 'Studio'], [0, 12, 1.5, 'busy', 'Busy', 'Google Calendar'], [0, 18, 1, 'gym', 'Tom R', 'Gym'],
+  [0, 7, 1, 'studio', 'Sarah M', 'Studio'], [0, 12, 1.5, 'busy', 'Busy', 'Sample busy time'], [0, 18, 1, 'gym', 'Tom R', 'Gym'],
   [1, 6.5, 1, 'studio', 'Mark & Jen', 'Studio · duo'], [1, 17.5, 1, 'online', 'Ray P', 'Online'],
   [2, 9.5, 1, 'studio', 'Mark & Jen', 'Studio · duo'], [2, 12.25, 0.75, 'online', 'Ellie B', 'Online call'],
   [3, 7, 1, 'studio', 'Sarah M', 'Studio'], [3, 10.5, 1, 'online', 'Priya S', 'Online'], [3, 17.75, 1, 'gym', 'Tom R', 'Gym'],
-  [4, 6.5, 1, 'studio', 'Mark & Jen', 'Studio · duo'], [4, 12, 2, 'busy', 'Busy', 'Google Calendar'], [4, 17, 1, 'pending', 'Priya S', 'Waiting for you'],
+  [4, 6.5, 1, 'studio', 'Mark & Jen', 'Studio · duo'], [4, 12, 2, 'busy', 'Busy', 'Sample busy time'], [4, 17, 1, 'pending', 'Priya S', 'Waiting for you'],
 ];
 export const DAYNAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 // Working hours. The gym opens at 6:30; Wednesday is a half day; no weekends.
@@ -125,9 +125,9 @@ export const REQS = [
 ];
 // Bookings clients have sent back. They stay pending until approved.
 export const APPROVE = [
-  { id: 'b1', c: 'sarah', what: 'Accepted 7 of 8 November sessions (Mon and Thu 7:00). One change request below.', okBtn: 'Confirm 7', ok: '7 confirmed · added to both calendars', review: true },
-  { id: 'b2', c: 'priya', what: 'Booked Fri 23 Oct · 17:00 · online (extra session from her allowance)', okBtn: 'Confirm', ok: 'Confirmed · added to both calendars', review: false },
-  { id: 'b3', c: 'ellie', what: 'Accepted all 4 November sessions (Wed 12:15 online)', okBtn: 'Confirm 4', ok: '4 confirmed · added to both calendars', review: true },
+  { id: 'b1', c: 'sarah', what: 'Accepted 7 of 8 November sessions (Mon and Thu 7:00). One change request below.', okBtn: 'Confirm 7', ok: '7 confirmed · Sarah notified', review: true },
+  { id: 'b2', c: 'priya', what: 'Booked Fri 23 Oct · 17:00 · online (extra session from her allowance)', okBtn: 'Confirm', ok: 'Confirmed · Priya notified', review: false },
+  { id: 'b3', c: 'ellie', what: 'Accepted all 4 November sessions (Wed 12:15 online)', okBtn: 'Confirm 4', ok: '4 confirmed · Ellie notified', review: true },
 ];
 export const hhmm = (h: number) => `${Math.floor(h)}:${String(Math.round(h % 1 * 60)).padStart(2, '0')}`;
 
@@ -155,10 +155,13 @@ export const PACKAGES: Package[] = [
   { id: 'duo8', name: '8 PT sessions · duo', sub: 'a month · for two', price: null, duo: true },
 ];
 export const PARTNER: Record<string, string> = { mark: 'Jen', jen: 'Mark' };
-export type Billing = [string, string, number | null, 'paid' | 'due' | 'overdue', string];
-export const BILLING: Billing[] = [['sarah', 'pt8', 260, 'paid', 'Automatic'], ['tom', 'pt8', 240, 'due', 'Automatic'], ['priya', 'online', 120, 'paid', 'Automatic'],
-  ['dave', 'online', 120, 'overdue', 'Card declined 18 Oct'], ['ellie', 'pt4', 140, 'due', 'Pays when reminded'], ['mark', 'duo8', null, 'paid', 'Automatic'],
-  ['jen', 'duo8', null, 'paid', 'Automatic'], ['ray', 'online', 120, 'paid', 'Automatic']];
+// [client, package, monthly price, status, how and when they pay, status label]
+// Clients don't all pay the same way or on the same day.
+export type Billing = [string, string, number | null, 'paid' | 'due' | 'overdue', string, string];
+export const BILLING: Billing[] = [['sarah', 'pt8', 260, 'paid', 'Bank transfer · 1st', 'Paid 1 Oct'], ['tom', 'pt8', 240, 'due', 'Bank transfer · 25th', 'Due 25 Oct'],
+  ['priya', 'online', 120, 'paid', 'Bank transfer · 8th', 'Paid 8 Oct'], ['dave', 'online', 120, 'overdue', 'Bank transfer · 18th', 'Overdue since 18 Oct'],
+  ['ellie', 'pt4', 140, 'due', 'Pays per block of 4', 'Block ends 30 Oct'], ['mark', 'duo8', null, 'paid', 'Mark pays both · 1st', 'Paid 1 Oct'],
+  ['jen', 'duo8', null, 'paid', 'Paid by Mark', 'Paid 1 Oct'], ['ray', 'online', 120, 'paid', 'Cash at session', 'Paid 12 Oct']];
 export const pkgById = (id: string) => PACKAGES.find(p => p.id === id) ?? PACKAGES[0];
 export const gbp = (n: number) => '£' + n.toLocaleString('en-GB');
 

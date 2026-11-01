@@ -3,7 +3,8 @@
 import type { Priority } from '@/lib/rules';
 
 export type Exercise = {
-  id: string; name: string; sets: number; reps: [number, number]; rest: number; inc: number;
+  // lib: the exercise's id in the library (for its video and steps).
+  id: string; lib: string; name: string; sets: number; reps: [number, number]; rest: number; inc: number;
   priority: Priority; setup: number; kit: 'machine' | 'dumbbell' | 'barbell' | 'body';
   last: { load: number; reps: number[] }; alts: [string, string, string][];
 };
@@ -11,21 +12,21 @@ export type Exercise = {
 export const WORKOUT: { name: string; exercises: Exercise[] } = {
   name: 'Lower Body A',
   exercises: [
-    { id: 'lp', name: 'Leg Press', sets: 3, reps: [10, 12], rest: 120, inc: 10, priority: 'must_keep', setup: 1.5, kit: 'machine',
+    { id: 'lp', lib: 'lp', name: 'Leg Press', sets: 3, reps: [10, 12], rest: 120, inc: 10, priority: 'must_keep', setup: 1.5, kit: 'machine',
       last: { load: 120, reps: [12, 12, 12] },
-      alts: [['Hack Squat', 'Same pattern · start 70kg', 'machine'], ['Goblet Squat', 'If machines are busy · 24kg', 'dumbbell'], ['Box Squat', 'Easier on the knees', 'body']] },
-    { id: 'rdl', name: 'Romanian Deadlift', sets: 3, reps: [8, 10], rest: 120, inc: 2.5, priority: 'must_keep', setup: 1.5, kit: 'dumbbell',
+      alts: [['Hack Squat', 'Same pattern', 'machine'], ['Goblet Squat', 'If the machine is busy', 'dumbbell'], ['Box Squat', 'Easier on the knees', 'body']] },
+    { id: 'rdl', lib: 'rdl', name: 'Romanian Deadlift', sets: 3, reps: [8, 10], rest: 120, inc: 2.5, priority: 'must_keep', setup: 1.5, kit: 'dumbbell',
       last: { load: 60, reps: [10, 9, 8] },
-      alts: [['Dumbbell RDL', 'Same pattern · 2 × 24kg', 'dumbbell'], ['Cable Pull-through', 'Lighter on the lower back', 'machine']] },
-    { id: 'lun', name: 'Walking Lunge', sets: 3, reps: [10, 10], rest: 90, inc: 2, priority: 'keep_if_time', setup: 1, kit: 'dumbbell',
+      alts: [['Dumbbell RDL', 'Same pattern', 'dumbbell'], ['Cable Pull-through', 'Lighter on the lower back', 'machine']] },
+    { id: 'lun', lib: 'wl', name: 'Walking Lunge', sets: 3, reps: [10, 10], rest: 90, inc: 2, priority: 'keep_if_time', setup: 1, kit: 'dumbbell',
       last: { load: 12, reps: [10, 10, 10] },
       alts: [['Split Squat', 'Stationary · easier balance', 'dumbbell'], ['Step-up', 'Knee-friendly', 'body']] },
-    { id: 'lc', name: 'Seated Leg Curl', sets: 3, reps: [12, 15], rest: 75, inc: 5, priority: 'keep_if_time', setup: 1, kit: 'machine',
+    { id: 'lc', lib: 'lc', name: 'Seated Leg Curl', sets: 3, reps: [12, 15], rest: 75, inc: 5, priority: 'keep_if_time', setup: 1, kit: 'machine',
       last: { load: 40, reps: [15, 14, 13] },
       alts: [['Lying Leg Curl', 'Same muscles', 'machine'], ['Swiss Ball Curl', 'No machine needed', 'body']] },
-    { id: 'cr', name: 'Calf Raise', sets: 2, reps: [15, 20], rest: 60, inc: 5, priority: 'first_to_cut', setup: 0.5, kit: 'machine',
+    { id: 'cr', lib: 'cr', name: 'Calf Raise', sets: 2, reps: [15, 20], rest: 60, inc: 5, priority: 'first_to_cut', setup: 0.5, kit: 'machine',
       last: { load: 50, reps: [20, 18] }, alts: [] },
-    { id: 'db', name: 'Dead Bug', sets: 2, reps: [10, 10], rest: 45, inc: 0, priority: 'first_to_cut', setup: 0.5, kit: 'body',
+    { id: 'db', lib: 'dbg', name: 'Dead Bug', sets: 2, reps: [10, 10], rest: 45, inc: 0, priority: 'first_to_cut', setup: 0.5, kit: 'body',
       last: { load: 0, reps: [10, 10] }, alts: [] },
   ],
 };
@@ -59,6 +60,8 @@ export const EXLIB: LibraryExercise[] = [
   ex('pu', 'Incline Push-up', 'push', 'body', 'Chest, triceps', ['Hands on a bench, body in one line', 'Lower your chest to the bench', 'Push the floor away'], ['Push-up', 'DB Bench Press']),
   ex('lpd', 'Lat Pulldown', 'pull', 'machine', 'Back, biceps', ['Grip just outside shoulder-width', 'Pull elbows down to your ribs', 'Control it back up'], ['Assisted Pull-up', 'Single-arm Pulldown']),
   ex('sr', 'Seated Row', 'pull', 'machine', 'Mid back', ['Chest up, shoulders down', 'Pull to your belly button', 'Pause, then let your shoulders reach forward'], ['DB Row', 'Chest-supported Row']),
+  ex('lc', 'Seated Leg Curl', 'hinge', 'machine', 'Hamstrings', ['Knees in line with the pivot', 'Curl all the way, squeeze for a second', 'Lower slowly for 2 seconds'], ['Lying Leg Curl', 'Swiss Ball Curl']),
+  ex('cr', 'Calf Raise', 'squat', 'machine', 'Calves', ['Balls of the feet on the edge', 'Full stretch at the bottom', 'Pause at the top'], []),
   ex('wl', 'Walking Lunge', 'lunge', 'dumbbell', 'Quads, glutes', ['Long step, back knee towards the floor', 'Front knee follows your toes', 'Push through the front heel'], ['Split Squat', 'Step-up']),
   ex('ss', 'Split Squat', 'lunge', 'dumbbell', 'Quads, glutes', ['Stay in one place, feet hip-width apart', 'Drop straight down', 'Most weight through the front foot'], ['Step-up']),
   ex('dbg', 'Dead Bug', 'core', 'body', 'Deep core', ['Lower back pressed into the floor', 'Opposite arm and leg go out together', 'Breathe out as you reach'], ['Plank']),
@@ -120,8 +123,8 @@ export const HOURS: Record<string, [number, number] | null> = { Mon: [6.5, 19.5]
 export const hm = (h: number) => `${Math.floor(h)}:${h % 1 ? '30' : '00'}`;
 
 export const AI: Record<string, { q: string; a: string; src: string; go?: [string, string]; handoff?: boolean }> = {
-  swap: { q: 'Can I swap leg press today?', a: 'Yes. Your coach has approved two swaps for Leg Press: Hack Squat (start around 70 kg) or Goblet Squat with a 24 kg dumbbell. Keep the same sets and reps.', src: 'Lower Body A · your coach\'s approved swaps', go: ['Start workout', '/workout'] },
-  eat: { q: 'What should I eat before a 7am session?', a: 'Keep it light: a banana and a coffee, or a yoghurt 45 minutes before. Have your 30 g protein breakfast afterwards.', src: 'Your nutrition targets · PT Thursday 7:00', go: ['See this week\'s meals', '/community'] },
+  swap: { q: 'Can I swap leg press today?', a: 'Yes. Kyle has approved three swaps for Leg Press: Hack Squat, Goblet Squat or Box Squat. Keep the same sets and reps, and pick a weight you could lift for two more reps than the target.', src: 'Swaps Kyle approved for Lower Body A', go: ['Start workout', '/workout'] },
+  eat: { q: 'What should I eat before a 7am session?', a: 'Keep it light: a banana and a coffee, or a yoghurt 45 minutes before. Have your 30 g protein breakfast afterwards.', src: 'General guidance · your next PT is Thursday 7:00', go: ['See this week\'s meals', '/community'] },
   knee: { q: 'My knee aches during lunges', handoff: true, a: 'Pain is something your coach needs to look at, so I\'ve passed this on instead of guessing. Until they reply, skip the lunges and use "I have pain" in your workout if it flares up.', src: 'Pain always goes to your coach' },
 };
 

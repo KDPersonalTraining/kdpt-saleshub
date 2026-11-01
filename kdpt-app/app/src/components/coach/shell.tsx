@@ -27,7 +27,7 @@ export function CoachShell({ me, children }: { me: { name: string; role: string;
     <Ctx.Provider value={{ toast }}>
       <div className="shell">
         <aside className="side">
-          <div className="logo"><img src="/kd-mark.png" alt="KD" /><span>Coach</span></div>
+          <div className="logo"><img src="/kd-mark.png" alt="KD" /><span>Coach</span>{me.demo && <span className="demotag">Demo</span>}</div>
           {NAV.map(([k, l, icon, n, c]) => { const t = c && tint(c); return (
             <Link key={k} href={`/coach${k ? '/' + k : ''}`} className={`nav ${section === k ? 'on' : ''}`}>
               <Icon name={icon} />{l}{n ? <span className="count" style={{ background: t![0], color: t![1] }}>{n}</span> : null}

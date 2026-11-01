@@ -40,17 +40,15 @@ export function NotifToggles() {
 }
 
 function PaySheet() {
-  const s = useClient(), { toast } = useUI(), fail = s.preview.payFail;
-  if (s.paid) return <><Sent bg="var(--amber)" ink="#2a1600" title="Paid · thank you">Receipt sent to your email. {s.autopay ? 'December will be taken automatically.' : ''}</Sent><Done /></>;
+  const s = useClient(), fail = s.preview.payFail;
+  if (s.paid) return <><Sent bg="var(--amber)" ink="#2a1600" title="Marked as paid">Demo only: no money was taken. Card payments will work once they&apos;re switched on.</Sent><Done /></>;
   return (
     <>
       <div><h3>November payment</h3><div className="sub">{fail ? 'Failed on Sunday 1 November' : 'Due Sunday 1 November'}</div></div>
       {fail && <div className="failbox"><Icon name="pain" /><span><b>Your bank declined this payment.</b> Update your card or try again. Sessions stay booked for 7 days.</span></div>}
       <div className="paycard"><div className="line"><span>8 PT sessions</span><span className="num">£260.00</span></div><div className="line"><span>1–30 November</span><span /></div><div className="line total"><span>Total</span><span className="num">£260.00</span></div></div>
-      <div className="cardrow"><span className="brand">VISA</span><span className="t"><b>•••• 4242</b><small>Expires 08/28</small></span><button onClick={() => toast('Change card in Stripe')} style={{ color: 'var(--fg2)', fontSize: 14 }}>Change</button></div>
-      <div className="tg"><span className="li" style={{ background: 'rgba(255,180,94,.14)', color: 'var(--amber)' }}><Icon name="card" /></span><span className="t"><b>Pay automatically each month</b><small>Reminder 3 days before, cancel any time</small></span>
-        <Switch on={s.autopay} label="Pay automatically" onChange={() => setState({ autopay: !s.autopay })} /></div>
-      <button className="pill-btn mint" onClick={() => setState({ paid: true })}>{fail ? 'Try again · £260.00' : 'Pay £260.00'}</button>
+      <p className="foot">Card payments aren&apos;t switched on yet. Pay Kyle the usual way for now.</p>
+      <button className="pill-btn mint" onClick={() => setState({ paid: true })}>Try it · demo, no charge</button>
     </>
   );
 }
@@ -74,18 +72,25 @@ function BookSheet() {
       </>
     );
   }
-  if (s.book.done) return <><Sent bg="var(--sky)" ink="#03121f" title="Sent to Kyle">You&apos;ll get a notification when Kyle confirms.</Sent><Done /></>;
+  if (s.book.done) return (
+    <><div><h3>Your November sessions</h3><div className="sub">Awaiting Kyle. Nothing&apos;s confirmed until he approves it.</div></div>
+      <div className="group">{NOV.map(([d, day, t], i) => (
+        <div className="optrow" key={i}><span className="datebox sm"><small>{d}</small><b className="num">{day}</b></span>
+          <span className="t"><b className="num">{s.book.req[i] ? s.book.req[i] : `${t} · Studio`}</b><small>{s.book.req[i] ? `Change requested from ${t} · awaiting Kyle` : 'Accepted · awaiting Kyle'}</small></span>
+          <span className="state await">Awaiting Kyle</span></div>
+      ))}</div><Done /></>
+  );
   return (
     <>
       <div><h3>Your November sessions</h3><div className="sub">Move any that don&apos;t work. Nothing&apos;s booked until Kyle confirms.</div></div>
       <button className="optrow" style={{ background: 'var(--s2)', borderRadius: 14 }} onClick={() => openSheet('avail')}><Li icon="clock" color="var(--sky)" /><span className="t"><b>My times change each month</b><small>Send Kyle your availability instead</small></span><Chev /></button>
       <div className="group">{NOV.map(([d, day, t], i) => (
         <div className="optrow" key={i}><span className="datebox sm"><small>{d}</small><b className="num">{day}</b></span>
-          <span className="t"><b className="num">{t} · Studio</b><small>{s.book.req[i] ? <span style={{ color: 'var(--amber)' }}>Asked for {s.book.req[i]}</span> : 'PT with Kyle · 60 min'}</small></span>
+          <span className="t"><b className="num">{t} · Studio · 60 min</b><small>{s.book.req[i] ? <span style={{ color: 'var(--amber)' }}>Change to {s.book.req[i]} · not sent yet</span> : 'Proposed by Kyle'}</small></span>
           <button className="add" style={{ color: 'var(--sky)' }} onClick={() => setPick(i)}>{s.book.req[i] ? 'Change' : 'Move'}</button></div>
       ))}</div>
       <p className="foot">Free to change up to 24 hours before. Later cancellations count as used.</p>
-      <button className="pill-btn mint" onClick={() => setState({ book: { ...s.book, done: true } })}>Send to Kyle{reqs ? ` · ${reqs} change${reqs > 1 ? 's' : ''}` : ''}</button>
+      <button className="pill-btn mint" onClick={() => setState({ book: { ...s.book, done: true } })}>{reqs ? `Accept the rest · request ${reqs} change${reqs > 1 ? 's' : ''}` : 'Accept all 8'}</button>
     </>
   );
 }

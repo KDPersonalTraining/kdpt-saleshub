@@ -15,8 +15,12 @@ export type ClientState = {
   scale: number;
   notifs: Record<string, boolean>;
   read: boolean;
-  // Training
-  duration: number; idx: number; logs: Record<string, SetLog[]>; swaps: Record<string, string>; finishedAt: number | null;
+  // Training. Everything about the workout in progress is kept here, so it
+  // survives leaving the screen or closing the app.
+  duration: number; idx: number; logs: Record<string, SetLog[]>; swaps: Record<string, string>;
+  exNotes: Record<string, { rpe: number | null; note: string }>; skipped: Record<string, boolean>;
+  startedAt: number | null; finishedAt: number | null;
+  rest: { endsAt: number; total: number; pausedLeft: number | null } | null;
   pain: { area: string | null; sev: number; act: string | null; sent: boolean };
   // Bookings and payments
   sessionCancelled: boolean; sessionsLeft: number; book: { req: Record<number, string>; done: boolean };
@@ -42,7 +46,7 @@ const initial = (): ClientState => ({
   scale: 1,
   notifs: { workout: true, booking: true, session: true, payment: true, drop: true, checkin: true },
   read: false,
-  duration: 60, idx: 0, logs: {}, swaps: {}, finishedAt: null,
+  duration: 60, idx: 0, logs: {}, swaps: {}, exNotes: {}, skipped: {}, startedAt: null, finishedAt: null, rest: null,
   pain: { area: null, sev: 3, act: null, sent: false },
   sessionCancelled: false, sessionsLeft: 6, book: { req: {}, done: false },
   avail: { days: { Mon: null, Tue: [16.5, 19.5], Wed: null, Thu: [14, 19.5], Fri: null }, note: '', sent: false }, paid: false, autopay: true,
@@ -93,3 +97,6 @@ const serverSnapshot = initial();
 export function useClient(): ClientState {
   return useSyncExternalStore(subscribe, () => state, () => serverSnapshot);
 }
+
+// Clears the workout in progress (after finishing or abandoning it).
+export const resetWorkout = (): Partial<ClientState> => ({ idx: 0, logs: {}, swaps: {}, exNotes: {}, skipped: {}, startedAt: null, finishedAt: null, rest: null });

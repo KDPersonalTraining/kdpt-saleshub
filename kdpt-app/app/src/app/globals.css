@@ -2,7 +2,7 @@
    stylesheet from its layout. */
 :root {
   --bg: #000; --s1: #0d0e0e; --s2: #151716; --s3: #1e211f; --hair: rgba(255,255,255,.08);
-  --fg: #f5f7f6; --fg2: #a2a8a5; --fg3: #676d6a;
+  --fg: #f5f7f6; --fg2: #b3b9b6; --fg3: #8d9490;
   --mint: #7ed597; --mint-ink: #03140a; --amber: #ffb45e; --violet: #a99bff; --sky: #6ec6ff; --coral: #ff6b5e;
   --display: 'Montserrat', 'Helvetica Neue', Arial, sans-serif; --body: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
   color-scheme: dark;
@@ -34,3 +34,8 @@ button { cursor: pointer; border: 0; background: none; padding: 0; }
 .si-demo b { display: block; font: 700 16px var(--display); }
 .si-demo small { color: var(--fg3); font-size: 13px; }
 .si-note { font-size: 12px; color: var(--fg3); border-top: 1px solid var(--hair); padding-top: 16px; }
+
+/* Respect the phone's "reduce motion" setting. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

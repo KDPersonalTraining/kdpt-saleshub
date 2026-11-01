@@ -10,8 +10,8 @@
   --s4: #262a28;
   --hair: rgba(255,255,255,0.07);
   --fg: #f5f7f6;
-  --fg2: #a2a8a5;
-  --fg3: #676d6a;
+  --fg2: #b3b9b6;
+  --fg3: #8d9490;
   --mint: #7ed597;
   --mint-ink: #03140a;
   --amber: #ffb45e;
@@ -496,3 +496,9 @@ textarea.fb { width: 100%; min-height: 120px; resize: vertical; background: var(
 /* ---- Real app additions ------------------------------------------------ */
 a { color: inherit; text-decoration: none; }
 .side .me { display: flex; align-items: center; gap: 10px; }
+.demotag { margin-left: auto; font: 600 10px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--amber); border: 1px solid rgba(255,180,94,.4); border-radius: 6px; padding: 2px 6px; }
+
+/* Respect the phone's "reduce motion" setting. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
