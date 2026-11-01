@@ -21,7 +21,8 @@ export const CLIENTS: Client[] = [
 export const byId = (id: string) => CLIENTS.find(c => c.id === id) ?? CLIENTS[0];
 // Chosen by each client at onboarding.
 export const CHECKIN: Record<string, string> = { sarah: 'Weekly · Sun', tom: 'Monthly', priya: 'Weekly · Mon', dave: 'Weekly · Sun', ellie: 'Every 2 weeks · Sun', mark: 'Monthly', jen: 'Monthly', ray: 'Every 2 weeks · Fri' };
-export const PAY: Record<string, [Tint, string]> = { sarah: ['mint', 'Paid · Nov'], tom: ['grey', 'Due 1 Nov'], priya: ['mint', 'Paid · Nov'], dave: ['coral', 'Overdue 5 days'], ellie: ['grey', 'Due 1 Nov'], mark: ['mint', 'Paid · Nov'], jen: ['mint', 'Paid · Nov'], ray: ['mint', 'Paid · Nov'] };
+// Payment status for a client, from the same record the Payments page uses.
+export const payFor = (id: string): [Tint, string] => { const b = BILLING.find(x => x[0] === id); return b ? [b[3] === 'paid' ? 'mint' : b[3] === 'overdue' ? 'coral' : 'grey', b[5]] : ['grey', 'No payment set up']; };
 
 export type LibEx = { id: string; name: string; pat: string; kit: string; c: Tint; filmed: boolean };
 export const LIB: LibEx[] = [
@@ -216,4 +217,19 @@ export const TRAVEL: Record<string, number> = { 'Studio>Gym': 20, 'Gym>Studio': 
 // Time off already in the diary for November.
 export const NOV_TIME_OFF: { date: string; start: number; end: number; reason: string }[] = [
   { date: '2026-11-13', start: 0, end: 24 * 60, reason: 'Course day (blocked by you)' },
+];
+
+// Client record details (sample).
+export const CONTACT: Record<string, { email: string; phone: string; since: string; emergency: string; goal: string; health: [Tint, string][] }> = {
+  sarah: { email: 'sarah.m@example.com', phone: '07700 900123', since: 'September 2026', emergency: 'Tom Mitchell · 07700 900456', goal: 'Get stronger',
+    health: [['amber', 'Left knee: patellar pain history'], ['mint', 'Health questions: all clear (6 Sep)']] },
+};
+export const contactFor = (id: string) => CONTACT[id] ?? { email: `${id}@example.com`, phone: '07700 900000', since: '2026', emergency: 'Not given', goal: 'General fitness', health: [['mint', 'Health questions: all clear']] as [Tint, string][] };
+// [date, time, location, state]
+export const SESSION_HISTORY: [string, string, string, 'confirmed' | 'completed' | 'late_cancelled' | 'awaiting_coach' | 'change_requested'][] = [
+  ['Thu 5 Nov', '7:00', 'Studio', 'change_requested'], ['Mon 2 Nov', '7:00', 'Studio', 'awaiting_coach'], ['Thu 22 Oct', '7:00', 'Studio', 'confirmed'],
+  ['Mon 19 Oct', '7:00', 'Studio', 'completed'], ['Thu 15 Oct', '7:00', 'Studio', 'completed'], ['Mon 12 Oct', '7:00', 'Studio', 'late_cancelled'], ['Thu 8 Oct', '7:00', 'Studio', 'completed'],
+];
+export const PAYMENT_HISTORY: [string, string, string, 'paid' | 'due' | 'overdue'][] = [
+  ['1 Nov', '£260', 'November · 8 PT', 'due'], ['1 Oct', '£260', 'October · 8 PT', 'paid'], ['1 Sep', '£260', 'September · 8 PT', 'paid'],
 ];

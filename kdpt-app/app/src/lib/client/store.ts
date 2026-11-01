@@ -32,6 +32,8 @@ export type ClientState = {
   fuelMode: 'full' | 'protein' | 'simple';
   // Messages
   chat: string[]; ai: string[]; handed: boolean;
+  // Questions typed to KAI and what happened to them.
+  aiLog: { q: string; a: string; to: 'kai' | 'coach' | 'urgent' | 'demo' }[];
   // Community
   liked: Record<string, boolean>; comments: Record<string, string[]>;
   // Progress
@@ -55,7 +57,7 @@ const initial = (): ClientState => ({
   avail: { days: { Mon: null, Tue: [16.5, 19.5], Wed: null, Thu: [14, 19.5], Fri: null }, note: '', sent: false }, paid: false, autopay: true,
   log: { Breakfast: [{ food: 'eggs', qty: 1 }, { food: 'sourdough', qty: 1 }, { food: 'avo', qty: 1 }], Lunch: [{ food: 'wrap', qty: 1 }], Snacks: [{ food: 'yog', qty: 1 }, { food: 'berries', qty: 1 }], Dinner: [] }, water: 6,
   favs: ['wrap', 'yog'], recent: ['eggs', 'sourdough', 'avo', 'wrap', 'yog', 'berries', 'chicken', 'rice'], fuelMode: 'full',
-  chat: [], ai: [], handed: false,
+  chat: [], ai: [], handed: false, aiLog: [],
   liked: {}, comments: {},
   showWeight: false,
   checkin: null, checkinsSent: 0,

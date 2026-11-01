@@ -6,9 +6,9 @@ import { Icon } from '@/components/icon';
 import { PlanEditor } from '@/components/coach/plan-editor';
 import { useToast } from '@/components/coach/shell';
 import { Avatar, Sec, Switch, Tag, Tile } from '@/components/coach/ui';
-import { CHECKIN, CHECKIN_ROWS, MEAL_PHOTOS, PAY, SARAH_PLAN, TIMELINE, WEEK_LOG, byId, planMinutes, tint, type Client, type Row } from '@/lib/coach/sample-data';
+import { CHECKIN, CHECKIN_ROWS, MEAL_PHOTOS, PAYMENT_HISTORY, payFor, SARAH_PLAN, SESSION_HISTORY, TIMELINE, WEEK_LOG, byId, contactFor, planMinutes, tint, type Client, type Row, type Tint } from '@/lib/coach/sample-data';
 
-const TABS = [['overview', 'Overview', 'user'], ['training', 'Training', 'train'], ['nutrition', 'Nutrition', 'fuel'], ['checkins', 'Check-ins', 'clip']] as const;
+const TABS = [['overview', 'Overview', 'user'], ['training', 'Training', 'train'], ['nutrition', 'Nutrition', 'fuel'], ['checkins', 'Check-ins', 'clip'], ['sessions', 'Sessions', 'schedule'], ['payments', 'Payments', 'card'], ['notes', 'Notes', 'messages']] as const;
 const clone = <T,>(o: T): T => JSON.parse(JSON.stringify(o));
 
 export default function ClientProfile({ params }: { params: Promise<{ id: string }> }) {
@@ -20,26 +20,36 @@ export default function ClientProfile({ params }: { params: Promise<{ id: string
       <div className="prof">
         <Avatar c={c} />
         <div className="grow"><h1>{c.name}</h1>
-          <div className="meta"><Tag c="grey">{c.type}</Tag><Tag c="grey">{c.pkg}</Tag><Tag c="mint" icon="train">{c.prog}</Tag><Tag c="violet" icon="clip">{CHECKIN[c.id]}</Tag><Tag c={PAY[c.id][0]} icon="card">{PAY[c.id][1]}</Tag></div></div>
+          <div className="meta"><Tag c="grey">{c.type}</Tag><Tag c="grey">{c.pkg}</Tag><Tag c="mint" icon="train">{c.prog}</Tag><Tag c="violet" icon="clip">{CHECKIN[c.id]}</Tag><Tag c={payFor(c.id)[0]} icon="card">{payFor(c.id)[1]}</Tag></div></div>
         <div style={{ display: 'flex', gap: 8 }}><Link className="btn ghost" href={`/coach/messages?c=${c.id}`}><Icon name="messages" className="sm" />Message</Link><Link className="btn line" href="/coach/schedule"><Icon name="schedule" className="sm" />Book</Link></div>
       </div>
       {c.id === 'sarah' && <div className="flag"><Icon name="pain" /><span><b>Left knee</b> · history of patellar pain. Keep squat depth comfortable; no deep lunges.</span></div>}
       <div className="tabs" role="tablist">{TABS.map(([k, l, i]) => <button key={k} role="tab" className={tab === k ? 'on' : ''} onClick={() => setTab(k)}><Icon name={i} className="sm" />{l}</button>)}</div>
-      {tab === 'training' ? <Training c={c} /> : tab === 'nutrition' ? <Nutrition c={c} /> : tab === 'checkins' ? <Checkins c={c} /> : <Overview />}
+      {c.id !== 'sarah' && ['training', 'nutrition', 'checkins', 'sessions'].includes(tab) ? <DemoOnlySarah c={c} />
+        : tab === 'training' ? <Training c={c} /> : tab === 'nutrition' ? <Nutrition c={c} /> : tab === 'checkins' ? <Checkins c={c} /> : tab === 'sessions' ? <Sessions /> : tab === 'payments' ? <Payments c={c} /> : tab === 'notes' ? <Notes c={c} /> : <Overview c={c} />}
     </>
   );
 }
 
-function Overview() {
+function Overview({ c }: { c: Client }) {
+  const d = contactFor(c.id);
   return (
     <>
-      <div className="statrow">
-        <div className="card"><b className="num" style={{ color: 'var(--mint)' }}>92%</b><small>Sessions completed · 8 wks</small></div>
-        <div className="card"><b className="num" style={{ color: 'var(--violet)' }}>−5 cm</b><small>Waist since 1 Sep</small></div>
-        <div className="card"><b className="num" style={{ color: 'var(--amber)' }}>4</b><small>New bests this block</small></div>
+      <div className="grid2">
+        <div className="card pad"><Sec title="Details" />
+          <div className="kv"><span>Email</span><b>{d.email}</b><span>Phone</span><b>{d.phone}</b><span>Client since</span><b>{d.since}</b><span>Goal</span><b>{d.goal}</b><span>Emergency contact</span><b>{d.emergency}</b></div></div>
+        <div className="card pad"><Sec title="Health" right="Only you can see this" />
+          <div style={{ display: 'grid', gap: 8 }}>{d.health.map(([t, h]) => <Tag key={h} c={t} icon={t === 'mint' ? 'check' : 'pain'} style={{ justifySelf: 'start', height: 'auto', padding: '6px 10px', whiteSpace: 'normal' }}>{h}</Tag>)}</div></div>
       </div>
-      <div className="card pad"><Sec title="Timeline" right="Everything, newest first" />
-        <div className="timeline">{TIMELINE.map(([i, c, t, s, w]) => <div className="ev" key={t}><Tile icon={i} c={c} /><span><b>{t}</b><small>{s}</small></span><time>{w}</time></div>)}</div></div>
+      <div className="statrow">
+        <div className="card"><b className="num" style={{ color: c.adh >= 85 ? 'var(--mint)' : c.adh >= 65 ? 'var(--amber)' : 'var(--coral)' }}>{c.adh}%</b><small>Planned workouts done</small></div>
+        <div className="card"><b>{c.last}</b><small>Last workout</small></div>
+        <div className="card"><b>{c.prog.split(' · ')[0]}</b><small>{c.prog.split(' · ')[1] ?? 'Programme'}</small></div>
+      </div>
+      {c.id === 'sarah' ? (
+        <div className="card pad"><Sec title="Timeline" right="Everything, newest first" />
+          <div className="timeline">{TIMELINE.map(([i, cl, t, sub, w]) => <div className="ev" key={t}><Tile icon={i} c={cl} /><span><b>{t}</b><small>{sub}</small></span><time>{w}</time></div>)}</div></div>
+      ) : <DemoOnlySarah c={c} />}
     </>
   );
 }
@@ -141,5 +151,51 @@ function Checkins({ c }: { c: Client }) {
         </div>
       ))}</div>
     </>
+  );
+}
+
+const SESSION_STATE: Record<string, [Tint, string]> = { confirmed: ['mint', 'Confirmed'], completed: ['grey', 'Completed'], late_cancelled: ['coral', 'Late cancel · counted'], awaiting_coach: ['amber', 'Awaiting you'], change_requested: ['amber', 'Change requested'] };
+function Sessions() {
+  const done = SESSION_HISTORY.filter(x => x[3] === 'completed').length;
+  return (
+    <>
+      <div className="statrow"><div className="card"><b className="num">{done}</b><small>Completed this block</small></div><div className="card"><b className="num" style={{ color: 'var(--coral)' }}>1</b><small>Late cancellations</small></div><div className="card"><b className="num">6 of 8</b><small>Left in October</small></div></div>
+      <div className="card">{SESSION_HISTORY.map(([d, t, loc, st]) => (
+        <div className="ev" key={d} style={{ padding: '12px 18px' }}><Tile icon="schedule" c={SESSION_STATE[st][0]} /><span><b>{d} · {t}</b><small>{loc} · 60 min</small></span><Tag c={SESSION_STATE[st][0]}>{SESSION_STATE[st][1]}</Tag></div>
+      ))}</div>
+    </>
+  );
+}
+function Payments({ c }: { c: Client }) {
+  return (
+    <>
+      <div className="flag" style={{ borderColor: 'var(--hair)', background: 'var(--s2)' }}><span style={{ color: 'var(--fg2)' }}><Icon name="card" /></span><span>{c.pkg} · bank transfer, due on the 1st. Change price, due date or add a discount in <Link href="/coach/payments" style={{ textDecoration: 'underline' }}>Payments</Link>.</span></div>
+      <div className="card">{PAYMENT_HISTORY.map(([d, amt, what, st]) => (
+        <div className="ev" key={d} style={{ padding: '12px 18px' }}><Tile icon="card" c={st === 'paid' ? 'mint' : st === 'due' ? 'grey' : 'coral'} /><span><b>{what}</b><small>Due {d}</small></span><span style={{ display: 'flex', gap: 10, alignItems: 'center' }}><b className="num">{amt}</b><Tag c={st === 'paid' ? 'mint' : st === 'due' ? 'grey' : 'coral'}>{st === 'paid' ? 'Paid' : st === 'due' ? 'Due' : 'Overdue'}</Tag></span></div>
+      ))}</div>
+    </>
+  );
+}
+// Kyle's private notes on a client. Never shown to the client or to KAI.
+function Notes({ c }: { c: Client }) {
+  const [notes, setNotes] = useState<[string, string][]>(c.id === 'sarah' ? [['19 Oct', 'Knee better on box squats than leg press. Keep depth to parallel.'], ['6 Sep', 'Wants to deadlift bodyweight by summer. Responds well to clear numbers.']] : []);
+  const [text, setText] = useState('');
+  return (
+    <div className="card pad" style={{ display: 'grid', gap: 12 }}>
+      <Sec style={{ margin: 0 }} title="Coaching notes" right="Only you see these. Never shown to the client or KAI." />
+      <textarea className="fb" value={text} onChange={e => setText(e.target.value)} placeholder="Add a note…" aria-label="New note" style={{ minHeight: 70 }} />
+      <button className="btn mint" style={{ justifySelf: 'start' }} disabled={!text.trim()} onClick={() => { setNotes([['Today', text.trim()], ...notes]); setText(''); }}><Icon name="check" className="sm" />Save note</button>
+      {notes.map(([d, n], i) => <div key={i} className="note-row"><time>{d}</time><p>{n}</p></div>)}
+      {!notes.length && <p className="muted" style={{ margin: 0 }}>No notes yet.</p>}
+    </div>
+  );
+}
+
+// The demo's sample history only covers Sarah in detail.
+function DemoOnlySarah({ c }: { c: Client }) {
+  return (
+    <div className="card pad" style={{ display: 'flex', gap: 14, alignItems: 'center' }}><Tile icon="info" c="grey" />
+      <span><b>No sample history for {c.name.split(' ')[0]}</b><br /><small className="muted">The demo has full sample data for Sarah only. With the database connected, this shows {c.name.split(' ')[0]}&apos;s own records.</small></span>
+      <Link className="btn line" style={{ marginLeft: 'auto' }} href="/coach/clients/sarah">See Sarah</Link></div>
   );
 }

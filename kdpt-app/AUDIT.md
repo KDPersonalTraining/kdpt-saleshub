@@ -130,3 +130,44 @@ Work goes in this order. Each step is tested and pushed before the next.
 - Hannah's sign-up and her screens.
 - The booking flow.
 - The coach payments and schedule pages.
+
+### 1 November: plan step 7 and more of Phase 1
+
+- **Monthly booking run.** Schedule → Schedule November turns each client's regular slots into the month's proposals.
+  - Checks: working hours, the Wednesday half day, time off and holidays, clashes, travel time between gyms, and each package's allowance.
+  - November 2026 has five Mondays; the extra slot is left out rather than booked.
+  - Anything that can't go ahead needs Kyle's decision (leave out, or propose anyway) before sending.
+  - Booking states (proposed → awaiting client → change requested → awaiting coach → confirmed, plus declined and cancelled) and the 24-hour rule are tested code.
+- **Coach Today.**
+  - Alerts are grouped as Today, This week and When you have time. A missed workout is never "today".
+  - Each alert opens a panel: the details (for pain, where, how bad, what she did, the injury on file and the exercises involved), a KAI-drafted message to edit, and the right action.
+  - Alerts can be marked dealt with or snoozed, with undo.
+  - New alerts for a block ending and a block of sessions ending (renewals).
+- **Nutrition.**
+  - Pick a portion in servings or grams; the macros update as you go.
+  - Recent foods and favourites.
+  - Tap a logged food to change the amount or remove it.
+  - Three tracking styles set per client: full numbers, protein only, or no numbers.
+  - Older saved logs are upgraded automatically.
+- **Progress.**
+  - Compare over 1, 3 or 6 months. If the history is shorter, it says "since you started" instead of pretending.
+  - Changes are judged against the client's goal.
+  - Weight shows a 7-day average (or every weigh-in) with an explanation.
+  - Measurement changes are shown in a neutral colour.
+- **KAI.**
+  - Every question goes through a tested safety check first:
+    - possible emergencies → stop and call 999 (and the coach is told)
+    - pain, injury, medical questions and plan changes → passed to the coach
+  - KAI uses a client's plan only if they've allowed it; health answers and photos are never used.
+  - In demo, typed questions say honestly that KAI isn't connected.
+- **Client profile.**
+  - Details and health on Overview.
+  - New Sessions (with booking states), Payments and private Notes tabs.
+  - Other clients no longer show Sarah's sample data.
+  - Payment status matches the Payments page.
+
+**Tested with:**
+
+- 65 unit tests, including bookings, food, trends and KAI triage.
+- Browser runs of a workout, food logging, KAI, Hannah's sign-up, coach Today, the month planner and client profiles.
+- The production build.

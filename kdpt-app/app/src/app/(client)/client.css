@@ -919,3 +919,6 @@ button.food { width: 100%; text-align: left; }
 .periods { display: flex; gap: 6px; }
 .periods button { height: 34px; padding: 0 12px; border-radius: 10px; background: var(--s2); font-size: 13px; font-weight: 500; color: var(--fg2); }
 .periods button[aria-pressed="true"] { background: var(--fg); color: #000; }
+.consentbar { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 18px; background: rgba(169,155,255,.08); border: 1px solid rgba(169,155,255,.3); font-size: 14px; color: var(--fg2); }
+.consentbar span { flex: 1; }
+.consentbar .pill-btn { width: auto; padding: 0 16px; flex: none; }

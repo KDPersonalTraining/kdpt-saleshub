@@ -26,8 +26,10 @@ export default function Chat() {
             <div className="msg me">Thanks! Knee felt a bit tight on the lunges though</div>
             <div className="msg them">Noted. Keep the lunges short-stride and tell me if it&apos;s worse.</div>
           </>)}
-          {s.handed && <><div className="sysnote"><span className="orb sm"><Icon name="spark" /></span>KAI passed this to your coach</div>
+          {s.ai.includes('knee') && <><div className="sysnote"><span className="orb sm"><Icon name="spark" /></span>KAI passed this to your coach</div>
             <div className="msg me"><div className="quote">My knee aches during lunges</div>Asked KAI about this. Can you take a look?</div></>}
+          {s.aiLog.filter(m => m.to === 'coach' || m.to === 'urgent').map((m, i) => <div key={'k' + i}><div className="sysnote"><span className="orb sm"><Icon name="spark" /></span>KAI passed this to your coach</div>
+            <div className="msg me"><div className="quote">{m.q}</div>Asked KAI about this. Can you take a look?</div></div>)}
           {s.chat.map((m, i) => <div className="msg me" key={i}>{m}</div>)}
           <div ref={end} />
         </div>
