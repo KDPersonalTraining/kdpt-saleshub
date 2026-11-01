@@ -7,7 +7,7 @@ import { Icon } from '@/components/icon';
 import { loadStore, setState, useClient } from '@/lib/client/store';
 import { Sheet } from './sheets';
 
-export type SheetName = 'pay' | 'book' | 'avail' | 'session' | 'momentum' | 'time' | 'swap' | 'pain' | 'notifset' | 'addfood';
+export type SheetName = 'pay' | 'book' | 'avail' | 'session' | 'momentum' | 'time' | 'swap' | 'pain' | 'notifset' | 'addfood' | 'editfood';
 type UI = {
   toast: (m: string) => void;
   sheet: SheetName | null;

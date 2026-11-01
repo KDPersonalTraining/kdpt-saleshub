@@ -56,6 +56,8 @@ export default function Profile() {
             <div className="cons" style={{ padding: '12px 14px' }} key={k}><Li icon={i} color={col} /><span className="t"><b>{t}</b><small>{d}</small></span>
               <Switch on={s.preview[k]} label={t} onChange={() => setState({ preview: { ...s.preview, [k]: !s.preview[k] }, ...(k === 'payFail' ? { paid: false } : {}) })} /></div>
           ))}
+          <div className="cons" style={{ padding: '12px 14px', flexWrap: 'wrap' }}><Li icon="fuel" color="var(--amber)" /><span className="t"><b>Fuel numbers</b><small>Kyle sets this per client</small></span>
+            <span className="tsize">{([['full', 'All'], ['protein', 'Protein'], ['simple', 'None']] as const).map(([k, l]) => <button key={k} aria-pressed={s.fuelMode === k} style={{ width: 'auto', padding: '0 10px', fontSize: 13 }} onClick={() => setState({ fuelMode: k })}>{l}</button>)}</span></div>
           <button className="optrow" onClick={() => { resetStore(me.id, me.isNew); toast('Demo reset'); }}><Li icon="swap" color="var(--fg2)" /><span className="t"><b>Reset the demo</b><small>Clears everything you&apos;ve logged on this device</small></span></button>
         </div></div>
       )}

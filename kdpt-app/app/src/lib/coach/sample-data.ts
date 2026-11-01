@@ -66,14 +66,22 @@ export const SARAH_PLAN: Record<string, Row[]> = {
 };
 export const planMinutes = (rows: Row[]) => Math.round(rows.reduce((m, x) => m + 1.25 + (x.sets * 50 + (x.sets - 1) * x.rest) / 60 + 1, 0) + 8);
 
-export const ALERTS: { id: string; c: string; tag: [Tint, string, string]; why: string }[] = [
-  { id: 'a1', c: 'sarah', tag: ['coral', 'pain', 'Pain · knee 4/10'], why: 'During leg press this morning. Swapped to box squat and finished.' },
-  { id: 'a2', c: 'tom', tag: ['amber', 'clock', 'Missed workouts'], why: 'No workout for 9 days. His usual gap is 2–3.' },
-  { id: 'a3', c: 'priya', tag: ['amber', 'messages', 'Awaiting reply'], why: 'Handed over by KAI: “Can I train legs the day after my 10k?” · 26 h ago' },
-  { id: 'a4', c: 'dave', tag: ['grey', 'fuel', 'Meals to review'], why: '6 meals since Thursday, none reviewed.' },
-  { id: 'a6', c: 'dave', tag: ['coral', 'card', 'Payment overdue'], why: '£120 due 18 Oct. Reminders sent 15 and 18 Oct.' },
-  { id: 'a5', c: 'ellie', tag: ['violet', 'clip', 'Check-in'], why: 'Feeling low and asked for a call with you. Sleep 2/5 for the second week running.' },
+// Things that need Kyle. Urgency: 1 = today (safety, money), 2 = this week,
+// 3 = when there's time. A missed workout is never an emergency on its own.
+export type AlertKind = 'pain' | 'missed' | 'reply' | 'meals' | 'payment' | 'checkin' | 'block' | 'renewal';
+export type Alert = { id: string; c: string; kind: AlertKind; urgency: 1 | 2 | 3; tag: [Tint, string, string]; why: string; when: string };
+export const ALERTS: Alert[] = [
+  { id: 'a1', c: 'sarah', kind: 'pain', urgency: 1, tag: ['coral', 'pain', 'Pain · knee 4/10'], why: 'During leg press this morning. Swapped to box squat and finished.', when: 'Today 07:42' },
+  { id: 'a6', c: 'dave', kind: 'payment', urgency: 1, tag: ['coral', 'card', 'Payment overdue'], why: '£120 was due 18 Oct by bank transfer. Reminders sent 15 and 18 Oct.', when: '13 days' },
+  { id: 'a5', c: 'ellie', kind: 'checkin', urgency: 2, tag: ['violet', 'clip', 'Check-in'], why: 'Feeling low and asked for a call with you. Sleep 2/5 for the second week running.', when: 'Sun 19:10' },
+  { id: 'a3', c: 'priya', kind: 'reply', urgency: 2, tag: ['amber', 'messages', 'Awaiting reply'], why: 'Handed over by KAI: “Can I train legs the day after my 10k?”', when: '26 h ago' },
+  { id: 'a2', c: 'tom', kind: 'missed', urgency: 3, tag: ['amber', 'clock', 'Behind on training'], why: 'No workout for 9 days. His usual gap is 2–3.', when: '9 days' },
+  { id: 'a4', c: 'dave', kind: 'meals', urgency: 3, tag: ['grey', 'fuel', 'Meals to review'], why: '6 meals since Thursday, none reviewed.', when: 'Since Thu' },
+  { id: 'a7', c: 'sarah', kind: 'block', urgency: 3, tag: ['mint', 'programmes', 'Block ends soon'], why: 'Strength Block 1 finishes in 2 weeks. Plan what comes next.', when: 'Week 6 of 8' },
+  { id: 'a8', c: 'ellie', kind: 'renewal', urgency: 3, tag: ['sky', 'card', 'Block of 4 ending'], why: 'Her last session of this block is Wednesday. Ask if she wants another 4.', when: 'Wed' },
 ];
+export const URGENCY = { 1: 'Today', 2: 'This week', 3: 'When you have time' } as const;
+
 export const APPROVALS: { id: string; c: string; kind: [Tint, string]; text: string }[] = [
   { id: 'p1', c: 'dave', kind: ['amber', 'Nutrition feedback'], text: 'Good consistency this week, Dave. Protein is low at lunch (~25g). Add a chicken pot or Greek yoghurt to get closer to 150g.' },
   { id: 'p2', c: 'sarah', kind: ['mint', 'Programme change'], text: 'Replace Leg Press with Box Squat in Lower A for 2 weeks, then review.' },
@@ -192,3 +200,20 @@ export const CHECKIN_FORM: Question[] = [
   { id: 'q11', step: 'Support', q: 'Anything else for your coach?', type: 'text', req: false },
 ];
 export const CHECKIN_STEPS = ['How you feel', 'Your week', 'Wins', 'Support'];
+
+// Regular weekly slots, used to build each month's proposed sessions.
+// Weekday: Monday = 0. Clients whose times change send availability instead.
+export const REGULAR: { client: string; weekday: 0 | 1 | 2 | 3 | 4 | 5 | 6; time: string; minutes: number; location: string }[] = [
+  { client: 'sarah', weekday: 0, time: '7:00', minutes: 60, location: 'Studio' }, { client: 'sarah', weekday: 3, time: '7:00', minutes: 60, location: 'Studio' },
+  { client: 'mark', weekday: 1, time: '6:30', minutes: 60, location: 'Studio' }, { client: 'mark', weekday: 4, time: '6:30', minutes: 60, location: 'Studio' },
+  { client: 'tom', weekday: 0, time: '18:00', minutes: 60, location: 'Gym' }, { client: 'tom', weekday: 3, time: '17:45', minutes: 60, location: 'Gym' },
+  { client: 'ray', weekday: 1, time: '17:30', minutes: 45, location: 'Online' },
+];
+export const ALLOWANCE: Record<string, number> = { sarah: 8, mark: 8, tom: 8, ray: 4 };
+export const SENDS_AVAILABILITY = ['ellie', 'priya'];
+// Minutes to travel between locations. Online needs none.
+export const TRAVEL: Record<string, number> = { 'Studio>Gym': 20, 'Gym>Studio': 20 };
+// Time off already in the diary for November.
+export const NOV_TIME_OFF: { date: string; start: number; end: number; reason: string }[] = [
+  { date: '2026-11-13', start: 0, end: 24 * 60, reason: 'Course day (blocked by you)' },
+];

@@ -900,3 +900,19 @@ a { color: inherit; text-decoration: none; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
 .finish .group { text-align: left; }
+
+/* ---- Food portions ------------------------------------------------------- */
+button.food { width: 100%; text-align: left; }
+.food .addbtn { pointer-events: none; }
+.portion-head { display: grid; grid-template-columns: 40px minmax(0, 1fr) 40px; gap: 12px; align-items: center; }
+.portion-head .ib { width: 40px; height: 40px; border-radius: 50%; background: var(--s2); display: grid; place-items: center; }
+.portion-head h3 { font-size: 20px; }
+.qtyrow { display: grid; grid-template-columns: 64px 1fr 64px; align-items: center; gap: 10px; }
+.qtyrow button { height: 64px; border-radius: 20px; background: var(--s2); font: 700 28px var(--display); }
+.qtyrow span { text-align: center; display: grid; }
+.qtyrow b { font: 800 40px var(--display); }
+.qtyrow small { color: var(--fg3); }
+.macros4 { display: flex; justify-content: space-around; text-align: center; background: var(--s2); border-radius: 18px; padding: 14px 8px; color: var(--fg2); font-size: 12px; }
+.macros4 span { display: grid; gap: 2px; }
+.macros4 b { font: 700 18px var(--display); color: inherit; }
+.macros4 span:first-child b { color: var(--fg); }

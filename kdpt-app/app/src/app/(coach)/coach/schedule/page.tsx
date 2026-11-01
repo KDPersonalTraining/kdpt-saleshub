@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Icon } from '@/components/icon';
+import { MonthPlanner } from '@/components/coach/month-planner';
 import { useToast } from '@/components/coach/shell';
 import { Avatar, Head, Modal, Sec, Switch, Tag, Tile } from '@/components/coach/ui';
 import { APPROVE, AVAIL, CAL_END, CAL_START, DAYNAMES, DAYS, DEFAULT_HOURS, EVENTS, HOUR, REQS, byId, hhmm, type CalEvent } from '@/lib/coach/sample-data';
@@ -17,7 +18,8 @@ export default function Schedule() {
   const [availDone, setAvailDone] = useState<Record<string, boolean>>({});
   const [approved, setApproved] = useState<Record<string, string>>({});
   const [reqDone, setReqDone] = useState<Record<string, string>>({});
-  const [modal, setModal] = useState<'hours' | 'block' | null>(null);
+  const [modal, setModal] = useState<'hours' | 'block' | 'month' | null>(null);
+  const [sentMonth, setSentMonth] = useState(0);
 
   const off: CalEvent[] = [];
   DAYNAMES.forEach((d, i) => { const h = hours[d];
@@ -33,7 +35,7 @@ export default function Schedule() {
       <Head title="Schedule" sub={mode === 'coach' ? 'You propose every session. Clients reply, and nothing is booked until you confirm it.' : 'Clients pick from your open times, within their monthly allowance.'}>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}><Tag c="grey" icon="schedule">Google Calendar not connected</Tag>
           <button className="btn white" onClick={() => setModal('block')}><Icon name="close" className="sm" />Block time</button>
-          <button className="btn mint" onClick={() => toast('November drafted from everyone\'s regular slots. Review, then send on the 20th')}><Icon name="schedule" className="sm" />Schedule November</button></div></Head>
+          <button className="btn mint" onClick={() => setModal('month')}><Icon name="schedule" className="sm" />{sentMonth ? `November · ${sentMonth} sent` : 'Schedule November'}</button></div></Head>
       <div className="card srules">
         <div><span className="eyebrow">Who sets sessions</span><span className="modes">{([['coach', 'You schedule'], ['self', 'Clients pick']] as const).map(([k, l]) => <button key={k} className={mode === k ? 'on' : ''} onClick={() => setMode(k)}>{l}</button>)}</span>
           <small>{mode === 'coach' ? 'You place each client into their regular slot. They can only request changes.' : 'Clients choose open slots themselves. You still approve changes inside 24 hours.'}</small></div>
@@ -92,6 +94,7 @@ export default function Schedule() {
             ))}</div></div>
         </section>
       </div>
+      {modal === 'month' && <MonthPlanner hours={hours} onClose={() => setModal(null)} onSend={n => { setSentMonth(n); setModal(null); toast(`${n} sessions sent · awaiting clients`); }} />}
       {modal === 'hours' && <HoursModal hours={hours} setHours={setHours} onClose={() => setModal(null)} />}
       {modal === 'block' && <BlockModal onClose={() => setModal(null)} onSave={b => { setBlocks([...blocks, b]); setModal(null); toast('Blocked'); }} />}
     </>

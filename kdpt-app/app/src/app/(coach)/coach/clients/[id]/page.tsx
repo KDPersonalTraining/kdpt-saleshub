@@ -113,7 +113,7 @@ function Nutrition({ c }: { c: Client }) {
         </section>
         <section className="card pad" style={{ display: 'grid', gap: 14, alignContent: 'start' }}>
           <Sec style={{ margin: 0 }} title="Weekly feedback" right={<span className="sc-label"><span className="orb"><Icon name="spark" /></span>KAI draft</span>} />
-          {sent ? <div className="flag" style={{ background: 'rgba(126,213,151,.08)', borderColor: 'rgba(126,213,151,.25)' }}><Icon name="check" /><span>Sent to {first} · shows at the bottom of her Fuel tab</span></div> : (<>
+          {sent ? <div className="flag ok"><Icon name="check" /><span>Sent to {first} · shows at the bottom of her Fuel tab</span></div> : (<>
             <textarea className="fb" aria-label="Feedback" defaultValue={`Protein's up to ${avg[1]}g on average, ${first}, nice work. Friday ran over on calories and carbs and protein dipped, so plan Friday's dinner ahead. Dinners are light on veg: add a side salad or frozen veg.`} />
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><button className="btn mint" onClick={() => setSent(true)}><Icon name="send" className="sm" />Send</button><button className="btn line" onClick={() => toast('Redrafting from this week\'s food log')}><Icon name="spark" className="sm" />Redraft</button></div>
           </>)}

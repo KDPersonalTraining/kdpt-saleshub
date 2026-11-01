@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from 'react';
 import type { Slot } from './sample-data';
+import { normaliseLog, type LogItem } from './food';
 
 // The client app's local state. In demo mode it is the only copy and lives
 // in this browser. With Supabase connected, the same shape is filled from the
@@ -26,7 +27,9 @@ export type ClientState = {
   sessionCancelled: boolean; sessionsLeft: number; book: { req: Record<number, string>; done: boolean };
   avail: { days: Record<string, [number, number] | null>; note: string; sent: boolean }; paid: boolean; autopay: boolean;
   // Food
-  log: Record<Slot, string[]>; water: number;
+  log: Record<Slot, LogItem[]>; water: number; favs: string[]; recent: string[];
+  // How much of the numbers this client sees, set by Kyle: everything, protein only, or none.
+  fuelMode: 'full' | 'protein' | 'simple';
   // Messages
   chat: string[]; ai: string[]; handed: boolean;
   // Community
@@ -50,7 +53,8 @@ const initial = (): ClientState => ({
   pain: { area: null, sev: 3, act: null, sent: false },
   sessionCancelled: false, sessionsLeft: 6, book: { req: {}, done: false },
   avail: { days: { Mon: null, Tue: [16.5, 19.5], Wed: null, Thu: [14, 19.5], Fri: null }, note: '', sent: false }, paid: false, autopay: true,
-  log: { Breakfast: ['eggs', 'sourdough', 'avo'], Lunch: ['wrap'], Snacks: ['yog', 'berries'], Dinner: [] }, water: 6,
+  log: { Breakfast: [{ food: 'eggs', qty: 1 }, { food: 'sourdough', qty: 1 }, { food: 'avo', qty: 1 }], Lunch: [{ food: 'wrap', qty: 1 }], Snacks: [{ food: 'yog', qty: 1 }, { food: 'berries', qty: 1 }], Dinner: [] }, water: 6,
+  favs: ['wrap', 'yog'], recent: ['eggs', 'sourdough', 'avo', 'wrap', 'yog', 'berries', 'chicken', 'rice'], fuelMode: 'full',
   chat: [], ai: [], handed: false,
   liked: {}, comments: {},
   showWeight: false,
@@ -70,10 +74,11 @@ export function loadStore(personId: string, isNew: boolean) {
   if (loadedFor === personId) return;
   loadedFor = personId;
   const fresh = initial();
-  if (isNew) Object.assign(fresh, { onb: { ...fresh.onb, done: false, consent: {} }, log: { Breakfast: [], Lunch: [], Snacks: [], Dinner: [] }, water: 0, sessionsLeft: 8, preview: { ...fresh.preview, fresh: true } });
+  if (isNew) Object.assign(fresh, { onb: { ...fresh.onb, done: false, consent: {} }, log: { Breakfast: [], Lunch: [], Snacks: [], Dinner: [] }, water: 0, favs: [], recent: [], sessionsLeft: 8, preview: { ...fresh.preview, fresh: true } });
   try {
     const saved = localStorage.getItem(`${KEY}:${personId}`);
     state = saved ? { ...fresh, ...JSON.parse(saved) } : fresh;
+    state.log = normaliseLog(state.log as unknown as Record<string, unknown[]>);
   } catch {
     state = fresh;
   }

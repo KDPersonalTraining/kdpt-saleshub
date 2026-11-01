@@ -6,6 +6,7 @@ import { Icon } from '@/components/icon';
 import { FOODS, FREQ, HOURS, MOMENTUM, NOTIF_TYPES, NOV, hm, type Food, type Slot } from '@/lib/client/sample-data';
 import { setState, useClient } from '@/lib/client/store';
 import { planFor } from '@/lib/client/workout';
+import { clampQty, resolveFood, scaled } from '@/lib/client/food';
 import { AccBars, Chev, Li, MomentumRings, Sent, Switch } from './ui';
 import { useUI, type SheetName } from './shell';
 
@@ -21,6 +22,7 @@ export function Sheet({ name }: { name: SheetName }) {
     case 'pain': return <PainSheet />;
     case 'notifset': return <><div><h3>Notifications</h3><div className="sub">Choose what reaches your phone</div></div><NotifToggles /><Done /></>;
     case 'addfood': return <AddFoodSheet />;
+    case 'editfood': return <EditFoodSheet />;
   }
 }
 
@@ -233,35 +235,44 @@ function PainSheet() {
 function AddFoodSheet() {
   const s = useClient(), { sheetArg, closeSheet, toast } = useUI();
   const slot = (sheetArg ?? 'Breakfast') as Slot;
-  const [tab, setTab] = useState<'search' | 'scan' | 'recipes' | 'quick'>('search');
+  const [tab, setTab] = useState<'recent' | 'search' | 'recipes' | 'quick'>(s.recent.length ? 'recent' : 'search');
   const [q, setQ] = useState('');
+  const [pick, setPick] = useState<Food | null>(null);
   const [quick, setQuick] = useState({ kcal: '', P: '', C: '', F: '' });
-  const add = (id: string) => { setState({ log: { ...s.log, [slot]: [...s.log[slot], id] } }); toast(`Added to ${slot}`); closeSheet(); };
-  const list = FOODS.filter(f => (tab === 'recipes' ? f.img : true) && f.n.toLowerCase().includes(q.toLowerCase()));
+  const add = (food: string, qty: number) => {
+    setState({ log: { ...s.log, [slot]: [...s.log[slot], { food, qty }] }, recent: [food, ...s.recent.filter(r => r !== food)].slice(0, 20) });
+    toast(`Added to ${slot}`); closeSheet();
+  };
+  if (pick) return <Portion f={pick} qty={1} slot={slot} onBack={() => setPick(null)} onSave={qty => add(pick.id, qty)} />;
+  const recent = s.recent.map(id => FOODS.find(f => f.id === id)).filter(Boolean) as Food[];
+  const favs = s.favs.map(id => FOODS.find(f => f.id === id)).filter(Boolean) as Food[];
+  const list = tab === 'recent' ? [...favs, ...recent.filter(f => !s.favs.includes(f.id))]
+    : FOODS.filter(f => (tab === 'recipes' ? f.img : true) && f.n.toLowerCase().includes(q.toLowerCase()));
   return (
     <>
       <div><h3>Add to {slot}</h3></div>
-      <div className="tabs4">{([['search', 'Search'], ['scan', 'Scan'], ['recipes', 'Recipes'], ['quick', 'Quick add']] as const).map(([k, l]) => <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}</div>
-      {(tab === 'search' || tab === 'recipes') && (
+      <div className="tabs4">{([['recent', 'Recent'], ['search', 'Search'], ['recipes', "Kyle's recipes"], ['quick', 'Quick add']] as const).map(([k, l]) => <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}</div>
+      {tab !== 'quick' && (
         <>
-          {tab === 'search' && <label className="search"><Icon name="search" /><input placeholder="Search foods" value={q} onChange={e => setQ(e.target.value)} aria-label="Search foods" /></label>}
+          {tab === 'search' && <label className="search"><Icon name="search" /><input placeholder="Search foods" value={q} onChange={e => setQ(e.target.value)} aria-label="Search foods" autoFocus /></label>}
           <div className="group" style={{ '--inset': '14px' } as React.CSSProperties}>
             {list.length ? list.map(f => (
-              <div className="food" key={f.id}>{f.img && <img src={`/assets/${f.img}.jpg`} alt="" />}<span className="t"><b>{f.n}</b><small className="num">{f.p} · {f.kcal} kcal · P {f.P} C {f.C} F {f.F}</small></span>
-                <button className="addbtn" onClick={() => add(f.id)} aria-label={`Add ${f.n}`}><Icon name="plus" /></button></div>
-            )) : <div className="empty">No matches. Try Quick add to enter the numbers yourself.</div>}
+              <button className="food" key={f.id} onClick={() => setPick(f)}>{f.img && <img src={`/assets/${f.img}.jpg`} alt="" />}
+                <span className="t"><b>{s.favs.includes(f.id) && <span style={{ color: 'var(--amber)' }}>★ </span>}{f.n}</b><small className="num">{f.p} · {f.kcal} kcal · {f.P}g protein</small></span>
+                <span className="addbtn" aria-hidden="true"><Icon name="plus" /></span></button>
+            )) : <div className="empty">{tab === 'recent' ? 'Foods you log show up here.' : 'No matches. Try Quick add.'}</div>}
           </div>
+          <p className="foot">Barcode scanning comes once the food database is connected.</p>
         </>
       )}
-      {tab === 'scan' && <div className="scanbox"><span>Point the camera at a barcode<br /><small style={{ color: 'var(--fg3)' }}>Uses your phone&apos;s camera in the installed app</small></span></div>}
       {tab === 'quick' && (
         <>
           <div className="qa">{([['kcal', 'Calories', 'kcal'], ['P', 'Protein', 'g'], ['C', 'Carbs', 'g'], ['F', 'Fat', 'g']] as const).map(([k, l, u]) => (
-            <label key={k}>{l} ({u})<input inputMode="decimal" placeholder="0" value={quick[k]} onChange={e => setQuick({ ...quick, [k]: e.target.value })} /></label>
+            <label key={k}>{l} ({u})<input inputMode="decimal" placeholder="0" value={quick[k]} onChange={e => setQuick({ ...quick, [k]: e.target.value.replace(/[^\d.]/g, '') })} /></label>
           ))}</div>
-          <button className="pill-btn mint" onClick={() => {
-            const n = (v: string) => parseFloat(v) || 0;
-            add(`quick:${n(quick.kcal)}:${n(quick.P)}:${n(quick.C)}:${n(quick.F)}`);
+          <button className="pill-btn mint" disabled={!(parseFloat(quick.kcal) > 0)} style={parseFloat(quick.kcal) > 0 ? undefined : { opacity: .4 }} onClick={() => {
+            const n = (v: string) => Math.min(5000, parseFloat(v) || 0);
+            add(`quick:${n(quick.kcal)}:${n(quick.P)}:${n(quick.C)}:${n(quick.F)}`, 1);
           }}>Add to {slot}</button>
         </>
       )}
@@ -269,9 +280,46 @@ function AddFoodSheet() {
   );
 }
 
-// Foods logged with Quick add are stored as "quick:kcal:P:C:F".
-export function resolveFood(id: string): Food | undefined {
-  if (!id.startsWith('quick:')) return FOODS.find(f => f.id === id);
-  const [, kcal, P, C, F] = id.split(':').map(Number);
-  return { id, n: 'Quick add', p: 'Entered by you', kcal, P, C, F };
+// Choosing how much: servings, or grams for foods that are weighed.
+function Portion({ f, qty: start, slot, onBack, onSave, onRemove }: { f: Food; qty: number; slot: Slot; onBack: () => void; onSave: (qty: number) => void; onRemove?: () => void }) {
+  const s = useClient();
+  const [qty, setQty] = useState(start);
+  const [grams, setGrams] = useState(f.g ? String(Math.round(f.g * start)) : '');
+  const fav = s.favs.includes(f.id);
+  const x = scaled(f, qty), mode = s.fuelMode;
+  const setG = (v: string) => { const t = v.replace(/\D/g, '').slice(0, 4); setGrams(t); if (f.g && +t > 0) setQty(clampQty(+t / f.g)); };
+  return (
+    <>
+      <div className="portion-head">
+        <button className="ib" onClick={onBack} aria-label="Back"><Icon name="back" /></button>
+        <span><h3>{f.n}</h3><div className="sub">{f.p} per serving</div></span>
+        {!f.id.startsWith('quick:') && <button className="ib" aria-pressed={fav} aria-label={fav ? 'Remove from favourites' : 'Add to favourites'} style={{ color: fav ? 'var(--amber)' : 'var(--fg3)', fontSize: 20 }}
+          onClick={() => setState({ favs: fav ? s.favs.filter(id => id !== f.id) : [f.id, ...s.favs] })}>{fav ? '★' : '☆'}</button>}
+      </div>
+      <div className="qtyrow">
+        <button onClick={() => { const q = clampQty(qty - (qty > 1 ? 0.5 : 0.25)); setQty(q); if (f.g) setGrams(String(Math.round(f.g * q))); }} aria-label="Less">−</button>
+        <span><b className="num">{qty}</b><small>serving{qty === 1 ? '' : 's'}</small></span>
+        <button onClick={() => { const q = clampQty(qty + (qty >= 1 ? 0.5 : 0.25)); setQty(q); if (f.g) setGrams(String(Math.round(f.g * q))); }} aria-label="More">+</button>
+      </div>
+      {f.g && <label className="search" style={{ justifyContent: 'space-between' }}><span style={{ color: 'var(--fg2)' }}>Or weigh it</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input inputMode="numeric" value={grams} onChange={e => setG(e.target.value)} aria-label="Grams" style={{ width: 70, textAlign: 'right', fontWeight: 700 }} onFocus={e => e.currentTarget.select()} />g</span></label>}
+      {mode !== 'simple' && <div className="macros4 num">
+        {mode === 'full' && <span><b>{Math.round(x.kcal)}</b>kcal</span>}
+        <span style={{ color: 'var(--amber)' }}><b>{Math.round(x.P)}g</b>protein</span>
+        {mode === 'full' && <><span style={{ color: 'var(--sky)' }}><b>{Math.round(x.C)}g</b>carbs</span><span style={{ color: 'var(--violet)' }}><b>{Math.round(x.F)}g</b>fat</span></>}
+      </div>}
+      <button className="pill-btn mint" onClick={() => onSave(qty)}>{onRemove ? 'Save' : `Add to ${slot}`}</button>
+      {onRemove && <button className="pill-btn dark" style={{ color: 'var(--coral)' }} onClick={onRemove}>Remove</button>}
+    </>
+  );
+}
+
+// Tapping something already logged: change how much, or remove it.
+function EditFoodSheet() {
+  const s = useClient(), { sheetArg, closeSheet } = useUI();
+  const [slot, i] = (sheetArg ?? 'Breakfast|0').split('|') as [Slot, string];
+  const it = s.log[slot]?.[+i], f = it && resolveFood(it.food);
+  if (!it || !f) return <Done />;
+  const put = (items: typeof s.log[Slot]) => { setState({ log: { ...s.log, [slot]: items } }); closeSheet(); };
+  return <Portion f={f} qty={it.qty} slot={slot} onBack={closeSheet} onSave={qty => put(s.log[slot].map((x, j) => (j === +i ? { ...x, qty } : x)))} onRemove={() => put(s.log[slot].filter((_, j) => j !== +i))} />;
 }

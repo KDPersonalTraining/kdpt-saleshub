@@ -86,24 +86,25 @@ export const WEIGHT_7DAY = [71.2, 71.0, 70.6, 70.3, 70.1, 69.6, 69.2, 69.0, 68.6
 export const CONSISTENCY: [string, string][] = [['7 Sep', 'w,,w,,w,pt,'], ['14 Sep', 'w,,w,,w,pt,'], ['21 Sep', 'w,,x,,w,pt,'], ['28 Sep', 'w,pt,w,,w,,'], ['5 Oct', 'w,,w,,w,pt,'], ['12 Oct', 'w,pt,w,,w,pt,'], ['19 Oct', 'w,pt,w,,,,']];
 
 // Food. In the live app this is Open Food Facts plus Kyle's recipes.
-export type Food = { id: string; n: string; p: string; kcal: number; P: number; C: number; F: number; img?: string };
+// Values are per serving (p). g = grams in one serving, where weighing makes sense.
+export type Food = { id: string; n: string; p: string; kcal: number; P: number; C: number; F: number; img?: string; g?: number };
 export const FOODS: Food[] = [
   { id: 'eggs', n: 'Eggs, scrambled', p: '2 large', kcal: 150, P: 13, C: 1, F: 11 },
   { id: 'sourdough', n: 'Sourdough toast', p: '1 slice', kcal: 120, P: 4, C: 23, F: 1 },
   { id: 'avo', n: 'Avocado', p: '½ medium', kcal: 120, P: 1.5, C: 6, F: 11 },
   { id: 'wrap', n: 'High-Protein Breakfast Wrap', p: '1 wrap · KDPT recipe', kcal: 400, P: 41, C: 35, F: 10, img: 'wrap' },
-  { id: 'yog', n: 'Greek yoghurt 0%', p: '170 g pot', kcal: 100, P: 17, C: 6, F: 0 },
-  { id: 'berries', n: 'Blueberries', p: '80 g', kcal: 45, P: 0.5, C: 11, F: 0.3 },
-  { id: 'chicken', n: 'Chicken breast, grilled', p: '150 g', kcal: 165, P: 31, C: 0, F: 3.6 },
-  { id: 'rice', n: 'Basmati rice, cooked', p: '150 g', kcal: 195, P: 4, C: 43, F: 0.5 },
-  { id: 'whey', n: 'Whey protein shake', p: '30 g scoop', kcal: 120, P: 24, C: 3, F: 1.5 },
-  { id: 'oats', n: 'Porridge oats', p: '50 g', kcal: 190, P: 6.5, C: 33, F: 3.5 },
-  { id: 'salmon', n: 'Salmon fillet', p: '130 g', kcal: 270, P: 28, C: 0, F: 17 },
+  { id: 'yog', n: 'Greek yoghurt 0%', p: '170 g pot', g: 170, kcal: 100, P: 17, C: 6, F: 0 },
+  { id: 'berries', n: 'Blueberries', p: '80 g', g: 80, kcal: 45, P: 0.5, C: 11, F: 0.3 },
+  { id: 'chicken', n: 'Chicken breast, grilled', p: '150 g', g: 150, kcal: 165, P: 31, C: 0, F: 3.6 },
+  { id: 'rice', n: 'Basmati rice, cooked', p: '150 g', g: 150, kcal: 195, P: 4, C: 43, F: 0.5 },
+  { id: 'whey', n: 'Whey protein shake', p: '30 g scoop', g: 30, kcal: 120, P: 24, C: 3, F: 1.5 },
+  { id: 'oats', n: 'Porridge oats', p: '50 g', g: 50, kcal: 190, P: 6.5, C: 33, F: 3.5 },
+  { id: 'salmon', n: 'Salmon fillet', p: '130 g', g: 130, kcal: 270, P: 28, C: 0, F: 17 },
   { id: 'pasta', n: 'Creamy Cajun Chicken Pasta', p: '1 portion · KDPT recipe', kcal: 480, P: 45, C: 52, F: 10, img: 'pasta' },
   { id: 'bowl', n: 'Big Mac Loaded Potato Bowl', p: '1 bowl · KDPT recipe', kcal: 540, P: 42, C: 48, F: 18, img: 'potato-bowl' },
   { id: 'turkey', n: 'Turkey & Pasta Tomato Bowl', p: '1 bowl · KDPT recipe', kcal: 500, P: 40, C: 55, F: 11, img: 'turkey-pasta' },
   { id: 'banana', n: 'Banana', p: '1 medium', kcal: 105, P: 1.3, C: 27, F: 0.4 },
-  { id: 'almonds', n: 'Almonds', p: '25 g', kcal: 145, P: 5, C: 5, F: 12.5 },
+  { id: 'almonds', n: 'Almonds', p: '25 g', g: 25, kcal: 145, P: 5, C: 5, F: 12.5 },
 ];
 export const TARGET = { kcal: 2100, P: 140, C: 210, F: 70 };
 export const MACROS = [['P', 'Protein', 'var(--amber)'], ['C', 'Carbs', 'var(--sky)'], ['F', 'Fat', 'var(--violet)']] as const;
