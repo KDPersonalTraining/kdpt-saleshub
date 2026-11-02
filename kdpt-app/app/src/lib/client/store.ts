@@ -23,6 +23,8 @@ export type ClientState = {
   duration: number; idx: number; logs: Record<string, SetLog[]>; swaps: Record<string, string>;
   exNotes: Record<string, { rpe: number | null; note: string }>; skipped: Record<string, boolean>;
   startedAt: number | null; finishedAt: number | null;
+  // Pausing stops the workout clock. between = the exercise just finished, while showing "up next".
+  pausedAt: number | null; pausedMs: number; between: string | null;
   rest: { endsAt: number; total: number; pausedLeft: number | null } | null;
   pain: { area: string | null; sev: number; act: string | null; sent: boolean };
   // Bookings and payments
@@ -53,7 +55,7 @@ const initial = (): ClientState => ({
   scale: 1, onbStep: 0,
   notifs: { workout: true, booking: true, session: true, payment: true, drop: true, checkin: true },
   read: false,
-  duration: 60, idx: 0, logs: {}, swaps: {}, exNotes: {}, skipped: {}, startedAt: null, finishedAt: null, rest: null,
+  duration: 60, idx: 0, logs: {}, swaps: {}, exNotes: {}, skipped: {}, startedAt: null, finishedAt: null, rest: null, pausedAt: null, pausedMs: 0, between: null,
   pain: { area: null, sev: 3, act: null, sent: false },
   sessionCancelled: false, sessionsLeft: 6, book: { req: {}, done: false },
   avail: { days: { Mon: null, Tue: [16.5, 19.5], Wed: null, Thu: [14, 19.5], Fri: null }, note: '', sent: false }, paid: false, autopay: true,
@@ -96,6 +98,16 @@ export function setState(patch: Partial<ClientState> | ((s: ClientState) => Part
   emit();
 }
 
+// For "set this if it isn't set yet" updates. Reads the store as it is now,
+// and does nothing until the client's saved data has loaded, so a screen that
+// opens first can never overwrite what was saved (a workout's start time, a
+// half-finished check-in).
+export function updateOnceLoaded(fn: (s: ClientState) => Partial<ClientState> | null) {
+  if (!loadedFor) return;
+  const patch = fn(state);
+  if (patch) setState(patch);
+}
+
 export function resetStore(personId: string, isNew: boolean) {
   try { localStorage.removeItem(`${KEY}:${personId}`); } catch { /* storage unavailable */ }
   loadedFor = null;
@@ -109,4 +121,4 @@ export function useClient(): ClientState {
 }
 
 // Clears the workout in progress (after finishing or abandoning it).
-export const resetWorkout = (): Partial<ClientState> => ({ idx: 0, logs: {}, swaps: {}, exNotes: {}, skipped: {}, startedAt: null, finishedAt: null, rest: null });
+export const resetWorkout = (): Partial<ClientState> => ({ idx: 0, logs: {}, swaps: {}, exNotes: {}, skipped: {}, startedAt: null, finishedAt: null, rest: null, pausedAt: null, pausedMs: 0, between: null });

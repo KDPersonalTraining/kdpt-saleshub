@@ -6,13 +6,13 @@ import { Icon } from '@/components/icon';
 import { useUI, type SheetName } from '@/components/client/shell';
 import { SubTop } from '@/components/client/ui';
 import { NOTES, type Note } from '@/lib/client/sample-data';
-import { setState, useClient } from '@/lib/client/store';
+import { updateOnceLoaded, useClient } from '@/lib/client/store';
 
 export default function Notifications() {
   const s = useClient(), { openSheet } = useUI(), router = useRouter();
   const wasRead = s.read;
   // Opening the list marks everything read (shown as unread this visit).
-  useEffect(() => { if (!s.read) setState({ read: true }); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { updateOnceLoaded(st => (st.read ? null : { read: true })); }, [s]);
   const row = (n: Note) => {
     const done = (n.id === 'pay' && s.paid) || (n.id === 'book' && s.book.done);
     return (

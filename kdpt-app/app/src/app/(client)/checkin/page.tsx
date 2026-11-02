@@ -8,13 +8,13 @@ import { useUI } from '@/components/client/shell';
 import { freqInfo } from '@/components/client/sheets';
 import { Eyebrow, Li } from '@/components/client/ui';
 import { MOODS, SUPPORT, WEEK_SCALES, WINS } from '@/lib/client/sample-data';
-import { newCheckin, setState, useClient, type CheckIn } from '@/lib/client/store';
+import { newCheckin, setState, updateOnceLoaded, useClient, type CheckIn } from '@/lib/client/store';
 
 const TITLES = ['', 'How are you feeling?', 'How was your week?', 'Wins beyond the scale', 'How can your coach help?'];
 
 export default function CheckinPage() {
   const s = useClient(), router = useRouter(), { toast } = useUI();
-  useEffect(() => { if (!s.checkin) setState({ checkin: newCheckin() }); }, [s.checkin]);
+  useEffect(() => { updateOnceLoaded(st => (st.checkin ? null : { checkin: newCheckin() })); }, [s]);
   const c = s.checkin;
   if (!c) return null;
   const set = (patch: Partial<CheckIn>) => setState({ checkin: { ...c, ...patch } });
