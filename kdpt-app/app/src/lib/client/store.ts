@@ -14,6 +14,8 @@ export type CheckIn = { step: number; mood: number; words: string; scales: Recor
 export type ClientState = {
   onb: { done: boolean; goal: string; days: number; freq: string; day: string; parq: (boolean | undefined)[]; injuries: string; consent: Record<string, boolean>; os: 'ios' | 'android' };
   scale: number;
+  // Where a new client got to in sign-up, so closing the app doesn't lose it.
+  onbStep: number;
   notifs: Record<string, boolean>;
   read: boolean;
   // Training. Everything about the workout in progress is kept here, so it
@@ -48,7 +50,7 @@ export const newCheckin = (): CheckIn => ({ step: 1, mood: 3, words: '', scales:
 
 const initial = (): ClientState => ({
   onb: { done: true, goal: 'strength', days: 3, freq: 'weekly', day: 'Sun', parq: [], injuries: '', consent: { terms: true, health: true, kai: true }, os: 'ios' },
-  scale: 1,
+  scale: 1, onbStep: 0,
   notifs: { workout: true, booking: true, session: true, payment: true, drop: true, checkin: true },
   read: false,
   duration: 60, idx: 0, logs: {}, swaps: {}, exNotes: {}, skipped: {}, startedAt: null, finishedAt: null, rest: null,
@@ -76,7 +78,8 @@ export function loadStore(personId: string, isNew: boolean) {
   if (loadedFor === personId) return;
   loadedFor = personId;
   const fresh = initial();
-  if (isNew) Object.assign(fresh, { onb: { ...fresh.onb, done: false, consent: {} }, log: { Breakfast: [], Lunch: [], Snacks: [], Dinner: [] }, water: 0, favs: [], recent: [], sessionsLeft: 8, preview: { ...fresh.preview, fresh: true } });
+  // A new client starts with nothing chosen, so every sign-up step needs an answer.
+  if (isNew) Object.assign(fresh, { onb: { ...fresh.onb, done: false, consent: {}, goal: '', days: 0, freq: '', day: '' }, log: { Breakfast: [], Lunch: [], Snacks: [], Dinner: [] }, water: 0, favs: [], recent: [], sessionsLeft: 8, preview: { ...fresh.preview, fresh: true } });
   try {
     const saved = localStorage.getItem(`${KEY}:${personId}`);
     state = saved ? { ...fresh, ...JSON.parse(saved) } : fresh;

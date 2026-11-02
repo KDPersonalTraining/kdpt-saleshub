@@ -22,7 +22,7 @@ export const useUI = () => useContext(Ctx)!;
 
 const TABS = [['home', 'Home'], ['train', 'Train'], ['fuel', 'Fuel'], ['progress', 'Progress'], ['community', 'Community']] as const;
 // Full-screen flows hide the tab bar.
-const NO_TABS = ['/workout', '/chat', '/kai', '/checkin', '/profile', '/welcome'];
+const NO_TABS = ['/workout', '/chat', '/kai', '/checkin', '/profile', '/welcome', '/tour'];
 
 export function ClientShell({ me, children }: { me: { id: string; name: string; isNew?: boolean; demo?: boolean }; children: React.ReactNode }) {
   const path = usePathname();
@@ -33,9 +33,19 @@ export function ClientShell({ me, children }: { me: { id: string; name: string; 
   const [sheetArg, setSheetArg] = useState<string | null>(null);
   const [pushMsg, setPush] = useState<{ title: string; body: string; sheet: SheetName; show: boolean } | null>(null);
   const screen = useRef<HTMLDivElement>(null);
+  const [entering, setEntering] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => { loadStore(me.id, !!me.isNew); }, [me.id, me.isNew]);
+  // A short welcome as the client enters the app: once per visit, tap to skip.
+  useEffect(() => {
+    let seen = true;
+    try { seen = !!sessionStorage.getItem('kdpt-entered'); sessionStorage.setItem('kdpt-entered', '1'); } catch { /* storage blocked */ }
+    if (seen || path === '/welcome') return;
+    setEntering(true);
+    const t = setTimeout(() => setEntering(false), 2200);
+    return () => clearTimeout(t);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   // New clients go through onboarding first.
   useEffect(() => { if (!s.onb.done && path !== '/welcome') router.replace('/welcome'); }, [s.onb.done, path, router]);
   useEffect(() => { if (screen.current) screen.current.scrollTop = 0; setSheet(null); }, [path]);
@@ -94,6 +104,11 @@ export function ClientShell({ me, children }: { me: { id: string; name: string; 
           <div className="scrim" onClick={e => { if (e.target === e.currentTarget) closeSheet(); }}>
             <div className="sheet" role="dialog" aria-modal="true"><div className="grab" /><Sheet name={sheet} /></div>
           </div>
+        )}
+        {entering && s.onb.done && (
+          <button className="splash" onClick={() => setEntering(false)} aria-label="Continue to the app">
+            <img src="/kd-mark.png" alt="KD Personal Training" /><span className="s-kicker">Welcome back</span><span className="s-name">{parts[0]}</span>
+          </button>
         )}
         {toastMsg && <div className="toast" role="status">{toastMsg}</div>}
         {pushMsg && (

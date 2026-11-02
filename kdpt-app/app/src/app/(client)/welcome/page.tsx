@@ -18,17 +18,17 @@ const LAST = Q + 7;
 
 export default function Welcome() {
   const s = useClient(), o = s.onb, { me } = useUI(), router = useRouter();
-  const [step, setStep] = useState(0);
+  const step = s.onbStep, setStep = (n: number) => setState({ onbStep: Math.max(0, n) });
   const [agreed, setAgreed] = useState(false);
   const set = (patch: Partial<typeof o>) => setState({ onb: { ...o, ...patch } });
   const next = () => setStep(step + 1);
 
   if (step === 0) return (
-    <div className="onb">
-      <div className="onb-photo"><img src="/assets/coaching.jpg" alt="" /></div>
-      <div className="onb-body"><img className="onb-mark" src="/kd-mark.png" alt="KD Personal Training" />
-        <h1>Welcome, {me.first}</h1><p className="lead">Two minutes and you&apos;re in.</p>
-        <button className="pill-btn mint" onClick={next}>Start <Icon name="right" /></button></div>
+    <div className="entrance">
+      <img className="e-logo" src="/kd-mark.png" alt="KD Personal Training" />
+      <div className="e-words"><span className="e-kicker">Welcome to KDPT</span><h1>{me.first}</h1></div>
+      <p className="e-sub">Kyle has set up your coaching. Let&apos;s get you started. It takes about two minutes.</p>
+      <button className="pill-btn mint e-go" onClick={next}>Begin</button>
     </div>
   );
 
@@ -40,7 +40,10 @@ export default function Welcome() {
         <h1>You&apos;re all set</h1>
         <div className="summary"><span className="chip"><Icon name={g[1]} /> {g[3]}</span><span className="chip"><Icon name="train" /> {o.days} days</span>
           <span className="chip"><Icon name="clip" /> {freqInfo(o.freq).label}{o.freq === 'monthly' ? '' : ' · ' + o.day}</span></div>
-        <button className="pill-btn white" style={{ width: '100%' }} onClick={() => { set({ done: true }); router.replace('/home'); }}>Open my app</button>
+        <div style={{ display: 'grid', gap: 10, width: '100%' }}>
+          <button className="pill-btn white" onClick={() => { set({ done: true }); router.replace('/tour?then=home'); }}>Show me around</button>
+          <button className="pill-btn dark" onClick={() => { set({ done: true }); router.replace('/home'); }}>Skip the tour</button></div>
+        <p className="fine">You can watch the tour again any time from your profile.</p>
       </div>
     );
   }
@@ -51,7 +54,7 @@ export default function Welcome() {
   const dock: [string, boolean] | null =
     step === Q + 1 ? [o.injuries.trim() ? 'Continue' : 'Nothing to add', true]
     : step === Q + 2 ? ['Agree and continue', agreed]
-    : step === Q + 5 ? ['Continue', true]
+    : step === Q + 5 ? ['Continue', !!o.freq && (o.freq === 'monthly' || !!o.day)]
     : step === Q + 7 ? ['Done', true]
     : null;
 
@@ -106,8 +109,8 @@ export default function Welcome() {
         {step === Q + 5 && (
           <div className="onb-step"><h1>How often should you check in?</h1>
             <div className="seg" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>{FREQ.map(([k, l]) => <button key={k} className={o.freq === k ? 'on' : ''} onClick={() => set({ freq: k })}>{l}</button>)}</div>
-            {o.freq !== 'monthly' && <div className="days7pick">{DAYS.map(d => <button key={d} aria-pressed={o.day === d} onClick={() => set({ day: d })}>{d.slice(0, 1)}<small>{d}</small></button>)}</div>}
-            <p className="fine">{o.freq === 'monthly' ? 'On the 1st of each month.' : `Every ${o.freq === 'weekly' ? '' : 'other '}${o.day === 'Sun' ? 'Sunday' : o.day === 'Sat' ? 'Saturday' : o.day + 'day'}. More often means a more accurate Momentum.`}</p>
+            {o.freq && o.freq !== 'monthly' && <div className="days7pick">{DAYS.map(d => <button key={d} aria-pressed={o.day === d} onClick={() => set({ day: d })}>{d.slice(0, 1)}<small>{d}</small></button>)}</div>}
+            <p className="fine">{!o.freq ? 'More often means a more accurate Momentum.' : o.freq === 'monthly' ? 'On the 1st of each month.' : !o.day ? 'Now pick a day.' : `Every ${o.freq === 'weekly' ? '' : 'other '}${({ Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' } as Record<string, string>)[o.day]}.`}</p>
           </div>
         )}
 

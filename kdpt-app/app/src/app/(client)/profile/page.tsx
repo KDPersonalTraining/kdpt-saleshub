@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Icon } from '@/components/icon';
 import { useUI, type SheetName } from '@/components/client/shell';
@@ -10,7 +11,7 @@ import { resetStore, setState, useClient } from '@/lib/client/store';
 import { SignOutButton } from '@/components/sign-out';
 
 export default function Profile() {
-  const s = useClient(), { openSheet, toast, me } = useUI();
+  const s = useClient(), { openSheet, toast, me } = useUI(), router = useRouter();
   const [delAsk, setDelAsk] = useState(false);
   const f = freqInfo(s.onb.freq), c = s.onb.consent;
   const Row = ({ icon, col, t, d, sheet, onClick }: { icon: string; col: string; t: string; d?: string; sheet?: SheetName; onClick?: () => void }) => (
@@ -34,6 +35,7 @@ export default function Profile() {
         <div className="optrow"><Li icon="info" color="var(--fg)" /><span className="t"><b>Text size</b></span>
           <span className="tsize">{[1, 1.12, 1.25].map((z, i) => <button key={z} aria-pressed={s.scale === z} style={{ fontSize: 13 + i * 4 }} aria-label={`Text size ${i + 1}`} onClick={() => setState({ scale: z })}>A</button>)}</span></div>
         <Row icon="bell" col="var(--amber)" t="Notifications" d="Choose what reaches your phone" sheet="notifset" />
+        <Row icon="film" col="var(--mint)" t="App tour" d="Kyle's video walkthrough and a quick guide" onClick={() => router.push('/tour')} />
       </div></div>
       <div><Eyebrow>Privacy and data</Eyebrow><div className="group">
         {CONSENTS.filter(x => !x[3]).map(([k, t, d]) => (
