@@ -1,27 +1,47 @@
 'use client';
 
+import { Check, Trophy } from 'lucide-react';
 import Link from 'next/link';
-import { Icon } from '@/components/icon';
-import { Ring, fmtSecs } from '@/components/client/ui';
-import { WORKOUT } from '@/lib/client/sample-data';
-import { setState, useClient } from '@/lib/client/store';
+import { LIFTS, WORKOUT } from '@/lib/client/sample-data';
+import { parseLoad, parseReps, summarise } from '@/lib/client/summary';
+import { resetWorkout, setState, useClient } from '@/lib/client/store';
+import { planFor } from '@/lib/client/workout';
+import { clock, elapsedMs } from '@/lib/client/session';
+import { estimateOneRepMax } from '@/lib/rules';
+
+// Best estimated 1-rep max on record before today, per exercise.
+const bestBefore = (name: string) => Math.max(0, ...(LIFTS[name] ?? []).map(([, w, r]) => estimateOneRepMax(w, r) ?? 0));
 
 export default function WorkoutDone() {
   const s = useClient();
-  const done = Object.values(s.logs).flat().filter(x => x.done);
-  const vol = Math.round(done.reduce((v, x) => v + (parseFloat(x.load) || 0) * (parseFloat(x.reps) || 0), 0));
+  const items = planFor(s.duration).items;
+  const sum = summarise({ exercises: items.map(({ ex }) => ({ id: ex.id, name: s.swaps[ex.id] ?? ex.name, last: ex.last, best: s.swaps[ex.id] ? 0 : bestBefore(ex.name) })),
+    logs: s.logs, skipped: s.skipped, startedAt: null, finishedAt: null });
   return (
-    <div className="finish fade">
-      <svg viewBox="0 0 150 150" width="150" height="150"><Ring size={150} stroke={14} pct={1} color="var(--mint)" />
-        <g transform="translate(47 47)" color="var(--mint)"><svg width="56" height="56" viewBox="0 0 24 24"><path d="m4.5 12.5 4.8 4.8L19.5 7" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" /></svg></g></svg>
-      <div><div className="eyebrow">{WORKOUT.name}</div><h1>Workout done</h1></div>
-      <div className="stats num">
-        <div className="stat"><Icon name="clock" style={{ color: 'var(--sky)' }} /><b>{fmtSecs(47 * 60 + 12)}</b><small>Time</small></div>
-        <div className="stat"><Icon name="weight" style={{ color: 'var(--amber)' }} /><b>{(vol || 8420).toLocaleString('en-GB')}</b><small>kg lifted</small></div>
-        <div className="stat"><Icon name="layers" style={{ color: 'var(--violet)' }} /><b>{done.length || 16}</b><small>Sets</small></div>
-        <div className="stat"><Icon name="trophy" style={{ color: 'var(--mint)' }} /><b>1</b><small>New best · Leg Press</small></div>
-      </div>
-      <Link className="pill-btn white" style={{ width: '100%' }} href="/home" onClick={() => setState({ idx: 0, logs: {}, swaps: {} })}>Done</Link>
+    <div className="wm wm-summary">
+      <div className="wm-sum-head"><span className="wm-cap ok"><Check size={16} strokeWidth={1.75} />Workout complete</span><h1>{WORKOUT.name}</h1></div>
+      <dl className="wm-stats">
+        <div><dt>Time</dt><dd className="num">{s.startedAt != null && s.finishedAt ? clock(elapsedMs({ startedAt: s.startedAt, pausedMs: s.pausedMs, pausedAt: null }, s.finishedAt)) : '–'}</dd></div>
+        <div><dt>Sets</dt><dd className="num">{sum.sets}</dd></div>
+        <div><dt>Lifted</dt><dd className="num">{sum.volumeKg.toLocaleString('en-GB')}<small> kg</small></dd></div>
+      </dl>
+      {sum.records.length > 0 && (
+        <section><span className="wm-cap">New personal bests</span>
+          <ul className="wm-list">{sum.records.map(r => (
+            <li key={r.exercise}><Trophy size={20} strokeWidth={1.75} style={{ color: 'var(--mint)' }} /><span><b>{r.exercise}</b><small className="num">{r.set} · est. 1-rep max {r.now} kg, up from {r.was}</small></span></li>
+          ))}</ul></section>
+      )}
+      <section><span className="wm-cap">What you did</span>
+        <ul className="wm-list">{items.map(({ ex }) => {
+          const done = (s.logs[ex.id] ?? []).filter(x => x.done && parseReps(x.reps) !== null);
+          const name = s.swaps[ex.id] ?? ex.name, meta = s.exNotes[ex.id];
+          return (
+            <li key={ex.id}><span><b>{name}</b>
+              <small className="num">{s.skipped[ex.id] ? 'Skipped' : done.length ? done.map(x => `${ex.inc === 0 ? 'BW' : (parseLoad(x.load) ?? 0)}×${x.reps}`).join('  ') : 'Not logged'}{meta?.rpe ? ` · RPE ${meta.rpe}` : ''}</small></span></li>
+          );
+        })}</ul></section>
+      {Object.values(s.exNotes).some(m => m.rpe || m.note) && <p className="wm-meta">Your ratings and notes go to Kyle.</p>}
+      <Link className="wm-primary" href="/home" onClick={() => setState(resetWorkout())}>Done</Link>
     </div>
   );
 }

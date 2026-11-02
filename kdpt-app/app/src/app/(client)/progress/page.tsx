@@ -4,10 +4,21 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import { Icon } from '@/components/icon';
 import { useUI } from '@/components/client/shell';
-import { Chev, Empty, Explain, Li, Switch } from '@/components/client/ui';
-import { CONSISTENCY, LIFTS, MEASUREMENTS, RECORDS, WEEKLY_TOTALS, WEIGHT_7DAY } from '@/lib/client/sample-data';
+import { Chev, Empty, Li, Switch } from '@/components/client/ui';
+import { CONSISTENCY, LIFTS, MEASUREMENTS, RECORDS, WEEKLY_TOTALS } from '@/lib/client/sample-data';
 import { setState, useClient } from '@/lib/client/store';
 import { estimateOneRepMax } from '@/lib/rules';
+import { describe, isoFromShort, movingAverage, windowChange, type Point } from '@/lib/client/trends';
+
+// The demo's "today". In the live app this is the real date.
+const TODAY = '2026-10-21';
+const PERIODS: [number, string][] = [[30, '1 month'], [91, '3 months'], [182, '6 months']];
+const TONE = { good: 'var(--mint)', neutral: 'var(--fg)', watch: 'var(--amber)' } as const;
+// Sample daily weigh-ins, 1 Sep to 21 Oct: a slow drift down with normal day-to-day noise.
+const DAILY_WEIGHT: Point[] = Array.from({ length: 51 }, (_, i) => {
+  const d = new Date(Date.UTC(2026, 8, 1 + i)).toISOString().slice(0, 10);
+  return { date: d, value: Math.round((71.4 - i * 0.07 + Math.sin(i * 1.7) * 0.5 + Math.cos(i * 0.9) * 0.3) * 10) / 10 };
+});
 
 const e1rm = (w: number, r: number) => Math.round(estimateOneRepMax(w, r) ?? w);
 const TABS = ['Strength', 'Records', 'Body', 'Consistency'];
@@ -24,7 +35,7 @@ function Progress() {
   if (s.preview.fresh) return (
     <div className="page fade">
       <div className="greet" style={{ paddingTop: 6 }}><div className="eyebrow">Your progress</div><h1>Progress</h1></div>
-      <Empty icon="progress" color="var(--mint)" title="Your progress starts here">After your first few workouts you&apos;ll see your lifts climb, your records and how consistent you&apos;ve been.</Empty>
+      <Empty icon="progress" color="var(--mint)" title="Your progress starts here">Your lifts, records and streaks appear after your first workouts.</Empty>
     </div>
   );
   return (
@@ -37,14 +48,22 @@ function Progress() {
 }
 
 function Strength({ lift, setLift }: { lift: string; setLift: (l: string) => void }) {
-  const rows = LIFTS[lift], f = rows[0], l = rows[rows.length - 1];
+  const [days, setDays] = useState(91);
+  const all = LIFTS[lift];
+  const pts = all.map(([d, w]) => ({ date: isoFromShort(d), value: w }));
+  const ch = windowChange(pts, days, TODAY);
+  const shown = ch ? all.filter(([d]) => isoFromShort(d) >= ch.from.date) : all;
+  const rows = shown.length >= 2 ? shown : all, f = rows[0], l = rows[rows.length - 1];
   const rev = rows.slice().reverse();
+  const words = ch && describe(ch, ' kg', 'up');
   return (
     <>
       <div className="liftchips">{Object.keys(LIFTS).map(k => <button key={k} className={lift === k ? 'on' : ''} onClick={() => setLift(k)}>{k}</button>)}</div>
-      <div className="card big-stat"><div className="eyebrow">{lift} · top set each session, kg</div>
-        <div className="delta num">+{l[1] - f[1]} kg</div>
-        <div className="lbl num">{f[1]} kg × {f[2]} on {f[0]} → {l[1]} kg × {l[2]} on {l[0]}</div>
+      <div className="periods" role="group" aria-label="Compare over">{PERIODS.map(([d, l]) => <button key={d} aria-pressed={days === d} onClick={() => setDays(d)}>{l}</button>)}</div>
+      <div className="card big-stat"><div className="eyebrow">{lift} · heaviest set each session</div>
+        <div className="delta num" style={{ color: words ? TONE[words.tone] : undefined }}>{ch ? `${ch.delta > 0 ? '+' : ''}${ch.delta} kg` : '–'}</div>
+        <div className="lbl">{words?.text ?? 'Not enough sessions yet'}</div>
+        <div className="lbl num" style={{ color: 'var(--fg3)' }}>{f[1]} kg × {f[2]} on {f[0]} → {l[1]} kg × {l[2]} on {l[0]}</div>
         <LiftChart rows={rows} /></div>
       <div><div className="sec-head" style={{ marginBottom: 10 }}><h2>Every session</h2></div>
         <div className="group" style={{ '--inset': '14px' } as React.CSSProperties}>{rev.map((x, i) => {
@@ -56,7 +75,7 @@ function Strength({ lift, setLift }: { lift: string; setLift: (l: string) => voi
         })}</div></div>
       <div className="card big-stat"><div className="eyebrow">Total lifted this week</div><div className="delta num" style={{ color: 'var(--sky)', fontSize: 40 }}>{WEEKLY_TOTALS[7][1].toLocaleString('en-GB')} kg</div>
         <div className="vbars">{WEEKLY_TOTALS.map(([d, v]) => <div key={d}><i style={{ height: Math.round(v / 8420 * 70) }} />{d}</div>)}</div>
-        <Explain style={{ marginTop: 12 }}>Every set&apos;s weight × reps, added up. If it climbs week to week you&apos;re doing more work, and that&apos;s what builds strength and muscle.</Explain></div>
+        <div className="lbl" style={{ marginTop: 10 }}>Weight × reps, every set added up.</div></div>
     </>
   );
 }
@@ -81,15 +100,10 @@ function LiftChart({ rows }: { rows: [string, number, number][] }) {
 function Records() {
   return (
     <>
-      <div className="card big-stat"><div className="eyebrow">Records set in October</div><div className="delta num">{RECORDS.length}</div><div className="lbl">Your own personal bests, compared only with you.</div></div>
+      <div className="card big-stat"><div className="eyebrow">Records set in October</div><div className="delta num">{RECORDS.length}</div></div>
       <div className="group">{RECORDS.map(([lift, type, v, d, ch]) => (
         <div className="rec" key={lift + type}><Li icon="trophy" color="var(--amber)" /><span className="t"><b>{lift}</b><small>{type} · {d}</small></span><span className="v num">{v}<small>{ch}</small></span></div>
       ))}</div>
-      <div><div className="eyebrow" style={{ marginBottom: 10 }}>What counts as a record?</div>
-        <div className="group" style={{ '--inset': '14px' } as React.CSSProperties}>{[['Heaviest weight', 'The most you\'ve lifted for your planned reps.'], ['Est. 1-rep max', 'The most you could lift once, worked out from your sets. You never have to test it.'],
-          ['Most reps', 'More reps than ever at the same weight.'], ['Best session total', 'Your biggest total lifted (weight × reps) in one workout.']].map(([t, d]) => (
-          <div className="rec" key={t}><span className="t"><b>{t}</b><small style={{ fontSize: 13 }}>{d}</small></span></div>
-        ))}</div></div>
     </>
   );
 }
@@ -104,9 +118,8 @@ function Body() {
   const [open, setOpen] = useState<Record<string, boolean>>({});
   return (
     <>
-      <Explain>Measurements and photos pick up changes the scales miss. Everything here is optional and private to you and your coach.</Explain>
-      <div><div className="sec-head" style={{ marginBottom: 10 }}><h2>Measurements</h2><button onClick={() => toast('Add today\'s measurements')}>+ Add</button></div>
-        <div className="group">{MEASUREMENTS.map(([n, v, ch]) => <div className="rec" key={n}><Li icon="body" color="var(--violet)" /><span className="t"><b>{n}</b><small>Since 1 September</small></span><span className="v num">{v}<small>{ch}</small></span></div>)}</div></div>
+            <div><div className="sec-head" style={{ marginBottom: 10 }}><h2>Measurements</h2><button onClick={() => toast('Add today\'s measurements')}>+ Add</button></div>
+        <div className="group">{MEASUREMENTS.map(([n, v, ch]) => <div className="rec" key={n}><Li icon="body" color="var(--violet)" /><span className="t"><b>{n}</b><small>Since 1 September</small></span><span className="v num">{v}<small style={{ color: 'var(--fg2)' }}>{ch}</small></span></div>)}</div></div>
       <div><div className="sec-head" style={{ marginBottom: 10 }}><h2>Photos</h2></div>
         <div className="photos3">{['Front', 'Side', 'Back'].map(x => <button key={x} onClick={() => toast('Camera opens · photos stay private')}><Icon name="camera" />{x}</button>)}</div></div>
       <div className="group">{(Object.keys(GUIDES) as (keyof typeof GUIDES)[]).map(k => { const [t, steps] = GUIDES[k]; return (
@@ -115,7 +128,7 @@ function Body() {
       ); })}</div>
       <div className="group"><div className="optrow"><Li icon="weight" color="#c9cfcb" /><span className="t"><b>Show my weight</b><small>Off by default. It&apos;s one number among many</small></span>
         <Switch on={s.showWeight} label="Show my weight" onChange={() => setState({ showWeight: !s.showWeight })} /></div>
-        {s.showWeight && <div style={{ padding: '0 14px 14px' }}><LineChart pts={WEIGHT_7DAY} color="#a99bff" /><div className="lbl num" style={{ color: 'var(--fg2)', fontSize: 13 }}>7-day average: 71.2 → 67.8 kg</div></div>}</div>
+        {s.showWeight && <Weight goal={s.onb.goal} />}</div>
     </>
   );
 }
@@ -140,8 +153,7 @@ function Consistency() {
   const label = (v: string) => (v === 'w' ? 'Workout done' : v === 'pt' ? 'PT session' : v === 'x' ? 'Missed' : 'Rest day');
   return (
     <>
-      <Explain>Each square is one day, each row is one week. It shows what you planned with your coach and what you did.</Explain>
-      <div className="card"><div className="cal8"><span />{['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => <span key={i} className="h">{d}</span>)}
+            <div className="card"><div className="cal8"><span />{['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => <span key={i} className="h">{d}</span>)}
         {CONSISTENCY.map(([wk, days]) => [<span key={wk} className="num">{wk}</span>, ...days.split(',').map((v, i) => <i key={wk + i} className={v} title={label(v)} />)])}</div>
         <div className="legend2"><span><i style={{ background: 'var(--mint)' }} />Workout done</span><span><i style={{ background: 'var(--sky)' }} />PT session</span><span><i style={{ boxShadow: 'inset 0 0 0 1.5px var(--coral)' }} />Missed</span><span><i style={{ background: 'var(--s3)' }} />Rest day</span></div></div>
       <div className="group">{[['train', 'var(--mint)', 'Workouts done', '19 of 20 planned', '95%'], ['cal', 'var(--sky)', 'PT sessions', '9 of 9 attended', '100%'],
@@ -149,5 +161,22 @@ function Consistency() {
         <div className="rec" key={t}><Li icon={i} color={c} /><span className="t"><b>{t}</b><small>{d}</small></span><span className="v num">{v}</span></div>
       ))}</div>
     </>
+  );
+}
+
+// Daily weigh-ins bounce around with water and food. The 7-day average shows
+// the real direction; the change is judged against the client's goal.
+function Weight({ goal }: { goal: string }) {
+  const [smooth, setSmooth] = useState(true);
+  const pts = smooth ? movingAverage(DAILY_WEIGHT) : DAILY_WEIGHT;
+  const ch = windowChange(movingAverage(DAILY_WEIGHT), 182, TODAY);
+  const words = ch && describe(ch, ' kg', goal === 'fat' ? 'down' : goal === 'muscle' ? 'up' : 'either');
+  return (
+    <div style={{ padding: '0 14px 14px', display: 'grid', gap: 10 }}>
+      <div className="periods" role="group" aria-label="Weight view">{([[true, '7-day average'], [false, 'Every weigh-in']] as const).map(([v, l]) => <button key={l} aria-pressed={smooth === v} onClick={() => setSmooth(v)}>{l}</button>)}</div>
+      <LineChart pts={pts.map(p => p.value)} color="#a99bff" />
+      {words && <div className="lbl num" style={{ color: TONE[words.tone] }}>{words.text}, by 7-day average</div>}
+      <small style={{ color: 'var(--fg3)' }}>{smooth ? 'Each point is the average of the last 7 days, so one heavy day doesn\'t look like a trend.' : 'Day-to-day weight moves 1–2 kg with water and food. That\'s normal.'}</small>
+    </div>
   );
 }

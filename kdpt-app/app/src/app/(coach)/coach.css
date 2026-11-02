@@ -10,8 +10,8 @@
   --s4: #262a28;
   --hair: rgba(255,255,255,0.07);
   --fg: #f5f7f6;
-  --fg2: #a2a8a5;
-  --fg3: #676d6a;
+  --fg2: #b3b9b6;
+  --fg3: #8d9490;
   --mint: #7ed597;
   --mint-ink: #03140a;
   --amber: #ffb45e;
@@ -496,3 +496,54 @@ textarea.fb { width: 100%; min-height: 120px; resize: vertical; background: var(
 /* ---- Real app additions ------------------------------------------------ */
 a { color: inherit; text-decoration: none; }
 .side .me { display: flex; align-items: center; gap: 10px; }
+.demotag { margin-left: auto; font: 600 10px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--amber); border: 1px solid rgba(255,180,94,.4); border-radius: 6px; padding: 2px 6px; }
+
+/* Respect the phone's "reduce motion" setting. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+.plan-clients { display: grid; gap: 4px; }
+.plan-clients > div { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--hair); }
+.plan-clients b { display: block; font-weight: 600; font-size: 14px; }
+.plan-clients small { color: var(--fg3); font-size: 12px; }
+.plan-clients .num { font: 700 15px var(--display); }
+.plan-problems { display: grid; gap: 8px; }
+.plan-problems > div { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 12px 14px; border-radius: 10px; background: rgba(255,180,94,.06); border: 1px solid rgba(255,180,94,.3); }
+.plan-problems > div.decided { background: var(--s1); border-color: var(--hair); }
+.plan-problems b { display: block; font-weight: 600; font-size: 14px; }
+.plan-problems small { color: var(--fg3); font-size: 12px; }
+.btn[disabled] { opacity: .4; cursor: default; }
+/* Today: alerts open a panel with everything needed to deal with them */
+button.arow { width: 100%; text-align: left; cursor: pointer; }
+button.arow:hover { background: var(--s3); }
+.arow .go { display: flex; align-items: center; gap: 8px; color: var(--fg3); white-space: nowrap; }
+.arow .go small { font-size: 12px; }
+.resolved { color: var(--fg2); }
+.resolved summary { cursor: pointer; font-size: 13px; padding: 6px 0; }
+.resolved > div { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--hair); font-size: 13px; }
+.resolved > div > span:first-child { flex: 1; }
+.ap-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 12px; align-items: center; }
+.ap-head b { display: block; font: 700 16px var(--display); }
+.ap-head small { color: var(--fg3); font-size: 12px; }
+.ap-why { margin: 0; color: var(--fg); line-height: 1.5; }
+.ap-why span { color: var(--fg3); }
+.ap-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.ap-facts > div { background: var(--s1); border-radius: 10px; padding: 12px; display: grid; gap: 2px; }
+.ap-facts small { color: var(--fg3); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+.ap-facts b { font-weight: 600; }
+.ap-rows { display: grid; gap: 6px; }
+.ap-rows > div { display: flex; gap: 12px; align-items: center; padding: 8px 10px; border-radius: 10px; background: var(--s1); }
+.ap-rows .tile { width: 34px; height: 34px; border-radius: 10px; }
+.ap-rows b { display: block; font-weight: 600; font-size: 14px; } .ap-rows small { color: var(--fg3); font-size: 12px; }
+.ap-reply .fb { min-height: 100px; width: 100%; }
+.ap-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+@media (max-width: 600px) { .ap-head { grid-template-columns: auto minmax(0, 1fr) auto; } .ap-head .tag { grid-column: 2; grid-row: 2; justify-self: start; } }
+.flag.ok { background: rgba(126,213,151,.08); border-color: rgba(126,213,151,.25); }
+.flag.ok svg { color: var(--mint); }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 16px; font-size: 14px; }
+.kv span { color: var(--fg3); }
+.kv b { font-weight: 500; overflow-wrap: anywhere; }
+.tabs { overflow-x: auto; scrollbar-width: none; }
+.note-row { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 12px; padding-top: 12px; border-top: 1px solid var(--hair); }
+.note-row time { color: var(--fg3); font-size: 13px; }
+.note-row p { margin: 0; line-height: 1.5; }

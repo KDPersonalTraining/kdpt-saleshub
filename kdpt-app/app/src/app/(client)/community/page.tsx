@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Icon } from '@/components/icon';
 import { useUI } from '@/components/client/shell';
-import { Chev, Explain, Li } from '@/components/client/ui';
+import { Chev, Li } from '@/components/client/ui';
 import { CATS, COMMUNITY_LIBRARY, FOODS, PEOPLE, POSTS, type Post } from '@/lib/client/sample-data';
 import { setState, useClient } from '@/lib/client/store';
 
@@ -22,7 +22,6 @@ export default function Community() {
       </div>
       {tab === 'feed' ? (
         <>
-          <Explain>Like and comment on anything here. New posts come from Kyle for now.</Explain>
           {POSTS.map(p => <PostCard key={p.id} p={p} />)}
         </>
       ) : !cat ? (
@@ -80,7 +79,7 @@ function Category({ cat, back }: { cat: string; back: () => void }) {
       <div className="group" style={{ '--inset': cat === 'meals' ? '66px' : '68px' } as React.CSSProperties}>
         {cat === 'meals' ? COMMUNITY_LIBRARY.meals.map(([img, n, w]) => { const f = FOODS.find(x => x.img === img); return (
           <div className="food" key={n}><img src={`/assets/${img}.jpg`} alt="" /><span className="t"><b>{n}</b><small className="num">{w}{f ? ` · ${f.kcal} kcal · ${f.P}g protein` : ''}</small></span>
-            {f && <button className="addbtn" onClick={() => { setState({ log: { ...s.log, Dinner: [...s.log.Dinner, f.id] } }); toast('Added to today\'s dinner in Fuel'); }} aria-label="Add to Fuel"><Icon name="plus" /></button>}</div>
+            {f && <button className="addbtn" onClick={() => { setState({ log: { ...s.log, Dinner: [...s.log.Dinner, { food: f.id, qty: 1 }] } }); toast('Added to today\'s dinner in Fuel'); }} aria-label="Add to Fuel"><Icon name="plus" /></button>}</div>
         ); }) : COMMUNITY_LIBRARY[cat].map(r => (
           <button className="optrow" key={r[1]} onClick={() => toast(r[1])}><Li icon={i} color={col} /><span className="t"><b>{r[1]}</b><small>{r[0]}{r[2] ? ' · ' + r[2] : ''}</small></span><Chev /></button>
         ))}

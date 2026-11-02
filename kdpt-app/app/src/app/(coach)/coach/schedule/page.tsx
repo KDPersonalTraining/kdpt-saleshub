@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Icon } from '@/components/icon';
+import { MonthPlanner } from '@/components/coach/month-planner';
 import { useToast } from '@/components/coach/shell';
 import { Avatar, Head, Modal, Sec, Switch, Tag, Tile } from '@/components/coach/ui';
 import { APPROVE, AVAIL, CAL_END, CAL_START, DAYNAMES, DAYS, DEFAULT_HOURS, EVENTS, HOUR, REQS, byId, hhmm, type CalEvent } from '@/lib/coach/sample-data';
@@ -17,7 +18,8 @@ export default function Schedule() {
   const [availDone, setAvailDone] = useState<Record<string, boolean>>({});
   const [approved, setApproved] = useState<Record<string, string>>({});
   const [reqDone, setReqDone] = useState<Record<string, string>>({});
-  const [modal, setModal] = useState<'hours' | 'block' | null>(null);
+  const [modal, setModal] = useState<'hours' | 'block' | 'month' | null>(null);
+  const [sentMonth, setSentMonth] = useState(0);
 
   const off: CalEvent[] = [];
   DAYNAMES.forEach((d, i) => { const h = hours[d];
@@ -31,14 +33,14 @@ export default function Schedule() {
   return (
     <>
       <Head title="Schedule" sub={mode === 'coach' ? 'You propose every session. Clients reply, and nothing is booked until you confirm it.' : 'Clients pick from your open times, within their monthly allowance.'}>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}><Tag c="mint" icon="check">Google Calendar synced 2 min ago</Tag>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}><Tag c="grey" icon="schedule">Google Calendar not connected</Tag>
           <button className="btn white" onClick={() => setModal('block')}><Icon name="close" className="sm" />Block time</button>
-          <button className="btn mint" onClick={() => toast('November drafted from everyone\'s regular slots. Review, then send on the 20th')}><Icon name="schedule" className="sm" />Schedule November</button></div></Head>
+          <button className="btn mint" onClick={() => setModal('month')}><Icon name="schedule" className="sm" />{sentMonth ? `November · ${sentMonth} sent` : 'Schedule November'}</button></div></Head>
       <div className="card srules">
         <div><span className="eyebrow">Who sets sessions</span><span className="modes">{([['coach', 'You schedule'], ['self', 'Clients pick']] as const).map(([k, l]) => <button key={k} className={mode === k ? 'on' : ''} onClick={() => setMode(k)}>{l}</button>)}</span>
           <small>{mode === 'coach' ? 'You place each client into their regular slot. They can only request changes.' : 'Clients choose open slots themselves. You still approve changes inside 24 hours.'}</small></div>
         <div><span className="eyebrow">Monthly cycle</span><b>Proposed on the 20th, confirmed by you</b><small>Clients reply by the 25th. Nothing is booked until you confirm it, whoever entered it.</small></div>
-        <div><span className="eyebrow">Busy time</span><b>Google Calendar blocks your diary</b><small>Anything in your Google Calendar can&apos;t be booked. Time you block here is added to it too.</small></div>
+        <div><span className="eyebrow">Busy time</span><b>Google Calendar, once connected</b><small>Then anything in it can&apos;t be booked. Until then, block time here.</small></div>
       </div>
       <div className="card hoursbar"><span className="eyebrow">Working hours</span>{DAYNAMES.map(d => { const h = hours[d]; return <span key={d} className={`hd ${h ? '' : 'off'}`}><b>{d}</b>{h ? `${hhmm(h[0])}–${hhmm(h[1])}` : 'Off'}</span>; })}
         <button className="btn line" onClick={() => setModal('hours')}>Edit hours</button></div>
@@ -55,7 +57,7 @@ export default function Schedule() {
               ))}</div>
             ))}
           </div>
-          <div className="chips" style={{ padding: '12px 16px', borderTop: '1px solid var(--hair)' }}><Tag c="mint">Studio</Tag><Tag c="sky">Gym</Tag><Tag c="violet">Online</Tag><Tag c="grey">Busy in Google</Tag><Tag c="coral">Blocked by you</Tag><Tag c="amber">Waiting for you</Tag></div>
+          <div className="chips" style={{ padding: '12px 16px', borderTop: '1px solid var(--hair)' }}><Tag c="mint">Studio</Tag><Tag c="sky">Gym</Tag><Tag c="violet">Online</Tag><Tag c="grey">Busy</Tag><Tag c="coral">Blocked by you</Tag><Tag c="amber">Waiting for you</Tag></div>
         </section>
         <section style={{ display: 'grid', gap: 20, alignContent: 'start' }}>
           <div><Sec title="Availability received" right={drafted ? 'KAI draft · you confirm' : <button className="btn violet" onClick={() => setDrafted(true)}><Icon name="spark" className="sm" />Draft times</button>} />
@@ -64,7 +66,7 @@ export default function Schedule() {
                 <div className="mv">{v.windows}</div>
                 {drafted && (availDone[v.id] ? <Tag c="mint" icon="check">Booked · {first(v.c)} notified</Tag> : (<>
                   <div className="mv" style={{ color: 'var(--fg)' }}><span className="sc-label" style={{ marginRight: 6 }}><span className="orb"><Icon name="spark" /></span></span>{v.draft}</div>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}><button className="btn mint" onClick={() => { setAvailDone({ ...availDone, [v.id]: true }); toast('Booked · added to both calendars'); }}>Confirm {v.n}</button>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}><button className="btn mint" onClick={() => { setAvailDone({ ...availDone, [v.id]: true }); toast('Booked · client notified'); }}>Confirm {v.n}</button>
                     <button className="btn ghost" onClick={() => toast('Drag the drafted sessions on the calendar to change them')}>Adjust</button></div></>))}
               </div>
             ); })}</div></div>
@@ -92,8 +94,9 @@ export default function Schedule() {
             ))}</div></div>
         </section>
       </div>
+      {modal === 'month' && <MonthPlanner hours={hours} onClose={() => setModal(null)} onSend={n => { setSentMonth(n); setModal(null); toast(`${n} sessions sent · awaiting clients`); }} />}
       {modal === 'hours' && <HoursModal hours={hours} setHours={setHours} onClose={() => setModal(null)} />}
-      {modal === 'block' && <BlockModal onClose={() => setModal(null)} onSave={b => { setBlocks([...blocks, b]); setModal(null); toast('Blocked · added to your Google Calendar'); }} />}
+      {modal === 'block' && <BlockModal onClose={() => setModal(null)} onSave={b => { setBlocks([...blocks, b]); setModal(null); toast('Blocked'); }} />}
     </>
   );
 }
@@ -121,7 +124,7 @@ function BlockModal({ onClose, onSave }: { onClose: () => void; onSave: (b: Bloc
   const hours = Array.from({ length: 29 }, (_, i) => 6 + i / 2);
   return (
     <Modal title="Block time" onClose={onClose}>
-      <span style={{ color: 'var(--fg3)' }}>Clients can&apos;t be scheduled into blocked time. It&apos;s added to your Google Calendar too.</span>
+      <span style={{ color: 'var(--fg3)' }}>Clients can&apos;t be scheduled into blocked time.</span>
       <div className="fields">
         <label className="full">Day<select value={b.day} onChange={e => setB({ ...b, day: +e.target.value })}>{DAYS.map(([d, n], i) => <option key={d} value={i}>{d} {n} October</option>)}</select></label>
         <label>From<select value={b.from} onChange={e => setB({ ...b, from: +e.target.value })}>{hours.map(h => <option key={h} value={h}>{hhmm(h)}</option>)}</select></label>

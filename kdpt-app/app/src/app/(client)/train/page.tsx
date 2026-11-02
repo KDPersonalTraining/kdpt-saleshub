@@ -3,13 +3,19 @@
 import Link from 'next/link';
 import { Icon } from '@/components/icon';
 import { useUI } from '@/components/client/shell';
-import { Chev } from '@/components/client/ui';
+import { Chev, Empty } from '@/components/client/ui';
 import { PROGRAMME } from '@/lib/client/sample-data';
 import { useClient } from '@/lib/client/store';
 import { planFor } from '@/lib/client/workout';
 
 export default function Train() {
   const s = useClient(), { toast } = useUI(), p = planFor(s.duration);
+  if (s.preview.fresh) return (
+    <div className="page fade">
+      <div className="greet" style={{ paddingTop: 6 }}><div className="eyebrow">Your programme</div><h1>Train</h1></div>
+      <Empty icon="programmes" color="var(--mint)" title="Your programme is on its way" cta={<Link className="pill-btn dark" href="/library">Browse exercises</Link>}>Kyle builds it after reading your health answers. It&apos;ll appear here.</Empty>
+    </div>
+  );
   return (
     <div className="page fade">
       <div className="greet" style={{ paddingTop: 6 }}><div className="eyebrow">Your programme</div><h1>{PROGRAMME.name}</h1></div>

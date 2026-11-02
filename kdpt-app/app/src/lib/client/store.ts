@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from 'react';
 import type { Slot } from './sample-data';
+import { normaliseLog, type LogItem } from './food';
 
 // The client app's local state. In demo mode it is the only copy and lives
 // in this browser. With Supabase connected, the same shape is filled from the
@@ -13,18 +14,30 @@ export type CheckIn = { step: number; mood: number; words: string; scales: Recor
 export type ClientState = {
   onb: { done: boolean; goal: string; days: number; freq: string; day: string; parq: (boolean | undefined)[]; injuries: string; consent: Record<string, boolean>; os: 'ios' | 'android' };
   scale: number;
+  // Where a new client got to in sign-up, so closing the app doesn't lose it.
+  onbStep: number;
   notifs: Record<string, boolean>;
   read: boolean;
-  // Training
-  duration: number; idx: number; logs: Record<string, SetLog[]>; swaps: Record<string, string>; finishedAt: number | null;
+  // Training. Everything about the workout in progress is kept here, so it
+  // survives leaving the screen or closing the app.
+  duration: number; idx: number; logs: Record<string, SetLog[]>; swaps: Record<string, string>;
+  exNotes: Record<string, { rpe: number | null; note: string }>; skipped: Record<string, boolean>;
+  startedAt: number | null; finishedAt: number | null;
+  // Pausing stops the workout clock. between = the exercise just finished, while showing "up next".
+  pausedAt: number | null; pausedMs: number; between: string | null;
+  rest: { endsAt: number; total: number; pausedLeft: number | null } | null;
   pain: { area: string | null; sev: number; act: string | null; sent: boolean };
   // Bookings and payments
   sessionCancelled: boolean; sessionsLeft: number; book: { req: Record<number, string>; done: boolean };
   avail: { days: Record<string, [number, number] | null>; note: string; sent: boolean }; paid: boolean; autopay: boolean;
   // Food
-  log: Record<Slot, string[]>; water: number;
+  log: Record<Slot, LogItem[]>; water: number; favs: string[]; recent: string[];
+  // How much of the numbers this client sees, set by Kyle: everything, protein only, or none.
+  fuelMode: 'full' | 'protein' | 'simple';
   // Messages
   chat: string[]; ai: string[]; handed: boolean;
+  // Questions typed to KAI and what happened to them.
+  aiLog: { q: string; a: string; to: 'kai' | 'coach' | 'urgent' | 'demo' }[];
   // Community
   liked: Record<string, boolean>; comments: Record<string, string[]>;
   // Progress
@@ -39,15 +52,16 @@ export const newCheckin = (): CheckIn => ({ step: 1, mood: 3, words: '', scales:
 
 const initial = (): ClientState => ({
   onb: { done: true, goal: 'strength', days: 3, freq: 'weekly', day: 'Sun', parq: [], injuries: '', consent: { terms: true, health: true, kai: true }, os: 'ios' },
-  scale: 1,
+  scale: 1, onbStep: 0,
   notifs: { workout: true, booking: true, session: true, payment: true, drop: true, checkin: true },
   read: false,
-  duration: 60, idx: 0, logs: {}, swaps: {}, finishedAt: null,
+  duration: 60, idx: 0, logs: {}, swaps: {}, exNotes: {}, skipped: {}, startedAt: null, finishedAt: null, rest: null, pausedAt: null, pausedMs: 0, between: null,
   pain: { area: null, sev: 3, act: null, sent: false },
   sessionCancelled: false, sessionsLeft: 6, book: { req: {}, done: false },
   avail: { days: { Mon: null, Tue: [16.5, 19.5], Wed: null, Thu: [14, 19.5], Fri: null }, note: '', sent: false }, paid: false, autopay: true,
-  log: { Breakfast: ['eggs', 'sourdough', 'avo'], Lunch: ['wrap'], Snacks: ['yog', 'berries'], Dinner: [] }, water: 6,
-  chat: [], ai: [], handed: false,
+  log: { Breakfast: [{ food: 'eggs', qty: 1 }, { food: 'sourdough', qty: 1 }, { food: 'avo', qty: 1 }], Lunch: [{ food: 'wrap', qty: 1 }], Snacks: [{ food: 'yog', qty: 1 }, { food: 'berries', qty: 1 }], Dinner: [] }, water: 6,
+  favs: ['wrap', 'yog'], recent: ['eggs', 'sourdough', 'avo', 'wrap', 'yog', 'berries', 'chicken', 'rice'], fuelMode: 'full',
+  chat: [], ai: [], handed: false, aiLog: [],
   liked: {}, comments: {},
   showWeight: false,
   checkin: null, checkinsSent: 0,
@@ -66,10 +80,12 @@ export function loadStore(personId: string, isNew: boolean) {
   if (loadedFor === personId) return;
   loadedFor = personId;
   const fresh = initial();
-  if (isNew) Object.assign(fresh, { onb: { ...fresh.onb, done: false, consent: {} }, log: { Breakfast: [], Lunch: [], Snacks: [], Dinner: [] }, water: 0, sessionsLeft: 8, preview: { ...fresh.preview, fresh: true } });
+  // A new client starts with nothing chosen, so every sign-up step needs an answer.
+  if (isNew) Object.assign(fresh, { onb: { ...fresh.onb, done: false, consent: {}, goal: '', days: 0, freq: '', day: '' }, log: { Breakfast: [], Lunch: [], Snacks: [], Dinner: [] }, water: 0, favs: [], recent: [], sessionsLeft: 8, preview: { ...fresh.preview, fresh: true } });
   try {
     const saved = localStorage.getItem(`${KEY}:${personId}`);
     state = saved ? { ...fresh, ...JSON.parse(saved) } : fresh;
+    state.log = normaliseLog(state.log as unknown as Record<string, unknown[]>);
   } catch {
     state = fresh;
   }
@@ -80,6 +96,16 @@ export function setState(patch: Partial<ClientState> | ((s: ClientState) => Part
   state = { ...state, ...(typeof patch === 'function' ? patch(state) : patch) };
   try { if (loadedFor) localStorage.setItem(`${KEY}:${loadedFor}`, JSON.stringify(state)); } catch { /* storage unavailable */ }
   emit();
+}
+
+// For "set this if it isn't set yet" updates. Reads the store as it is now,
+// and does nothing until the client's saved data has loaded, so a screen that
+// opens first can never overwrite what was saved (a workout's start time, a
+// half-finished check-in).
+export function updateOnceLoaded(fn: (s: ClientState) => Partial<ClientState> | null) {
+  if (!loadedFor) return;
+  const patch = fn(state);
+  if (patch) setState(patch);
 }
 
 export function resetStore(personId: string, isNew: boolean) {
@@ -93,3 +119,6 @@ const serverSnapshot = initial();
 export function useClient(): ClientState {
   return useSyncExternalStore(subscribe, () => state, () => serverSnapshot);
 }
+
+// Clears the workout in progress (after finishing or abandoning it).
+export const resetWorkout = (): Partial<ClientState> => ({ idx: 0, logs: {}, swaps: {}, exNotes: {}, skipped: {}, startedAt: null, finishedAt: null, rest: null, pausedAt: null, pausedMs: 0, between: null });

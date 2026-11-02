@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Icon } from '@/components/icon';
 import { useUI, type SheetName } from '@/components/client/shell';
@@ -10,7 +11,7 @@ import { resetStore, setState, useClient } from '@/lib/client/store';
 import { SignOutButton } from '@/components/sign-out';
 
 export default function Profile() {
-  const s = useClient(), { openSheet, toast, me } = useUI();
+  const s = useClient(), { openSheet, toast, me } = useUI(), router = useRouter();
   const [delAsk, setDelAsk] = useState(false);
   const f = freqInfo(s.onb.freq), c = s.onb.consent;
   const Row = ({ icon, col, t, d, sheet, onClick }: { icon: string; col: string; t: string; d?: string; sheet?: SheetName; onClick?: () => void }) => (
@@ -25,14 +26,16 @@ export default function Profile() {
         <span className="avatar" style={{ width: 64, height: 64, fontSize: 20, borderRadius: '50%', display: 'grid', placeItems: 'center', background: 'linear-gradient(135deg,#2c3a31,#1a201c)', color: 'var(--mint)', fontFamily: 'var(--display)', fontWeight: 700 }}>{me.initials}</span>
         <span><b style={{ font: '800 22px var(--display)', display: 'block' }}>{me.name}</b><small style={{ color: 'var(--fg3)' }}>Client since {me.isNew ? 'today' : 'September 2026'}</small></span></div>
       <div><Eyebrow>Coaching</Eyebrow><div className="group">
-        <Row icon="card" col="var(--amber)" t="8 PT sessions a month" d="£260 · paid automatically on the 1st" sheet="pay" />
-        <Row icon="cal" col="var(--sky)" t={`${s.sessionsLeft} of 8 sessions left in October`} d="24-hour cancellation policy" sheet="book" />
+        <Row icon="card" col="var(--amber)" t="8 PT sessions a month" d="£260 a month · due on the 1st" sheet="pay" />
+        {me.isNew ? <Row icon="cal" col="var(--sky)" t="Sessions" d="Kyle will send your first times" onClick={() => toast('Kyle will send your first session times')} />
+          : <Row icon="cal" col="var(--sky)" t={`${s.sessionsLeft} of 8 sessions left in October`} d="24-hour cancellation policy" sheet="book" />}
         <Row icon="clip" col="var(--violet)" t="Check-ins" d={`${f.label}${s.onb.freq === 'monthly' ? '' : ' · ' + s.onb.day}`} onClick={() => toast('Change how often you check in')} />
       </div></div>
       <div><Eyebrow>App</Eyebrow><div className="group">
         <div className="optrow"><Li icon="info" color="var(--fg)" /><span className="t"><b>Text size</b></span>
           <span className="tsize">{[1, 1.12, 1.25].map((z, i) => <button key={z} aria-pressed={s.scale === z} style={{ fontSize: 13 + i * 4 }} aria-label={`Text size ${i + 1}`} onClick={() => setState({ scale: z })}>A</button>)}</span></div>
         <Row icon="bell" col="var(--amber)" t="Notifications" d="Choose what reaches your phone" sheet="notifset" />
+        <Row icon="film" col="var(--mint)" t="App tour" d="Kyle's video walkthrough and a quick guide" onClick={() => router.push('/tour')} />
       </div></div>
       <div><Eyebrow>Privacy and data</Eyebrow><div className="group">
         {CONSENTS.filter(x => !x[3]).map(([k, t, d]) => (
@@ -55,6 +58,8 @@ export default function Profile() {
             <div className="cons" style={{ padding: '12px 14px' }} key={k}><Li icon={i} color={col} /><span className="t"><b>{t}</b><small>{d}</small></span>
               <Switch on={s.preview[k]} label={t} onChange={() => setState({ preview: { ...s.preview, [k]: !s.preview[k] }, ...(k === 'payFail' ? { paid: false } : {}) })} /></div>
           ))}
+          <div className="cons" style={{ padding: '12px 14px', flexWrap: 'wrap' }}><Li icon="fuel" color="var(--amber)" /><span className="t"><b>Fuel numbers</b><small>Kyle sets this per client</small></span>
+            <span className="tsize">{([['full', 'All'], ['protein', 'Protein'], ['simple', 'None']] as const).map(([k, l]) => <button key={k} aria-pressed={s.fuelMode === k} style={{ width: 'auto', padding: '0 10px', fontSize: 13 }} onClick={() => setState({ fuelMode: k })}>{l}</button>)}</span></div>
           <button className="optrow" onClick={() => { resetStore(me.id, me.isNew); toast('Demo reset'); }}><Li icon="swap" color="var(--fg2)" /><span className="t"><b>Reset the demo</b><small>Clears everything you&apos;ve logged on this device</small></span></button>
         </div></div>
       )}

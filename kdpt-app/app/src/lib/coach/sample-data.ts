@@ -21,7 +21,8 @@ export const CLIENTS: Client[] = [
 export const byId = (id: string) => CLIENTS.find(c => c.id === id) ?? CLIENTS[0];
 // Chosen by each client at onboarding.
 export const CHECKIN: Record<string, string> = { sarah: 'Weekly · Sun', tom: 'Monthly', priya: 'Weekly · Mon', dave: 'Weekly · Sun', ellie: 'Every 2 weeks · Sun', mark: 'Monthly', jen: 'Monthly', ray: 'Every 2 weeks · Fri' };
-export const PAY: Record<string, [Tint, string]> = { sarah: ['mint', 'Paid · Nov'], tom: ['grey', 'Due 1 Nov'], priya: ['mint', 'Paid · Nov'], dave: ['coral', 'Overdue 5 days'], ellie: ['grey', 'Due 1 Nov'], mark: ['mint', 'Paid · Nov'], jen: ['mint', 'Paid · Nov'], ray: ['mint', 'Paid · Nov'] };
+// Payment status for a client, from the same record the Payments page uses.
+export const payFor = (id: string): [Tint, string] => { const b = BILLING.find(x => x[0] === id); return b ? [b[3] === 'paid' ? 'mint' : b[3] === 'overdue' ? 'coral' : 'grey', b[5]] : ['grey', 'No payment set up']; };
 
 export type LibEx = { id: string; name: string; pat: string; kit: string; c: Tint; filmed: boolean };
 export const LIB: LibEx[] = [
@@ -66,14 +67,22 @@ export const SARAH_PLAN: Record<string, Row[]> = {
 };
 export const planMinutes = (rows: Row[]) => Math.round(rows.reduce((m, x) => m + 1.25 + (x.sets * 50 + (x.sets - 1) * x.rest) / 60 + 1, 0) + 8);
 
-export const ALERTS: { id: string; c: string; tag: [Tint, string, string]; why: string }[] = [
-  { id: 'a1', c: 'sarah', tag: ['coral', 'pain', 'Pain · knee 4/10'], why: 'During leg press this morning. Swapped to box squat and finished.' },
-  { id: 'a2', c: 'tom', tag: ['amber', 'clock', 'Missed workouts'], why: 'No workout for 9 days. His usual gap is 2–3.' },
-  { id: 'a3', c: 'priya', tag: ['amber', 'messages', 'Awaiting reply'], why: 'Handed over by KAI: “Can I train legs the day after my 10k?” · 26 h ago' },
-  { id: 'a4', c: 'dave', tag: ['grey', 'fuel', 'Meals to review'], why: '6 meals since Thursday, none reviewed.' },
-  { id: 'a6', c: 'dave', tag: ['coral', 'card', 'Payment overdue'], why: '£120 due 18 Oct. Reminders sent 15 and 18 Oct.' },
-  { id: 'a5', c: 'ellie', tag: ['violet', 'clip', 'Check-in'], why: 'Feeling low and asked for a call with you. Sleep 2/5 for the second week running.' },
+// Things that need Kyle. Urgency: 1 = today (safety, money), 2 = this week,
+// 3 = when there's time. A missed workout is never an emergency on its own.
+export type AlertKind = 'pain' | 'missed' | 'reply' | 'meals' | 'payment' | 'checkin' | 'block' | 'renewal';
+export type Alert = { id: string; c: string; kind: AlertKind; urgency: 1 | 2 | 3; tag: [Tint, string, string]; why: string; when: string };
+export const ALERTS: Alert[] = [
+  { id: 'a1', c: 'sarah', kind: 'pain', urgency: 1, tag: ['coral', 'pain', 'Pain · knee 4/10'], why: 'During leg press this morning. Swapped to box squat and finished.', when: 'Today 07:42' },
+  { id: 'a6', c: 'dave', kind: 'payment', urgency: 1, tag: ['coral', 'card', 'Payment overdue'], why: '£120 was due 18 Oct by bank transfer. Reminders sent 15 and 18 Oct.', when: '13 days' },
+  { id: 'a5', c: 'ellie', kind: 'checkin', urgency: 2, tag: ['violet', 'clip', 'Check-in'], why: 'Feeling low and asked for a call with you. Sleep 2/5 for the second week running.', when: 'Sun 19:10' },
+  { id: 'a3', c: 'priya', kind: 'reply', urgency: 2, tag: ['amber', 'messages', 'Awaiting reply'], why: 'Handed over by KAI: “Can I train legs the day after my 10k?”', when: '26 h ago' },
+  { id: 'a2', c: 'tom', kind: 'missed', urgency: 3, tag: ['amber', 'clock', 'Behind on training'], why: 'No workout for 9 days. His usual gap is 2–3.', when: '9 days' },
+  { id: 'a4', c: 'dave', kind: 'meals', urgency: 3, tag: ['grey', 'fuel', 'Meals to review'], why: '6 meals since Thursday, none reviewed.', when: 'Since Thu' },
+  { id: 'a7', c: 'sarah', kind: 'block', urgency: 3, tag: ['mint', 'programmes', 'Block ends soon'], why: 'Strength Block 1 finishes in 2 weeks. Plan what comes next.', when: 'Week 6 of 8' },
+  { id: 'a8', c: 'ellie', kind: 'renewal', urgency: 3, tag: ['sky', 'card', 'Block of 4 ending'], why: 'Her last session of this block is Wednesday. Ask if she wants another 4.', when: 'Wed' },
 ];
+export const URGENCY = { 1: 'Today', 2: 'This week', 3: 'When you have time' } as const;
+
 export const APPROVALS: { id: string; c: string; kind: [Tint, string]; text: string }[] = [
   { id: 'p1', c: 'dave', kind: ['amber', 'Nutrition feedback'], text: 'Good consistency this week, Dave. Protein is low at lunch (~25g). Add a chicken pot or Greek yoghurt to get closer to 150g.' },
   { id: 'p2', c: 'sarah', kind: ['mint', 'Programme change'], text: 'Replace Leg Press with Box Squat in Lower A for 2 weeks, then review.' },
@@ -105,11 +114,11 @@ export const DAYS: [string, number][] = [['Mon', 19], ['Tue', 20], ['Wed', 21], 
 export const CAL_START = 6, CAL_END = 20, HOUR = 44;
 export type CalEvent = [number, number, number, string, string, string];
 export const EVENTS: CalEvent[] = [
-  [0, 7, 1, 'studio', 'Sarah M', 'Studio'], [0, 12, 1.5, 'busy', 'Busy', 'Google Calendar'], [0, 18, 1, 'gym', 'Tom R', 'Gym'],
+  [0, 7, 1, 'studio', 'Sarah M', 'Studio'], [0, 12, 1.5, 'busy', 'Busy', 'Sample busy time'], [0, 18, 1, 'gym', 'Tom R', 'Gym'],
   [1, 6.5, 1, 'studio', 'Mark & Jen', 'Studio · duo'], [1, 17.5, 1, 'online', 'Ray P', 'Online'],
   [2, 9.5, 1, 'studio', 'Mark & Jen', 'Studio · duo'], [2, 12.25, 0.75, 'online', 'Ellie B', 'Online call'],
   [3, 7, 1, 'studio', 'Sarah M', 'Studio'], [3, 10.5, 1, 'online', 'Priya S', 'Online'], [3, 17.75, 1, 'gym', 'Tom R', 'Gym'],
-  [4, 6.5, 1, 'studio', 'Mark & Jen', 'Studio · duo'], [4, 12, 2, 'busy', 'Busy', 'Google Calendar'], [4, 17, 1, 'pending', 'Priya S', 'Waiting for you'],
+  [4, 6.5, 1, 'studio', 'Mark & Jen', 'Studio · duo'], [4, 12, 2, 'busy', 'Busy', 'Sample busy time'], [4, 17, 1, 'pending', 'Priya S', 'Waiting for you'],
 ];
 export const DAYNAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 // Working hours. The gym opens at 6:30; Wednesday is a half day; no weekends.
@@ -125,9 +134,9 @@ export const REQS = [
 ];
 // Bookings clients have sent back. They stay pending until approved.
 export const APPROVE = [
-  { id: 'b1', c: 'sarah', what: 'Accepted 7 of 8 November sessions (Mon and Thu 7:00). One change request below.', okBtn: 'Confirm 7', ok: '7 confirmed · added to both calendars', review: true },
-  { id: 'b2', c: 'priya', what: 'Booked Fri 23 Oct · 17:00 · online (extra session from her allowance)', okBtn: 'Confirm', ok: 'Confirmed · added to both calendars', review: false },
-  { id: 'b3', c: 'ellie', what: 'Accepted all 4 November sessions (Wed 12:15 online)', okBtn: 'Confirm 4', ok: '4 confirmed · added to both calendars', review: true },
+  { id: 'b1', c: 'sarah', what: 'Accepted 7 of 8 November sessions (Mon and Thu 7:00). One change request below.', okBtn: 'Confirm 7', ok: '7 confirmed · Sarah notified', review: true },
+  { id: 'b2', c: 'priya', what: 'Booked Fri 23 Oct · 17:00 · online (extra session from her allowance)', okBtn: 'Confirm', ok: 'Confirmed · Priya notified', review: false },
+  { id: 'b3', c: 'ellie', what: 'Accepted all 4 November sessions (Wed 12:15 online)', okBtn: 'Confirm 4', ok: '4 confirmed · Ellie notified', review: true },
 ];
 export const hhmm = (h: number) => `${Math.floor(h)}:${String(Math.round(h % 1 * 60)).padStart(2, '0')}`;
 
@@ -155,10 +164,13 @@ export const PACKAGES: Package[] = [
   { id: 'duo8', name: '8 PT sessions · duo', sub: 'a month · for two', price: null, duo: true },
 ];
 export const PARTNER: Record<string, string> = { mark: 'Jen', jen: 'Mark' };
-export type Billing = [string, string, number | null, 'paid' | 'due' | 'overdue', string];
-export const BILLING: Billing[] = [['sarah', 'pt8', 260, 'paid', 'Automatic'], ['tom', 'pt8', 240, 'due', 'Automatic'], ['priya', 'online', 120, 'paid', 'Automatic'],
-  ['dave', 'online', 120, 'overdue', 'Card declined 18 Oct'], ['ellie', 'pt4', 140, 'due', 'Pays when reminded'], ['mark', 'duo8', null, 'paid', 'Automatic'],
-  ['jen', 'duo8', null, 'paid', 'Automatic'], ['ray', 'online', 120, 'paid', 'Automatic']];
+// [client, package, monthly price, status, how and when they pay, status label]
+// Clients don't all pay the same way or on the same day.
+export type Billing = [string, string, number | null, 'paid' | 'due' | 'overdue', string, string];
+export const BILLING: Billing[] = [['sarah', 'pt8', 260, 'paid', 'Bank transfer · 1st', 'Paid 1 Oct'], ['tom', 'pt8', 240, 'due', 'Bank transfer · 25th', 'Due 25 Oct'],
+  ['priya', 'online', 120, 'paid', 'Bank transfer · 8th', 'Paid 8 Oct'], ['dave', 'online', 120, 'overdue', 'Bank transfer · 18th', 'Overdue since 18 Oct'],
+  ['ellie', 'pt4', 140, 'due', 'Pays per block of 4', 'Block ends 30 Oct'], ['mark', 'duo8', null, 'paid', 'Mark pays both · 1st', 'Paid 1 Oct'],
+  ['jen', 'duo8', null, 'paid', 'Paid by Mark', 'Paid 1 Oct'], ['ray', 'online', 120, 'paid', 'Cash at session', 'Paid 12 Oct']];
 export const pkgById = (id: string) => PACKAGES.find(p => p.id === id) ?? PACKAGES[0];
 export const gbp = (n: number) => '£' + n.toLocaleString('en-GB');
 
@@ -189,3 +201,35 @@ export const CHECKIN_FORM: Question[] = [
   { id: 'q11', step: 'Support', q: 'Anything else for your coach?', type: 'text', req: false },
 ];
 export const CHECKIN_STEPS = ['How you feel', 'Your week', 'Wins', 'Support'];
+
+// Regular weekly slots, used to build each month's proposed sessions.
+// Weekday: Monday = 0. Clients whose times change send availability instead.
+export const REGULAR: { client: string; weekday: 0 | 1 | 2 | 3 | 4 | 5 | 6; time: string; minutes: number; location: string }[] = [
+  { client: 'sarah', weekday: 0, time: '7:00', minutes: 60, location: 'Studio' }, { client: 'sarah', weekday: 3, time: '7:00', minutes: 60, location: 'Studio' },
+  { client: 'mark', weekday: 1, time: '6:30', minutes: 60, location: 'Studio' }, { client: 'mark', weekday: 4, time: '6:30', minutes: 60, location: 'Studio' },
+  { client: 'tom', weekday: 0, time: '18:00', minutes: 60, location: 'Gym' }, { client: 'tom', weekday: 3, time: '17:45', minutes: 60, location: 'Gym' },
+  { client: 'ray', weekday: 1, time: '17:30', minutes: 45, location: 'Online' },
+];
+export const ALLOWANCE: Record<string, number> = { sarah: 8, mark: 8, tom: 8, ray: 4 };
+export const SENDS_AVAILABILITY = ['ellie', 'priya'];
+// Minutes to travel between locations. Online needs none.
+export const TRAVEL: Record<string, number> = { 'Studio>Gym': 20, 'Gym>Studio': 20 };
+// Time off already in the diary for November.
+export const NOV_TIME_OFF: { date: string; start: number; end: number; reason: string }[] = [
+  { date: '2026-11-13', start: 0, end: 24 * 60, reason: 'Course day (blocked by you)' },
+];
+
+// Client record details (sample).
+export const CONTACT: Record<string, { email: string; phone: string; since: string; emergency: string; goal: string; health: [Tint, string][] }> = {
+  sarah: { email: 'sarah.m@example.com', phone: '07700 900123', since: 'September 2026', emergency: 'Tom Mitchell · 07700 900456', goal: 'Get stronger',
+    health: [['amber', 'Left knee: patellar pain history'], ['mint', 'Health questions: all clear (6 Sep)']] },
+};
+export const contactFor = (id: string) => CONTACT[id] ?? { email: `${id}@example.com`, phone: '07700 900000', since: '2026', emergency: 'Not given', goal: 'General fitness', health: [['mint', 'Health questions: all clear']] as [Tint, string][] };
+// [date, time, location, state]
+export const SESSION_HISTORY: [string, string, string, 'confirmed' | 'completed' | 'late_cancelled' | 'awaiting_coach' | 'change_requested'][] = [
+  ['Thu 5 Nov', '7:00', 'Studio', 'change_requested'], ['Mon 2 Nov', '7:00', 'Studio', 'awaiting_coach'], ['Thu 22 Oct', '7:00', 'Studio', 'confirmed'],
+  ['Mon 19 Oct', '7:00', 'Studio', 'completed'], ['Thu 15 Oct', '7:00', 'Studio', 'completed'], ['Mon 12 Oct', '7:00', 'Studio', 'late_cancelled'], ['Thu 8 Oct', '7:00', 'Studio', 'completed'],
+];
+export const PAYMENT_HISTORY: [string, string, string, 'paid' | 'due' | 'overdue'][] = [
+  ['1 Nov', '£260', 'November · 8 PT', 'due'], ['1 Oct', '£260', 'October · 8 PT', 'paid'], ['1 Sep', '£260', 'September · 8 PT', 'paid'],
+];

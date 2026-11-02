@@ -6,6 +6,7 @@ import { Icon } from '@/components/icon';
 import { FOODS, FREQ, HOURS, MOMENTUM, NOTIF_TYPES, NOV, hm, type Food, type Slot } from '@/lib/client/sample-data';
 import { setState, useClient } from '@/lib/client/store';
 import { planFor } from '@/lib/client/workout';
+import { clampQty, resolveFood, scaled } from '@/lib/client/food';
 import { AccBars, Chev, Li, MomentumRings, Sent, Switch } from './ui';
 import { useUI, type SheetName } from './shell';
 
@@ -21,6 +22,7 @@ export function Sheet({ name }: { name: SheetName }) {
     case 'pain': return <PainSheet />;
     case 'notifset': return <><div><h3>Notifications</h3><div className="sub">Choose what reaches your phone</div></div><NotifToggles /><Done /></>;
     case 'addfood': return <AddFoodSheet />;
+    case 'editfood': return <EditFoodSheet />;
   }
 }
 
@@ -40,17 +42,15 @@ export function NotifToggles() {
 }
 
 function PaySheet() {
-  const s = useClient(), { toast } = useUI(), fail = s.preview.payFail;
-  if (s.paid) return <><Sent bg="var(--amber)" ink="#2a1600" title="Paid · thank you">Receipt sent to your email. {s.autopay ? 'December will be taken automatically.' : ''}</Sent><Done /></>;
+  const s = useClient(), fail = s.preview.payFail;
+  if (s.paid) return <><Sent bg="var(--amber)" ink="#2a1600" title="Marked as paid">Demo only: no money was taken. Card payments will work once they&apos;re switched on.</Sent><Done /></>;
   return (
     <>
       <div><h3>November payment</h3><div className="sub">{fail ? 'Failed on Sunday 1 November' : 'Due Sunday 1 November'}</div></div>
-      {fail && <div className="failbox"><Icon name="pain" /><span><b>Your bank declined this payment.</b> Usually it&apos;s an expired card or a security check. Update your card or try again. Sessions stay booked for 7 days while you sort it.</span></div>}
+      {fail && <div className="failbox"><Icon name="pain" /><span><b>Your bank declined this payment.</b> Update your card or try again. Sessions stay booked for 7 days.</span></div>}
       <div className="paycard"><div className="line"><span>8 PT sessions</span><span className="num">£260.00</span></div><div className="line"><span>1–30 November</span><span /></div><div className="line total"><span>Total</span><span className="num">£260.00</span></div></div>
-      <div className="cardrow"><span className="brand">VISA</span><span className="t"><b>•••• 4242</b><small>Expires 08/28</small></span><button onClick={() => toast('Change card in Stripe')} style={{ color: 'var(--fg2)', fontSize: 14 }}>Change</button></div>
-      <div className="tg"><span className="li" style={{ background: 'rgba(255,180,94,.14)', color: 'var(--amber)' }}><Icon name="card" /></span><span className="t"><b>Pay automatically each month</b><small>Reminder 3 days before, cancel any time</small></span>
-        <Switch on={s.autopay} label="Pay automatically" onChange={() => setState({ autopay: !s.autopay })} /></div>
-      <button className="pill-btn mint" onClick={() => setState({ paid: true })}>{fail ? 'Try again · £260.00' : 'Pay £260.00'}</button>
+      <p className="foot">Card payments aren&apos;t switched on yet. Pay Kyle the usual way for now.</p>
+      <button className="pill-btn mint" onClick={() => setState({ paid: true })}>Try it · demo, no charge</button>
     </>
   );
 }
@@ -65,7 +65,7 @@ function BookSheet() {
     const cap = (x: string) => x.charAt(0) + x.slice(1).toLowerCase();
     return (
       <>
-        <div><h3>Ask to move {cap(d)} {day} Nov</h3><div className="sub">These are times Kyle has free that week. He&apos;ll approve or suggest another.</div></div>
+        <div><h3>Ask to move {cap(d)} {day} Nov</h3><div className="sub">Kyle&apos;s free times that week.</div></div>
         <div className="group">{alts.map(([dd, nn, tt]) => (
           <button key={dd + tt} className="optrow" onClick={() => { setState({ book: { ...s.book, req: { ...s.book.req, [pick]: `${cap(dd)} ${nn} Nov · ${tt}` } } }); setPick(null); }}>
             <span className="datebox sm"><small>{dd}</small><b className="num">{nn}</b></span><span className="t"><b className="num">{tt}</b><small>Studio</small></span><Chev /></button>
@@ -74,30 +74,37 @@ function BookSheet() {
       </>
     );
   }
-  if (s.book.done) return <><Sent bg="var(--sky)" ink="#03121f" title="Sent to Kyle">Your sessions show as pending until Kyle confirms them{reqs ? `, including your ${reqs} change request${reqs > 1 ? 's' : ''}` : ''}. You&apos;ll get a notification as soon as he does.</Sent><Done /></>;
+  if (s.book.done) return (
+    <><div><h3>Your November sessions</h3><div className="sub">Awaiting Kyle. Nothing&apos;s confirmed until he approves it.</div></div>
+      <div className="group">{NOV.map(([d, day, t], i) => (
+        <div className="optrow" key={i}><span className="datebox sm"><small>{d}</small><b className="num">{day}</b></span>
+          <span className="t"><b className="num">{s.book.req[i] ? s.book.req[i] : `${t} · Studio`}</b><small>{s.book.req[i] ? `Change requested from ${t} · awaiting Kyle` : 'Accepted · awaiting Kyle'}</small></span>
+          <span className="state await">Awaiting Kyle</span></div>
+      ))}</div><Done /></>
+  );
   return (
     <>
-      <div><h3>Your November sessions</h3><div className="sub">Kyle has proposed these. Check them, ask to move any that don&apos;t work, then send them back. Nothing is booked until Kyle confirms.</div></div>
+      <div><h3>Your November sessions</h3><div className="sub">Move any that don&apos;t work. Nothing&apos;s booked until Kyle confirms.</div></div>
       <button className="optrow" style={{ background: 'var(--s2)', borderRadius: 14 }} onClick={() => openSheet('avail')}><Li icon="clock" color="var(--sky)" /><span className="t"><b>My times change each month</b><small>Send Kyle your availability instead</small></span><Chev /></button>
       <div className="group">{NOV.map(([d, day, t], i) => (
         <div className="optrow" key={i}><span className="datebox sm"><small>{d}</small><b className="num">{day}</b></span>
-          <span className="t"><b className="num">{t} · Studio</b><small>{s.book.req[i] ? <span style={{ color: 'var(--amber)' }}>Asked for {s.book.req[i]}</span> : 'PT with Kyle · 60 min'}</small></span>
+          <span className="t"><b className="num">{t} · Studio · 60 min</b><small>{s.book.req[i] ? <span style={{ color: 'var(--amber)' }}>Change to {s.book.req[i]} · not sent yet</span> : 'Proposed by Kyle'}</small></span>
           <button className="add" style={{ color: 'var(--sky)' }} onClick={() => setPick(i)}>{s.book.req[i] ? 'Change' : 'Move'}</button></div>
       ))}</div>
       <p className="foot">Free to change up to 24 hours before. Later cancellations count as used.</p>
-      <button className="pill-btn mint" onClick={() => setState({ book: { ...s.book, done: true } })}>Send to Kyle{reqs ? ` · ${reqs} change${reqs > 1 ? 's' : ''}` : ''}</button>
+      <button className="pill-btn mint" onClick={() => setState({ book: { ...s.book, done: true } })}>{reqs ? `Accept the rest · request ${reqs} change${reqs > 1 ? 's' : ''}` : 'Accept all 8'}</button>
     </>
   );
 }
 
 function AvailSheet() {
   const s = useClient(), a = s.avail;
-  if (a.sent) return <><Sent bg="var(--sky)" ink="#03121f" title="Sent to Kyle">Kyle will fit your sessions into these times and confirm them. You&apos;ll get the exact days and times in a notification.</Sent><Done /></>;
+  if (a.sent) return <><Sent bg="var(--sky)" ink="#03121f" title="Sent to Kyle">You&apos;ll get a notification with your sessions.</Sent><Done /></>;
   const steps = (lo: number, hi: number) => { const o: number[] = []; for (let h = lo; h <= hi; h += 0.5) o.push(h); return o; };
   const setDay = (d: string, w: [number, number] | null) => setState({ avail: { ...a, days: { ...a.days, [d]: w } } });
   return (
     <>
-      <div><h3>When can you train in November?</h3><div className="sub">Tick the days that work and give a rough window. Kyle places your 8 sessions and confirms them.</div></div>
+      <div><h3>When can you train in November?</h3><div className="sub">Pick your days and rough times. Kyle confirms the exact slots.</div></div>
       <div className="group" style={{ '--inset': '14px' } as React.CSSProperties}>{Object.entries(HOURS).map(([d, hrs]) => {
         const w = a.days[d];
         if (!hrs) return <div className="avrow off" key={d}><b>{d}</b><span className="t">Kyle doesn&apos;t work {d === 'Sat' ? 'Saturdays' : 'Sundays'}</span></div>;
@@ -158,7 +165,7 @@ function MomentumSheet() {
       <div className="mom-big">
         <div className="wrap"><MomentumRings size={184} stroke={14} /><div className="c"><Icon name="bolt" size={30} style={{ color: 'var(--fg)' }} /></div></div>
         <div><b className="word" style={{ font: '800 30px var(--display)', color: 'var(--mint)', letterSpacing: '-.02em' }}>Strong</b><div className="eyebrow" style={{ marginTop: 2 }}>Week 6 of 8</div></div>
-        <p>Your best week of the block so far. One more workout and a protein snack closes the rings.</p>
+        <p>One more workout closes your rings this week.</p>
       </div>
       <div className="contrib group">{MOMENTUM.map(m => (
         <div className="crow" key={m.k}><span className="li" style={{ '--k': m.col } as React.CSSProperties}><Icon name={m.icon} /></span>
@@ -206,7 +213,7 @@ function SwapSheet() {
 function PainSheet() {
   const s = useClient(), p = s.pain, { closeSheet } = useUI();
   const set = (patch: Partial<typeof p>) => setState({ pain: { ...p, ...patch } });
-  if (p.sent) return <><Sent title="Your coach has been told">If the pain is sharp or sudden, stop and get it checked. The app can&apos;t diagnose injuries.</Sent>
+  if (p.sent) return <><Sent title="Your coach has been told">If it&apos;s sharp or sudden, stop and get it checked.</Sent>
     <button className="pill-btn white" onClick={closeSheet}>{p.act === 'swap' ? 'Choose a swap' : 'Done'}</button></>;
   const ready = p.area && p.act;
   return (
@@ -228,35 +235,44 @@ function PainSheet() {
 function AddFoodSheet() {
   const s = useClient(), { sheetArg, closeSheet, toast } = useUI();
   const slot = (sheetArg ?? 'Breakfast') as Slot;
-  const [tab, setTab] = useState<'search' | 'scan' | 'recipes' | 'quick'>('search');
+  const [tab, setTab] = useState<'recent' | 'search' | 'recipes' | 'quick'>(s.recent.length ? 'recent' : 'search');
   const [q, setQ] = useState('');
+  const [pick, setPick] = useState<Food | null>(null);
   const [quick, setQuick] = useState({ kcal: '', P: '', C: '', F: '' });
-  const add = (id: string) => { setState({ log: { ...s.log, [slot]: [...s.log[slot], id] } }); toast(`Added to ${slot}`); closeSheet(); };
-  const list = FOODS.filter(f => (tab === 'recipes' ? f.img : true) && f.n.toLowerCase().includes(q.toLowerCase()));
+  const add = (food: string, qty: number) => {
+    setState({ log: { ...s.log, [slot]: [...s.log[slot], { food, qty }] }, recent: [food, ...s.recent.filter(r => r !== food)].slice(0, 20) });
+    toast(`Added to ${slot}`); closeSheet();
+  };
+  if (pick) return <Portion f={pick} qty={1} slot={slot} onBack={() => setPick(null)} onSave={qty => add(pick.id, qty)} />;
+  const recent = s.recent.map(id => FOODS.find(f => f.id === id)).filter(Boolean) as Food[];
+  const favs = s.favs.map(id => FOODS.find(f => f.id === id)).filter(Boolean) as Food[];
+  const list = tab === 'recent' ? [...favs, ...recent.filter(f => !s.favs.includes(f.id))]
+    : FOODS.filter(f => (tab === 'recipes' ? f.img : true) && f.n.toLowerCase().includes(q.toLowerCase()));
   return (
     <>
       <div><h3>Add to {slot}</h3></div>
-      <div className="tabs4">{([['search', 'Search'], ['scan', 'Scan'], ['recipes', 'Recipes'], ['quick', 'Quick add']] as const).map(([k, l]) => <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}</div>
-      {(tab === 'search' || tab === 'recipes') && (
+      <div className="tabs4">{([['recent', 'Recent'], ['search', 'Search'], ['recipes', "Kyle's recipes"], ['quick', 'Quick add']] as const).map(([k, l]) => <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}</div>
+      {tab !== 'quick' && (
         <>
-          {tab === 'search' && <label className="search"><Icon name="search" /><input placeholder="Search foods" value={q} onChange={e => setQ(e.target.value)} aria-label="Search foods" /></label>}
+          {tab === 'search' && <label className="search"><Icon name="search" /><input placeholder="Search foods" value={q} onChange={e => setQ(e.target.value)} aria-label="Search foods" autoFocus /></label>}
           <div className="group" style={{ '--inset': '14px' } as React.CSSProperties}>
             {list.length ? list.map(f => (
-              <div className="food" key={f.id}>{f.img && <img src={`/assets/${f.img}.jpg`} alt="" />}<span className="t"><b>{f.n}</b><small className="num">{f.p} · {f.kcal} kcal · P {f.P} C {f.C} F {f.F}</small></span>
-                <button className="addbtn" onClick={() => add(f.id)} aria-label={`Add ${f.n}`}><Icon name="plus" /></button></div>
-            )) : <div className="empty">No matches. Try Quick add to enter the numbers yourself.</div>}
+              <button className="food" key={f.id} onClick={() => setPick(f)}>{f.img && <img src={`/assets/${f.img}.jpg`} alt="" />}
+                <span className="t"><b>{s.favs.includes(f.id) && <span style={{ color: 'var(--amber)' }}>★ </span>}{f.n}</b><small className="num">{f.p} · {f.kcal} kcal · {f.P}g protein</small></span>
+                <span className="addbtn" aria-hidden="true"><Icon name="plus" /></span></button>
+            )) : <div className="empty">{tab === 'recent' ? 'Foods you log show up here.' : 'No matches. Try Quick add.'}</div>}
           </div>
+          <p className="foot">Barcode scanning comes once the food database is connected.</p>
         </>
       )}
-      {tab === 'scan' && <div className="scanbox"><span>Point the camera at a barcode<br /><small style={{ color: 'var(--fg3)' }}>Uses your phone&apos;s camera in the installed app</small></span></div>}
       {tab === 'quick' && (
         <>
           <div className="qa">{([['kcal', 'Calories', 'kcal'], ['P', 'Protein', 'g'], ['C', 'Carbs', 'g'], ['F', 'Fat', 'g']] as const).map(([k, l, u]) => (
-            <label key={k}>{l} ({u})<input inputMode="decimal" placeholder="0" value={quick[k]} onChange={e => setQuick({ ...quick, [k]: e.target.value })} /></label>
+            <label key={k}>{l} ({u})<input inputMode="decimal" placeholder="0" value={quick[k]} onChange={e => setQuick({ ...quick, [k]: e.target.value.replace(/[^\d.]/g, '') })} /></label>
           ))}</div>
-          <button className="pill-btn mint" onClick={() => {
-            const n = (v: string) => parseFloat(v) || 0;
-            add(`quick:${n(quick.kcal)}:${n(quick.P)}:${n(quick.C)}:${n(quick.F)}`);
+          <button className="pill-btn mint" disabled={!(parseFloat(quick.kcal) > 0)} style={parseFloat(quick.kcal) > 0 ? undefined : { opacity: .4 }} onClick={() => {
+            const n = (v: string) => Math.min(5000, parseFloat(v) || 0);
+            add(`quick:${n(quick.kcal)}:${n(quick.P)}:${n(quick.C)}:${n(quick.F)}`, 1);
           }}>Add to {slot}</button>
         </>
       )}
@@ -264,9 +280,46 @@ function AddFoodSheet() {
   );
 }
 
-// Foods logged with Quick add are stored as "quick:kcal:P:C:F".
-export function resolveFood(id: string): Food | undefined {
-  if (!id.startsWith('quick:')) return FOODS.find(f => f.id === id);
-  const [, kcal, P, C, F] = id.split(':').map(Number);
-  return { id, n: 'Quick add', p: 'Entered by you', kcal, P, C, F };
+// Choosing how much: servings, or grams for foods that are weighed.
+function Portion({ f, qty: start, slot, onBack, onSave, onRemove }: { f: Food; qty: number; slot: Slot; onBack: () => void; onSave: (qty: number) => void; onRemove?: () => void }) {
+  const s = useClient();
+  const [qty, setQty] = useState(start);
+  const [grams, setGrams] = useState(f.g ? String(Math.round(f.g * start)) : '');
+  const fav = s.favs.includes(f.id);
+  const x = scaled(f, qty), mode = s.fuelMode;
+  const setG = (v: string) => { const t = v.replace(/\D/g, '').slice(0, 4); setGrams(t); if (f.g && +t > 0) setQty(clampQty(+t / f.g)); };
+  return (
+    <>
+      <div className="portion-head">
+        <button className="ib" onClick={onBack} aria-label="Back"><Icon name="back" /></button>
+        <span><h3>{f.n}</h3><div className="sub">{f.p} per serving</div></span>
+        {!f.id.startsWith('quick:') && <button className="ib" aria-pressed={fav} aria-label={fav ? 'Remove from favourites' : 'Add to favourites'} style={{ color: fav ? 'var(--amber)' : 'var(--fg3)', fontSize: 20 }}
+          onClick={() => setState({ favs: fav ? s.favs.filter(id => id !== f.id) : [f.id, ...s.favs] })}>{fav ? '★' : '☆'}</button>}
+      </div>
+      <div className="qtyrow">
+        <button onClick={() => { const q = clampQty(qty - (qty > 1 ? 0.5 : 0.25)); setQty(q); if (f.g) setGrams(String(Math.round(f.g * q))); }} aria-label="Less">−</button>
+        <span><b className="num">{qty}</b><small>serving{qty === 1 ? '' : 's'}</small></span>
+        <button onClick={() => { const q = clampQty(qty + (qty >= 1 ? 0.5 : 0.25)); setQty(q); if (f.g) setGrams(String(Math.round(f.g * q))); }} aria-label="More">+</button>
+      </div>
+      {f.g && <label className="search" style={{ justifyContent: 'space-between' }}><span style={{ color: 'var(--fg2)' }}>Or weigh it</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input inputMode="numeric" value={grams} onChange={e => setG(e.target.value)} aria-label="Grams" style={{ width: 70, textAlign: 'right', fontWeight: 700 }} onFocus={e => e.currentTarget.select()} />g</span></label>}
+      {mode !== 'simple' && <div className="macros4 num">
+        {mode === 'full' && <span><b>{Math.round(x.kcal)}</b>kcal</span>}
+        <span style={{ color: 'var(--amber)' }}><b>{Math.round(x.P)}g</b>protein</span>
+        {mode === 'full' && <><span style={{ color: 'var(--sky)' }}><b>{Math.round(x.C)}g</b>carbs</span><span style={{ color: 'var(--violet)' }}><b>{Math.round(x.F)}g</b>fat</span></>}
+      </div>}
+      <button className="pill-btn mint" onClick={() => onSave(qty)}>{onRemove ? 'Save' : `Add to ${slot}`}</button>
+      {onRemove && <button className="pill-btn dark" style={{ color: 'var(--coral)' }} onClick={onRemove}>Remove</button>}
+    </>
+  );
+}
+
+// Tapping something already logged: change how much, or remove it.
+function EditFoodSheet() {
+  const s = useClient(), { sheetArg, closeSheet } = useUI();
+  const [slot, i] = (sheetArg ?? 'Breakfast|0').split('|') as [Slot, string];
+  const it = s.log[slot]?.[+i], f = it && resolveFood(it.food);
+  if (!it || !f) return <Done />;
+  const put = (items: typeof s.log[Slot]) => { setState({ log: { ...s.log, [slot]: items } }); closeSheet(); };
+  return <Portion f={f} qty={it.qty} slot={slot} onBack={closeSheet} onSave={qty => put(s.log[slot].map((x, j) => (j === +i ? { ...x, qty } : x)))} onRemove={() => put(s.log[slot].filter((_, j) => j !== +i))} />;
 }

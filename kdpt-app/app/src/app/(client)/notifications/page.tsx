@@ -6,13 +6,13 @@ import { Icon } from '@/components/icon';
 import { useUI, type SheetName } from '@/components/client/shell';
 import { SubTop } from '@/components/client/ui';
 import { NOTES, type Note } from '@/lib/client/sample-data';
-import { setState, useClient } from '@/lib/client/store';
+import { updateOnceLoaded, useClient } from '@/lib/client/store';
 
 export default function Notifications() {
   const s = useClient(), { openSheet } = useUI(), router = useRouter();
   const wasRead = s.read;
   // Opening the list marks everything read (shown as unread this visit).
-  useEffect(() => { if (!s.read) setState({ read: true }); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { updateOnceLoaded(st => (st.read ? null : { read: true })); }, [s]);
   const row = (n: Note) => {
     const done = (n.id === 'pay' && s.paid) || (n.id === 'book' && s.book.done);
     return (
@@ -24,7 +24,8 @@ export default function Notifications() {
   return (
     <div className="page fade">
       <SubTop title="Notifications" back="/home" right={<button className="ib" onClick={() => openSheet('notifset')} aria-label="Notification settings"><Icon name="gear" /></button>} />
-      {(['Today', 'Earlier'] as const).map(g => <div className="ngroup" key={g}><div className="eyebrow">{g}</div><div className="group">{NOTES.filter(n => n.group === g).map(row)}</div></div>)}
+      {s.preview.fresh ? <div className="group"><div className="nrow"><span className="li" style={{ background: 'rgba(126,213,151,.14)', color: 'var(--mint)' }}><Icon name="spark" /></span><span><b>Welcome to KDPT</b><p>Kyle has your answers and is building your programme.</p><time>Now</time></span></div></div>
+      : (['Today', 'Earlier'] as const).map(g => <div className="ngroup" key={g}><div className="eyebrow">{g}</div><div className="group">{NOTES.filter(n => n.group === g).map(row)}</div></div>)}
     </div>
   );
 }
