@@ -1,0 +1,59 @@
+/* KDPT design system: shared building blocks for redesigned screens.
+   Rules in kdpt-app/DESIGN.md. Flat surfaces, hairlines, mint for the one
+   primary action and "done", 7 type sizes, radii 12 and 20, Lucide icons. */
+.ds { --raise: #121413; --line: rgba(255,255,255,.09); }
+.ds-page { padding: 8px var(--gut-r) 120px var(--gut); display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; }
+.ds-top { display: flex; align-items: center; justify-content: space-between; height: 52px; }
+.ds-top .logo { height: 22px; width: auto; }
+.ds-top .right { display: flex; gap: 4px; align-items: center; }
+.ds-iconbtn { position: relative; width: 44px; height: 44px; display: grid; place-items: center; color: var(--fg); border-radius: 12px; }
+.ds-iconbtn .dot { position: absolute; top: 9px; right: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 2px #000; }
+.ds-me { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; font: 700 13px var(--display); color: var(--fg2); margin-left: 4px; }
+.ds-eyebrow { color: var(--fg3); font: 600 12px var(--display); letter-spacing: .12em; text-transform: uppercase; }
+.ds-title { font: 800 28px/1.15 var(--display); letter-spacing: -.02em; margin-top: 6px; }
+.ds-h2 { font: 700 20px var(--display); letter-spacing: -.01em; }
+.ds-section { display: grid; gap: 12px; }
+.ds-section > header { display: flex; align-items: baseline; justify-content: space-between; }
+.ds-section > header a, .ds-section > header button { color: var(--fg2); font-size: 14px; }
+.ds-list { display: grid; border-top: 1px solid var(--line); }
+.ds-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 14px; align-items: center; min-height: 64px; padding: 10px 0; border-bottom: 1px solid var(--line); text-align: left; width: 100%; color: var(--fg); }
+.ds-row.noicon { grid-template-columns: minmax(0, 1fr) auto; }
+.ds-row > svg:first-child { color: var(--fg2); }
+.ds-row .t b { display: block; font-weight: 600; font-size: 16px; }
+.ds-row .t small { display: block; color: var(--fg3); font-size: 14px; margin-top: 2px; }
+.ds-row .end { display: flex; align-items: center; gap: 8px; color: var(--fg3); font-size: 14px; }
+.ds-tag { font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+.ds-tag.ok { color: var(--mint); } .ds-tag.wait { color: var(--amber); } .ds-tag.bad { color: var(--coral); }
+.ds-card { background: var(--raise); border-radius: 20px; padding: 20px; display: grid; gap: 16px; }
+.ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 56px; padding: 0 20px; border-radius: 12px; font: 700 16px var(--display); width: 100%; }
+.ds-btn.primary { background: var(--mint); color: var(--mint-ink); }
+.ds-btn.secondary { background: var(--raise); color: var(--fg); }
+.ds-btn.quiet { background: #1b1e1c; color: var(--fg); }
+.ds-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.ds-actions a, .ds-actions button { display: grid; justify-items: center; gap: 8px; padding: 16px 4px; border-radius: 12px; background: var(--raise); color: var(--fg); font-size: 14px; font-weight: 500; text-align: center; }
+.ds-actions svg { color: var(--fg2); }
+.ds-quote { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; align-items: start; text-align: left; }
+.ds-quote img { width: 36px; height: 36px; border-radius: 50%; background: #000; border: 1px solid var(--line); object-fit: contain; padding: 9px 6px; }
+.ds-quote small { color: var(--fg3); font-size: 12px; }
+.ds-quote p { margin: 4px 0 0; font-size: 16px; line-height: 1.5; }
+.ds-stat3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ds-stat3 > div { display: grid; gap: 6px; padding-right: 12px; }
+.ds-stat3 > div + div { border-left: 1px solid var(--line); padding-left: 12px; }
+.ds-stat3 small { color: var(--fg3); font-size: 12px; }
+.ds-stat3 b { font: 700 16px var(--display); }
+.ds-bar { height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.ds-bar i { display: block; height: 100%; background: var(--mint); border-radius: 2px; }
+
+/* Tab bar: full width, flat, labelled icons; mint marks where you are. */
+.tabbar.ds-tabbar { left: 0; right: 0; bottom: 0; height: auto; border-radius: 0; border: 0; border-top: 1px solid rgba(255,255,255,.09);
+  background: rgba(0,0,0,.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px)); }
+.tabbar.ds-tabbar :is(a, button) { gap: 4px; min-height: 52px; color: var(--fg3); }
+.tabbar.ds-tabbar :is(a, button) span { font-size: 11px; font-weight: 500; }
+.tabbar.ds-tabbar :is(a, button).on { color: var(--mint); }
+.tabbar.ds-tabbar :is(a, button).on svg { color: var(--mint); }
+.ds-week { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 16px; align-items: center; text-align: left; width: 100%; }
+.ds-steps { list-style: none; margin: 0; padding: 0; }
+.ds-steps .n { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--line); margin-right: 10px; font-size: 12px; color: var(--fg2); }
+.ds-steps .done .n { border-color: var(--mint); color: var(--mint); }
+.ds-steps .now .n { border-color: var(--fg); color: var(--fg); }
+.ds-steps .next b { color: var(--fg2); }

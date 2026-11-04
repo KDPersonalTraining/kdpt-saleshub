@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { ChartNoAxesColumn, Dumbbell, House, Users, Utensils } from 'lucide-react';
 import { Icon } from '@/components/icon';
 import { loadStore, setState, useClient } from '@/lib/client/store';
 import { Sheet } from './sheets';
@@ -20,7 +21,7 @@ type UI = {
 const Ctx = createContext<UI | null>(null);
 export const useUI = () => useContext(Ctx)!;
 
-const TABS = [['home', 'Home'], ['train', 'Train'], ['fuel', 'Fuel'], ['progress', 'Progress'], ['community', 'Community']] as const;
+const TABS = [['home', 'Home', House], ['train', 'Train', Dumbbell], ['fuel', 'Fuel', Utensils], ['progress', 'Progress', ChartNoAxesColumn], ['community', 'Community', Users]] as const;
 // Full-screen flows hide the tab bar.
 const NO_TABS = ['/workout', '/chat', '/kai', '/checkin', '/profile', '/welcome', '/tour'];
 
@@ -92,10 +93,10 @@ export function ClientShell({ me, children }: { me: { id: string; name: string; 
           {children}
         </div>
         {showTabs && (
-          <nav className="tabbar" aria-label="App sections">
-            {TABS.map(([k, l]) => (
-              <Link key={k} href={`/${k}`} className={k === active ? 'on' : ''} aria-label={l}>
-                <Icon name={k} /><span>{l}</span>{k === 'community' && <i className="pip" style={{ background: 'var(--violet)' }} />}
+          <nav className="tabbar ds-tabbar" aria-label="App sections">
+            {TABS.map(([k, l, TabIcon]) => (
+              <Link key={k} href={`/${k}`} className={k === active ? 'on' : ''} aria-current={k === active ? 'page' : undefined}>
+                <TabIcon size={24} strokeWidth={1.75} /><span>{l}</span>
               </Link>
             ))}
           </nav>

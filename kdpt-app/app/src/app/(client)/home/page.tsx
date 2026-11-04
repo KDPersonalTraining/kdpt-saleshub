@@ -1,21 +1,24 @@
 'use client';
 
+import { Bell, CalendarClock, ChevronRight, ClipboardCheck, CreditCard, Dumbbell, MessageCircle, Sparkles, Utensils } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { Icon } from '@/components/icon';
 import { useUI } from '@/components/client/shell';
-import { Chev, Li, MomentumRings } from '@/components/client/ui';
-import { WORKOUT } from '@/lib/client/sample-data';
+import { MomentumRings } from '@/components/client/ui';
+import { MOMENTUM, WORKOUT } from '@/lib/client/sample-data';
 import { useClient } from '@/lib/client/store';
 import { planFor } from '@/lib/client/workout';
 
+// Home: the next thing to do comes first (today's workout), then the next
+// session with Kyle, anything waiting on the client, and quick ways to log.
+const I = { size: 20, strokeWidth: 1.75 } as const;
 let pushedOnce = false;
 
 export default function Home() {
-  const s = useClient(), { openSheet, push, me } = useUI();
+  const s = useClient(), { openSheet, push, me } = useUI(), router = useRouter();
   const p = planFor(s.duration);
   const fresh = s.preview.fresh;
-  const days: [string, string, React.ReactNode][] = [['M', 'pt', 'PT'], ['T', 'done', <Icon key="c" name="check" />], ['W', 'now', '21'], ['T', 'pt', 'PT'], ['F', '', '23'], ['S', '', '24'], ['S', '', '25']];
 
   // Shown once per visit, like the real push when November's sessions are proposed.
   useEffect(() => {
@@ -27,55 +30,64 @@ export default function Home() {
 
   if (fresh) return <NewClientHome />;
 
+  const inProgress = s.startedAt != null;
+  const todo: { icon: React.ReactNode; title: string; sub: string; tag?: [string, string]; onClick: () => void }[] = [];
+  if (s.preview.payFail && !s.paid) todo.push({ icon: <CreditCard {...I} />, title: 'November payment didn’t go through', sub: 'Update your card or try again', tag: ['bad', 'Action needed'], onClick: () => openSheet('pay') });
+  if (!s.book.done) todo.push({ icon: <CalendarClock {...I} />, title: 'November sessions to review', sub: '8 proposed by Kyle', tag: ['wait', 'Waiting for you'], onClick: () => openSheet('book') });
+  if (!s.checkinsSent) todo.push({ icon: <ClipboardCheck {...I} />, title: 'Weekly check-in', sub: 'Due Sunday · 2 minutes', onClick: () => router.push('/checkin') });
+
   return (
-    <div className="page fade">
-      <div className="topbar"><img src="/kd-mark.png" alt="KD Personal Training" /><div className="right">
-        <Link className="ib" href="/notifications" aria-label="Notifications"><Icon name="bell" />{!s.read && <span className="badge">3</span>}</Link>
-        <Link className="kd-av" href="/chat" aria-label="Messages from Kyle"><img src="/kd-mark.png" alt="" /><span className="dot" /></Link>
-        <Link className="avatar" href="/profile" aria-label="Profile and settings">{me.initials}</Link></div></div>
-      <div className="greet"><div className="eyebrow">Wednesday 21 October</div><h1>Morning, {me.first}</h1></div>
+    <div className="ds ds-page fade">
+      <Top me={me.initials} unread={!s.read} />
+      <div><div className="ds-eyebrow">Wednesday 21 October</div><h1 className="ds-title">Morning, {me.first}</h1></div>
 
-      {s.preview.payFail && !s.paid && (
-        <button className="alert" onClick={() => openSheet('pay')}><Li icon="card" color="var(--coral)" /><span className="t"><b>November payment didn&apos;t go through</b><small>Your bank declined £260. Update your card to keep your sessions.</small></span><Chev /></button>
-      )}
+      <section className="ds-card" aria-label="Today's workout">
+        <div><div className="ds-eyebrow" style={{ color: inProgress ? 'var(--amber)' : 'var(--mint)' }}>{inProgress ? 'In progress' : 'Today'}</div>
+          <h2 className="ds-h2" style={{ marginTop: 6, fontSize: 24 }}>{WORKOUT.name}</h2>
+          <p style={{ margin: '4px 0 0', color: 'var(--fg2)', fontSize: 14 }} className="num">{p.items.length} exercises · about {p.minutes} min</p></div>
+        <Link className="ds-btn primary" href="/workout"><Dumbbell {...I} />{inProgress ? 'Carry on' : 'Start workout'}</Link>
+      </section>
 
-      <button className="card mom" onClick={() => openSheet('momentum')} aria-label={fresh ? 'Momentum: just started' : 'Momentum: strong. See the breakdown'}>
-        <MomentumRings size={96} stroke={9} pcts={fresh ? [0.04, 0.04, 0.04] : undefined} />
-        <span className="t"><span className="eyebrow">Momentum</span><span className="word">{fresh ? 'Day one' : 'Strong'}</span>
-          <small>{fresh ? 'Your rings fill as you train, eat well and check in.' : '2 of 3 workouts done. Protein nearly there.'}</small></span>
-        <Chev />
-      </button>
-
-      <Link className="hero" href="/workout" aria-label={`Start ${WORKOUT.name}`}>
-        <img src="/assets/gym.jpg" alt="" />
-        <span className="tag label-dot" style={{ color: s.startedAt ? 'var(--amber)' : 'var(--mint)' }}>{s.startedAt ? 'In progress · tap to carry on' : 'Today'}</span>
-        <div className="in">
-          <div><h2>{WORKOUT.name}</h2>
-            <div className="meta num"><span><Icon name="clock" /> {p.minutes} min</span><span><Icon name="layers" /> {p.items.length} exercises</span></div></div>
-          <span className="play"><Icon name="play" /></span>
+      <section className="ds-section">
+        <header><h2 className="ds-h2">Coming up</h2></header>
+        <div className="ds-list">
+          <button className="ds-row" onClick={() => openSheet('session')}><CalendarClock {...I} />
+            <span className="t"><b>PT with Kyle</b><small className="num">Thursday 22 October · 7:00 · Studio</small></span>
+            <span className="end">{s.sessionCancelled ? <span className="ds-tag bad">Cancelled</span> : <span className="ds-tag ok">Confirmed</span>}<ChevronRight {...I} /></span></button>
+          {todo.map(t => (
+            <button key={t.title} className="ds-row" onClick={t.onClick}>{t.icon}
+              <span className="t"><b>{t.title}</b><small>{t.sub}</small></span>
+              <span className="end">{t.tag && <span className={`ds-tag ${t.tag[0]}`}>{t.tag[1]}</span>}<ChevronRight {...I} /></span></button>
+          ))}
         </div>
-      </Link>
+      </section>
 
-      <div className="strip">{days.map(([d, c, t], i) => <div key={i} className={c}><i>{t}</i>{d}</div>)}</div>
+      <section className="ds-section">
+        <header><h2 className="ds-h2">This week</h2><button onClick={() => openSheet('momentum')}>Momentum</button></header>
+        <button className="ds-week" onClick={() => openSheet('momentum')} aria-label="Momentum this week. See the breakdown">
+          <MomentumRings size={64} stroke={6} />
+          <div className="ds-stat3">{MOMENTUM.map((m, i) => <div key={m.k}><small>{m.k}</small><b className="num">{['2 of 3', '5 of 7 days', 'Good'][i]}</b></div>)}</div>
+        </button>
+      </section>
 
-      <div className="actions">
-        <Link className="act" href="/fuel"><i style={{ color: 'var(--amber)' }}><Icon name="fuel" /></i>Log food</Link>
-        <button className="act" onClick={() => openSheet('book')}><i style={{ color: 'var(--sky)' }}><Icon name="cal" /></i>Book</button>
-        <Link className="act" href="/checkin"><i style={{ color: 'var(--violet)' }}><Icon name="clip" /></i>Check-in</Link>
-        <Link className="act" href="/kai"><i style={{ background: 'none' }}><span className="orb" style={{ width: 60, height: 60, boxShadow: 'none' }}><Icon name="spark" /></span></i>Ask KAI</Link>
+      <div className="ds-actions">
+        <Link href="/fuel"><Utensils {...I} />Log food</Link>
+        <Link href="/chat"><MessageCircle {...I} />Message Kyle</Link>
+        <Link href="/kai"><Sparkles {...I} style={{ color: 'var(--violet)' }} />Ask KAI</Link>
       </div>
 
-      <button className="card session" onClick={() => openSheet('session')}>
-        <span className="datebox"><small>THU</small><b>22</b></span>
-        <span className="t"><b>PT with Kyle</b>{s.sessionCancelled ? <span style={{ color: 'var(--coral)' }}>Cancelled</span> : <span><Icon name="clock" /> 7:00 &nbsp; <Icon name="pin" /> Studio</span>}</span>
-        <Chev />
-      </button>
-
-      <Link className="card note" href="/chat">
-        <img className="mark" src="/kd-mark.png" alt="" />
-        <span><small>Kyle · {fresh ? 'just now' : 'yesterday'}</small><p>{fresh ? `Welcome ${me.first}! I'll have your programme ready before our first session.` : 'Leg press goes up today. Take the first set steady 💪'}</p></span>
-      </Link>
+      <Link className="ds-quote" href="/chat"><img src="/kd-mark.png" alt="" /><span><small>Kyle · yesterday</small><p>Leg press goes up today. Take the first set steady.</p></span></Link>
     </div>
+  );
+}
+
+function Top({ me, unread }: { me: string; unread: boolean }) {
+  return (
+    <div className="ds-top"><img className="logo" src="/kd-mark.png" alt="KD Personal Training" />
+      <div className="right">
+        <Link className="ds-iconbtn" href="/notifications" aria-label={unread ? 'Notifications, new' : 'Notifications'}><Bell {...I} size={22} />{unread && <span className="dot" />}</Link>
+        <Link className="ds-me" href="/profile" aria-label="You: profile and settings">{me}</Link>
+      </div></div>
   );
 }
 
@@ -83,31 +95,28 @@ export default function Home() {
 // happens next instead of empty versions of an established client's screen.
 function NewClientHome() {
   const s = useClient(), { me } = useUI();
-  const steps: [string, string, string, 'done' | 'now' | 'next'][] = [
-    ['clip', 'Health questions', 'Done. Kyle reads them before you start', 'done'],
-    ['programmes', 'Your programme', 'Kyle builds it around your goal', 'now'],
-    ['cal', 'First session', 'Kyle will send you a time to accept', 'next'],
+  const steps: [string, string, 'done' | 'now' | 'next'][] = [
+    ['Health questions', 'Done. Kyle reads them before you start', 'done'],
+    ['Your programme', 'Kyle builds it around your goal', 'now'],
+    ['First session', 'Kyle will send you a time to accept', 'next'],
   ];
   return (
-    <div className="page fade">
-      <div className="topbar"><img src="/kd-mark.png" alt="KD Personal Training" /><div className="right">
-        <Link className="ib" href="/notifications" aria-label="Notifications"><Icon name="bell" />{!s.read && <span className="badge">1</span>}</Link>
-        <Link className="kd-av" href="/chat" aria-label="Messages from Kyle"><img src="/kd-mark.png" alt="" /><span className="dot" /></Link>
-        <Link className="avatar" href="/profile" aria-label="Profile and settings">{me.initials}</Link></div></div>
-      <div className="greet"><div className="eyebrow">Getting started</div><h1>Hi, {me.first}</h1></div>
-      <div className="group">{steps.map(([i, t, d, st]) => (
-        <div className="optrow" key={t}><Li icon={st === 'done' ? 'check' : i} color={st === 'done' ? 'var(--mint)' : st === 'now' ? 'var(--amber)' : 'var(--fg2)'} />
-          <span className="t"><b>{t}</b><small>{d}</small></span>{st === 'now' && <span className="state await">In progress</span>}</div>
-      ))}</div>
-      <div className="actions" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
-        <Link className="act" href="/fuel"><i style={{ color: 'var(--amber)' }}><Icon name="fuel" /></i>Log food</Link>
-        <Link className="act" href="/chat"><i style={{ color: 'var(--mint)' }}><Icon name="chat" /></i>Message Kyle</Link>
-        <Link className="act" href="/library"><i style={{ color: 'var(--sky)' }}><Icon name="layers" /></i>Exercises</Link>
+    <div className="ds ds-page fade">
+      <Top me={me.initials} unread={!s.read} />
+      <div><div className="ds-eyebrow">Getting started</div><h1 className="ds-title">Hi, {me.first}</h1></div>
+      <section className="ds-section">
+        <header><h2 className="ds-h2">What happens next</h2></header>
+        <ol className="ds-list ds-steps">{steps.map(([t, d, st], i) => (
+          <li key={t} className={`ds-row noicon ${st}`}><span className="t"><b><span className="n num">{st === 'done' ? '✓' : i + 1}</span>{t}</b><small>{d}</small></span>
+            {st === 'now' && <span className="end"><span className="ds-tag wait">In progress</span></span>}</li>
+        ))}</ol>
+      </section>
+      <div className="ds-actions">
+        <Link href="/fuel"><Utensils {...I} />Log food</Link>
+        <Link href="/chat"><MessageCircle {...I} />Message Kyle</Link>
+        <Link href="/tour"><Sparkles {...I} />App tour</Link>
       </div>
-      <Link className="card note" href="/chat">
-        <img className="mark" src="/kd-mark.png" alt="" />
-        <span><small>Kyle · just now</small><p>Welcome {me.first}! I&apos;ll have your programme ready before our first session.</p></span>
-      </Link>
+      <Link className="ds-quote" href="/chat"><img src="/kd-mark.png" alt="" /><span><small>Kyle · just now</small><p>Welcome {me.first}! I&apos;ll have your programme ready before our first session.</p></span></Link>
     </div>
   );
 }
