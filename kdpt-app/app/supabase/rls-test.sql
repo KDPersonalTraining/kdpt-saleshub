@@ -1,4 +1,4 @@
--- Local check of schema.sql against plain Postgres 16.
+-- Local check of the migrations against plain Postgres 16.
 -- Stubs the bits of Supabase the schema uses (auth.users, auth.uid(), the
 -- authenticated role), seeds a coach and two clients, then asserts what each
 -- person can see.
@@ -17,7 +17,8 @@ do $$ begin
   end if;
 end $$;
 
-\ir schema.sql
+\ir migrations/20261030000000_initial_schema.sql
+\ir migrations/20261105000000_client_app_state.sql
 
 grant usage on schema public, app, auth to authenticated;
 grant select, insert, update, delete on all tables in schema public to authenticated;
@@ -209,5 +210,28 @@ select pg_temp.as_user('00000000-0000-0000-0000-000000000003');
 select pg_temp.expect('Jo sees only her own consents through the view', (select count(*) from current_consents), 1);
 select pg_temp.as_user('00000000-0000-0000-0000-000000000001');
 select pg_temp.expect('Kyle sees both clients'' consents', (select count(*) from current_consents), 2);
+
+-- Each client's app data: own row only; the head coach can read; nobody can
+-- write someone else's.
+reset role;
+set role authenticated;
+select pg_temp.as_user('00000000-0000-0000-0000-000000000002');
+insert into client_app_state (client_id, org_id, state) values
+  ('00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-00000000000a', '{"onb":{"done":true}}');
+update client_app_state set state = '{"onb":{"done":true},"water":3}', version = version + 1 where client_id = auth.uid();
+select pg_temp.expect('Sam saves and updates his own app data', (select version from client_app_state), 2);
+select pg_temp.as_user('00000000-0000-0000-0000-000000000003');
+select pg_temp.expect('Jo cannot see Sam''s app data', (select count(*) from client_app_state), 0);
+do $$ begin
+  insert into client_app_state (client_id, org_id, state) values
+    ('00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-00000000000a', '{}');
+  raise exception 'FAIL Jo wrote Sam''s app data';
+exception when insufficient_privilege or unique_violation then raise notice 'ok   Jo cannot write Sam''s app data';
+end $$;
+update client_app_state set state = '{}' where client_id = '00000000-0000-0000-0000-000000000002';
+select pg_temp.as_user('00000000-0000-0000-0000-000000000002');
+select pg_temp.expect('Jo''s update did not touch Sam''s data', (select (state->>'water')::int from client_app_state), 3);
+select pg_temp.as_user('00000000-0000-0000-0000-000000000001');
+select pg_temp.expect('Kyle can read Sam''s app data', (select count(*) from client_app_state), 1);
 
 \echo 'All RLS checks passed.'

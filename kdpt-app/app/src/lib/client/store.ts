@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from 'react';
 import type { Slot } from './sample-data';
 import { normaliseLog, type LogItem } from './food';
+import { queueSave } from './sync';
 
 // The client app's local state. In demo mode it is the only copy and lives
 // in this browser. With Supabase connected, the same shape is filled from the
@@ -43,6 +44,8 @@ export type ClientState = {
   // Progress
   showWeight: boolean;
   checkin: CheckIn | null; checkinsSent: number;
+  // When this copy was last changed (ms). The newer of phone and database wins.
+  savedAt?: number;
   // Prototype-only previews of the offline and error states
   preview: { offline: boolean; payFail: boolean; fresh: boolean };
 };
@@ -71,20 +74,29 @@ const initial = (): ClientState => ({
 const KEY = 'kdpt-client-v1';
 let state: ClientState = initial();
 let loadedFor: string | null = null;
+// Set in live mode: where to copy the client's data in the database.
+let live: { clientId: string; orgId: string } | null = null;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach(l => l());
 
 // Called once by the app shell with who is signed in. A brand-new client
 // starts at onboarding with nothing logged.
-export function loadStore(personId: string, isNew: boolean) {
+export function loadStore(personId: string, isNew: boolean, remote?: { orgId: string; state: Partial<ClientState> | null }) {
   if (loadedFor === personId) return;
   loadedFor = personId;
+  live = remote ? { clientId: personId, orgId: remote.orgId } : null;
   const fresh = initial();
   // A new client starts with nothing chosen, so every sign-up step needs an answer.
+  // Live clients don't see sample data: until programmes and history come from
+  // the database, their screens show the new-client versions.
+  if (remote) fresh.preview = { ...fresh.preview, fresh: true };
   if (isNew) Object.assign(fresh, { onb: { ...fresh.onb, done: false, consent: {}, goal: '', days: 0, freq: '', day: '' }, log: { Breakfast: [], Lunch: [], Snacks: [], Dinner: [] }, water: 0, favs: [], recent: [], sessionsLeft: 8, preview: { ...fresh.preview, fresh: true } });
   try {
     const saved = localStorage.getItem(`${KEY}:${personId}`);
-    state = saved ? { ...fresh, ...JSON.parse(saved) } : fresh;
+    const local: Partial<ClientState> | null = saved ? JSON.parse(saved) : null;
+    const newest = pickNewest(local, remote?.state ?? null);
+    state = newest ? { ...fresh, ...newest } : fresh;
+    if (remote) state.preview = { ...state.preview, fresh: true };
     state.log = normaliseLog(state.log as unknown as Record<string, unknown[]>);
   } catch {
     state = fresh;
@@ -93,8 +105,9 @@ export function loadStore(personId: string, isNew: boolean) {
 }
 
 export function setState(patch: Partial<ClientState> | ((s: ClientState) => Partial<ClientState>)) {
-  state = { ...state, ...(typeof patch === 'function' ? patch(state) : patch) };
+  state = { ...state, ...(typeof patch === 'function' ? patch(state) : patch), savedAt: Date.now() };
   try { if (loadedFor) localStorage.setItem(`${KEY}:${loadedFor}`, JSON.stringify(state)); } catch { /* storage unavailable */ }
+  if (live) queueSave(live.clientId, live.orgId, state);
   emit();
 }
 
@@ -122,3 +135,11 @@ export function useClient(): ClientState {
 
 // Clears the workout in progress (after finishing or abandoning it).
 export const resetWorkout = (): Partial<ClientState> => ({ idx: 0, logs: {}, swaps: {}, exNotes: {}, skipped: {}, startedAt: null, finishedAt: null, rest: null, pausedAt: null, pausedMs: 0, between: null });
+
+// The phone's copy and the database's copy: use whichever was changed last.
+// On a tie, or if neither has a time, the phone wins (it's never behind itself).
+export function pickNewest<T extends { savedAt?: number }>(local: T | null, db: T | null): T | null {
+  if (!db) return local;
+  if (!local) return db;
+  return (db.savedAt ?? 0) > (local.savedAt ?? 0) ? db : local;
+}

@@ -12,17 +12,20 @@ const PROGS = ['Strength Block 1', 'Hypertrophy', 'Fat Loss Phase 1', 'Return to
 
 // Add a client: creates their account and emails a sign-in code. Regular
 // slots are proposed to them every month; Kyle still confirms each one.
-export function InviteModal({ onClose }: { onClose: () => void }) {
+// onSend: live mode creates the account and emails the sign-in code; it
+// returns an error message, or null when done. Demo mode leaves it out.
+export function InviteModal({ onClose, onSend }: { onClose: () => void; onSend?: (v: { first: string; last: string; email: string; type: string; pkg: string }) => Promise<string | null> }) {
   const toast = useToast();
   const [v, setV] = useState({ first: '', last: '', email: '', type: 'In-person', pkg: 'pt8', prog: 'later', slots: {} as Record<string, number> });
   const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
   const pk = v.type === 'Online' ? ['online'] : ['pt2', 'pt4', 'pt8', 'duo8'];
   const pkg = pk.includes(v.pkg) ? v.pkg : pk[pk.length > 1 ? 2 : 0], p = pkgById(pkg);
   const nSlots = Object.keys(v.slots).length;
   if (sent) return (
     <Modal onClose={onClose}>
       <div className="done"><Tile icon="send" c="mint" style={{ width: 56, height: 56 }} /><h2>Invite sent to {v.first}</h2>
-        <p>{v.email} gets an email with a link and a 6-digit code. In the app they answer the health questions, agree the consents, then pick their goal and check-in day.</p></div>
+        <p>{v.email} gets an email with a 6-digit sign-in code. They open the KDPT app, enter that email and the code, then answer the health questions, agree the consents, and pick their goal and check-in day.</p></div>
       <div className="steps3">{([['Sign-up', 'Health questions and consents', 'clip', 'violet'], ['Plan', v.prog === 'later' ? 'You choose a programme' : 'Programme is ready', 'programmes', 'mint'],
         ['Sessions', nSlots ? `${nSlots} regular slot${nSlots > 1 ? 's' : ''} proposed. You confirm` : 'They send availability', 'schedule', 'sky']] as const).map(([t, d, i, c]) => (
         <div key={t}><Tile icon={i} c={c} /><b>{t}</b><small>{d}</small></div>
@@ -54,8 +57,10 @@ export function InviteModal({ onClose }: { onClose: () => void }) {
       <div className="sumline"><Icon name="card" className="sm" /><span>{p.price ? `${gbp(p.price)} a month.` : 'Set the duo price in Payments first.'} Due date, payment method and discounts are set in Payments.</span></div>
       <button className="btn mint" style={{ justifySelf: 'start' }} onClick={() => {
         if (!/.+@.+\..+/.test(v.email) || !v.first.trim()) { toast('Add a first name and email'); return; }
-        setSent(true);
-      }}><Icon name="send" className="sm" />Send invite</button>
+        if (!onSend) { setSent(true); return; }
+        setBusy(true);
+        void onSend({ first: v.first.trim(), last: v.last.trim(), email: v.email.trim(), type: v.type, pkg }).then(err => { setBusy(false); if (err) toast(err); else setSent(true); });
+      }} disabled={busy}><Icon name="send" className="sm" />{busy ? "Sending…" : "Send invite"}</button>
     </Modal>
   );
 }

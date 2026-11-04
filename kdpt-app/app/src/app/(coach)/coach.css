@@ -557,3 +557,4 @@ button.arow:hover { background: var(--s3); }
 .nav svg { color: inherit; }
 .nav.on { color: var(--fg); }
 .nav.on svg { color: var(--mint); }
+.crow.live { grid-template-columns: minmax(200px, 2fr) 1fr 1fr 1fr 24px; min-width: 640px; }

@@ -12,6 +12,13 @@ screens are ready.
 
 If you see an error, screenshot it and send it to Claude. Don't run it again.
 
+### 1b. Add the client data table (added 5 November)
+
+If you set up the database before 5 November, run one more file the same way:
+`kdpt-app/app/supabase/migrations/20261105000000_client_app_state.sql`
+(on GitHub, click **Raw**, copy all, paste into a new query, **Run**). This is
+where each client's app data is saved. Run it once.
+
 ## 2. Create your coach account
 
 1. Left menu, **Authentication** → **Users** → **Add user** → **Create new user**.
@@ -36,6 +43,15 @@ If you see an error, screenshot it and send it to Claude. Don't run it again.
    Save.
 3. **Authentication** → **URL Configuration** → **Site URL**: `https://kdpt-app.vercel.app`.
 
+## 3b. Before inviting real clients: your own email sender
+
+Supabase's built-in email only sends a handful of emails an hour, which isn't
+enough for invites and sign-in codes. Before the soft launch, connect your
+own sender: Supabase → **Project Settings** → **Authentication** → **SMTP
+Settings**. Use Brevo (free for 300 emails a day): create an account, add and
+verify your sending address, then copy its SMTP host, port, login and key into
+Supabase. Claude can walk you through it.
+
 ## 4. Later: switch off demo mode
 
 Don't do this yet. The screens still use sample data, so real clients
@@ -45,6 +61,12 @@ When Claude confirms they're ready: Vercel → **kdpt-app** → **Settings** →
 **Environment Variables** → add `KDPT_LIVE` with the value `1`, then
 **Deployments** → **Redeploy**. From then on the sign-in page sends a real
 code to your email.
+
+What works with real data at that point: your sign-in, adding clients (they
+get a code by email), their sign-up answers and consents, and their app data
+saved to the database (food log, check-ins, settings). Your Clients page shows
+them. Programmes, workouts, bookings, messages and payments still show sample
+data, and each of those pages says so, until they're connected next.
 
 ## Other things only you can do
 
