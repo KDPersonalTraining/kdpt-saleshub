@@ -57,3 +57,69 @@
 .ds-steps .done .n { border-color: var(--mint); color: var(--mint); }
 .ds-steps .now .n { border-color: var(--fg); color: var(--fg); }
 .ds-steps .next b { color: var(--fg2); }
+
+/* ==== Older components brought in line with DESIGN.md ====================
+   Every screen not yet rebuilt still uses these classes. These rules take
+   away the tinted icon boxes, glows, floating cards and competing colours,
+   so the whole app reads as one product while screens are rebuilt. */
+.device { --raise: #121413; --line: rgba(255,255,255,.09); }
+/* Icons: plain line icons in the text colour. Coral stays only for pain and deleting. */
+.li, .gi, .wintile, .suptile, .act i:not(:has(.orb)) {
+  background: none !important; box-shadow: none !important; border-radius: 0 !important; color: var(--fg2) !important; }
+.li { width: 24px !important; height: 24px !important; }
+.li svg { width: 22px !important; height: 22px !important; }
+.li[style*="coral"] { color: var(--coral) !important; }
+.gi { width: 32px !important; height: 32px !important; }
+/* Lists: on the page, hairlines between full-width rows; no rounded box. */
+.group { background: none; border-radius: 0; border-top: 1px solid var(--line); --inset: 0px !important; }
+.group > * + *::before { left: 0; background: var(--line); }
+.group > :last-child { border-bottom: 1px solid var(--line) !important; }
+.optrow, .rec, .sess, .food, .hrow { padding-left: 0 !important; padding-right: 0 !important; min-height: 60px; }
+.optrow b, .rec b, .food b { font-size: 16px; }
+.optrow small, .rec small, .food small { font-size: 14px; }
+/* Cards: one flat raised surface, never glowing. */
+.card { background: var(--raise); border-radius: 20px; box-shadow: none; }
+.big-stat .delta { color: var(--fg); }
+.stat { background: none; border-radius: 0; border-top: 1px solid var(--line); padding: 14px 0 0; }
+.explain { background: none !important; border: 0 !important; padding: 0 !important; color: var(--fg3); font-size: 14px; }
+/* Buttons: same action, same look. Mint is the main action; white becomes mint. */
+.pill-btn { border-radius: 12px; height: 56px; font: 700 16px var(--display); letter-spacing: 0; text-transform: none; }
+.pill-btn.white { background: var(--mint); color: var(--mint-ink); }
+.pill-btn.dark { background: var(--raise); color: var(--fg); }
+.addbtn { color: var(--fg); background: var(--raise); box-shadow: none; border-radius: 12px; width: 40px; height: 40px; }
+/* Tabs and segments */
+.seg { background: var(--raise); border-radius: 12px; padding: 4px; }
+.seg button { border-radius: 9px; height: 40px; }
+.seg button.on { background: var(--fg); color: #000; }
+.liftchips button { border-radius: 9px; background: var(--raise); }
+.liftchips button.on { background: var(--fg); color: #000; }
+/* Quick actions: one raised row, plain icons. */
+.actions { background: none; padding: 0; gap: 8px; }
+.act { background: var(--raise); border-radius: 12px; padding: 14px 4px 12px; color: var(--fg); font-size: 13px; }
+.act i { width: 32px !important; height: 32px !important; }
+/* KAI: keep its violet identity, but flat and still. */
+.orb { background: rgba(169,155,255,.14); color: var(--violet); box-shadow: none !important; animation: none !important; border: 1px solid rgba(169,155,255,.35); }
+/* Notifications */
+.nrow { background: none; border-radius: 0; border-bottom: 1px solid var(--line); padding: 14px 0; }
+.nrow .li { background: none !important; }
+.nrow.unread::after { background: var(--mint); }
+/* Sheets */
+.sheet { background: #0e100f; border-radius: 20px 20px 0 0; }
+.sheet h3 { font-size: 20px; }
+/* Momentum card on other screens */
+.mom .word { color: var(--fg); }
+.slot-head { padding-left: 0; padding-right: 0; }
+.food .kc small { color: var(--fg3); }
+.cons { padding-left: 0 !important; padding-right: 0 !important; }
+.post { background: var(--raise); border: 0 !important; box-shadow: none; }
+.post.pinned { box-shadow: inset 0 0 0 1px var(--line); }
+.post .label-dot, .coachtag { color: var(--fg3) !important; }
+.label-dot::before { display: none; }
+.days7 button.on { background: var(--fg); color: #000; }
+.days7 button i { background: var(--fg3); }
+.mbar { background: var(--line); }
+.exfacts .li { color: var(--fg2) !important; }
+.exfacts > div { background: var(--raise); }
+.demo { background: var(--raise) !important; border: 1px dashed var(--line) !important; }
+.cues li { background: none; border-bottom: 1px solid var(--line); border-radius: 0; padding-left: 0; }
+.cues li::before { border-color: var(--line); color: var(--fg2); }
