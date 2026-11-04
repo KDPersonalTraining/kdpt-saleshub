@@ -199,4 +199,15 @@ do $$ begin
 exception when exclusion_violation then raise notice 'ok   double booking refused';
 end $$;
 
+-- The consents view must not leak other clients' choices.
+reset role;
+insert into consents (org_id, client_id, kind, granted, document_version) values
+  ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', 'health_data', true, 'privacy-2026-11'),
+  ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000003', 'health_data', true, 'privacy-2026-11');
+set role authenticated;
+select pg_temp.as_user('00000000-0000-0000-0000-000000000003');
+select pg_temp.expect('Jo sees only her own consents through the view', (select count(*) from current_consents), 1);
+select pg_temp.as_user('00000000-0000-0000-0000-000000000001');
+select pg_temp.expect('Kyle sees both clients'' consents', (select count(*) from current_consents), 2);
+
 \echo 'All RLS checks passed.'
