@@ -81,7 +81,9 @@ create table consents (
 );
 create index on consents (client_id, kind, recorded_at desc);
 
-create view current_consents as
+-- security_invoker: the view runs as the person asking, so row-level security
+-- on consents still applies. Without it the view would show everyone's rows.
+create view current_consents with (security_invoker = true) as
 select distinct on (client_id, kind) client_id, kind, granted, document_version, recorded_at
 from consents
 order by client_id, kind, recorded_at desc;
@@ -1169,3 +1171,18 @@ create policy own_reactions on post_reactions for all
 create policy org_read on post_reactions for select using (org_id = app.my_org());
 
 -- audit_log: no policies. Only the service role (server code) reads or writes it.
+
+-- ---------------------------------------------------------------------------
+-- API access (Supabase). Signed-in users may call the helper functions that
+-- the policies use; row-level security decides which rows they get. Nobody
+-- signed out can read or write any table.
+-- ---------------------------------------------------------------------------
+grant usage on schema app to authenticated;
+grant execute on all functions in schema app to authenticated;
+do $$ begin
+  if exists (select 1 from pg_roles where rolname = 'anon') then
+    execute 'revoke all on all tables in schema public from anon';
+    execute 'revoke all on all sequences in schema public from anon';
+    execute 'alter default privileges in schema public revoke all on tables from anon';
+  end if;
+end $$;
