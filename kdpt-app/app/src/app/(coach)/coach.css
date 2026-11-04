@@ -547,3 +547,14 @@ button.arow:hover { background: var(--s3); }
 .note-row { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 12px; padding-top: 12px; border-top: 1px solid var(--hair); }
 .note-row time { color: var(--fg3); font-size: 13px; }
 .note-row p { margin: 0; line-height: 1.5; }
+
+/* ---- Brought in line with DESIGN.md -------------------------------------
+   Plain line icons in the text colour; colour stays on status tags, where it
+   means something. Flat cards, no tinted icon boxes. */
+.tile, .tile.solid { background: none !important; box-shadow: none !important; border: 1px solid rgba(255,255,255,.09); color: var(--fg2) !important; }
+.kpi .tile { border: 0; width: 32px; height: 32px; }
+.card { box-shadow: none; }
+.nav svg { color: inherit; }
+.nav.on { color: var(--fg); }
+.nav.on svg { color: var(--mint); }
+.crow.live { grid-template-columns: minmax(200px, 2fr) 1fr 1fr 1fr 24px; min-width: 640px; }

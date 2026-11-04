@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { ChartNoAxesColumn, Dumbbell, House, Users, Utensils } from 'lucide-react';
 import { Icon } from '@/components/icon';
-import { loadStore, setState, useClient } from '@/lib/client/store';
+import { loadStore, setState, useClient, type ClientState } from '@/lib/client/store';
 import { Sheet } from './sheets';
 
 export type SheetName = 'pay' | 'book' | 'avail' | 'session' | 'momentum' | 'time' | 'swap' | 'pain' | 'notifset' | 'addfood' | 'editfood';
@@ -25,7 +25,7 @@ const TABS = [['home', 'Home', House], ['train', 'Train', Dumbbell], ['fuel', 'F
 // Full-screen flows hide the tab bar.
 const NO_TABS = ['/workout', '/chat', '/kai', '/checkin', '/profile', '/welcome', '/tour'];
 
-export function ClientShell({ me, children }: { me: { id: string; name: string; isNew?: boolean; demo?: boolean }; children: React.ReactNode }) {
+export function ClientShell({ me, remote, children }: { me: { id: string; name: string; isNew?: boolean; demo?: boolean }; remote?: { orgId: string; state: Partial<ClientState> | null }; children: React.ReactNode }) {
   const path = usePathname();
   const router = useRouter();
   const s = useClient();
@@ -37,7 +37,7 @@ export function ClientShell({ me, children }: { me: { id: string; name: string; 
   const [entering, setEntering] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  useEffect(() => { loadStore(me.id, !!me.isNew); }, [me.id, me.isNew]);
+  useEffect(() => { loadStore(me.id, !!me.isNew, remote); }, [me.id, me.isNew]); // eslint-disable-line react-hooks/exhaustive-deps
   // A short welcome as the client enters the app: once per visit, tap to skip.
   useEffect(() => {
     let seen = true;

@@ -8,6 +8,7 @@ import { freqInfo } from '@/components/client/sheets';
 import { Ring } from '@/components/client/ui';
 import { FREQ, GOALS, MOMENTUM, PARQ } from '@/lib/client/sample-data';
 import { setState, useClient } from '@/lib/client/store';
+import { submitOnboarding } from './actions';
 
 // Sign-up after the first sign-in. One thing per screen, as few words as
 // possible. Health questions must each be answered; the terms must be agreed.
@@ -17,11 +18,20 @@ const Q = PARQ.length;
 const LAST = Q + 7;
 
 export default function Welcome() {
-  const s = useClient(), o = s.onb, { me } = useUI(), router = useRouter();
+  const s = useClient(), o = s.onb, { me, toast } = useUI(), router = useRouter();
   const step = s.onbStep, setStep = (n: number) => setState({ onbStep: Math.max(0, n) });
   const [agreed, setAgreed] = useState(false);
   const set = (patch: Partial<typeof o>) => setState({ onb: { ...o, ...patch } });
   const next = () => setStep(step + 1);
+  const [saving, setSaving] = useState(false);
+  // Saves the answers to the client's record (live mode), then opens the app.
+  const finish = async (to: string) => {
+    setSaving(true);
+    const r = await submitOnboarding({ parq: o.parq.map(x => (x === undefined ? null : x)), injuries: o.injuries, goal: o.goal, days: o.days, freq: o.freq, day: o.day, consent: o.consent });
+    setSaving(false);
+    if (!r.ok) { toast(r.error ?? 'Something went wrong. Try again.'); return; }
+    set({ done: true }); router.replace(to);
+  };
 
   if (step === 0) return (
     <div className="entrance">
@@ -41,8 +51,8 @@ export default function Welcome() {
         <div className="summary"><span className="chip"><Icon name={g[1]} /> {g[3]}</span><span className="chip"><Icon name="train" /> {o.days} days</span>
           <span className="chip"><Icon name="clip" /> {freqInfo(o.freq).label}{o.freq === 'monthly' ? '' : ' · ' + o.day}</span></div>
         <div style={{ display: 'grid', gap: 10, width: '100%' }}>
-          <button className="pill-btn white" onClick={() => { set({ done: true }); router.replace('/tour?then=home'); }}>Show me around</button>
-          <button className="pill-btn dark" onClick={() => { set({ done: true }); router.replace('/home'); }}>Skip the tour</button></div>
+          <button className="pill-btn white" disabled={saving} onClick={() => finish('/tour?then=home')}>{saving ? 'Saving…' : 'Show me around'}</button>
+          <button className="pill-btn dark" disabled={saving} onClick={() => finish('/home')}>Skip the tour</button></div>
         <p className="fine">You can watch the tour again any time from your profile.</p>
       </div>
     );

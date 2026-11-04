@@ -4,10 +4,11 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icon';
 import { Chev } from '@/components/client/ui';
+import { useUI } from '@/components/client/shell';
 import { setState, useClient } from '@/lib/client/store';
 
 export default function Chat() {
-  const s = useClient(), fresh = s.preview.fresh;
+  const s = useClient(), fresh = s.preview.fresh, { me } = useUI();
   const [msg, setMsg] = useState('');
   const end = useRef<HTMLDivElement>(null);
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [s.chat.length]);
@@ -18,6 +19,7 @@ export default function Chat() {
         <div className="convo-head"><Link className="round" style={{ background: 'var(--s2)', width: 40, height: 40 }} href="/home" aria-label="Back"><Icon name="back" /></Link>
           <span className="kd-av" style={{ width: 44, height: 44 }}><img src="/kd-mark.png" alt="" /><span className="dot" /></span>
           <span className="t"><b>Kyle</b><small style={{ color: 'var(--mint)' }}>Your coach · replies within a few hours</small></span></div>
+        {!me.demo && <div className="explain" style={{ color: 'var(--amber)' }}>Messages here don&apos;t reach Kyle yet. Message him the usual way for now.</div>}
         <Link className="handoff" style={{ background: 'rgba(169,155,255,.07)', borderColor: 'rgba(169,155,255,.22)' }} href="/kai"><span className="orb sm"><Icon name="spark" /></span><span className="t"><b>Need an answer now?</b><small>Ask KAI, your AI assistant</small></span><Chev /></Link>
         <div className="msgs">
           {fresh ? (<><div className="stamp">Today</div><div className="msg them">Welcome to KDPT! Message me here any time. I&apos;ll go through your health answers before our first session.</div></>) : (<>

@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { DEMO_COOKIE, DEMO_PEOPLE, isDemo, isPersona } from '@/lib/demo';
 import { canAccess, homeFor, type Area, type Role } from './roles';
 
-export type Me = { id: string; role: Role; name: string; demo?: boolean; isNew?: boolean };
+export type Me = { id: string; role: Role; name: string; demo?: boolean; isNew?: boolean; orgId?: string };
 
 // The signed-in user's profile, or null. Claims are verified, not just read
 // from the cookie.
@@ -19,11 +19,11 @@ export async function getMe(): Promise<Me | null> {
   if (!id) return null;
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, full_name, preferred_name, archived_at')
+    .select('role, full_name, preferred_name, archived_at, org_id')
     .eq('id', id)
     .maybeSingle();
   if (!profile || profile.archived_at) return null;
-  return { id, role: profile.role as Role, name: profile.preferred_name || profile.full_name };
+  return { id, role: profile.role as Role, name: profile.preferred_name || profile.full_name, orgId: profile.org_id };
 }
 
 // Use at the top of each area's layout. Sends people to sign in, or to their
