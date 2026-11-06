@@ -17,7 +17,18 @@ export async function sendCode(_: SignInState, form: FormData): Promise<SignInSt
   const email = String(form.get('email') ?? '').trim().toLowerCase();
   if (!EMAIL.test(email)) return { step: 'email', email, error: 'Enter the email your invite came to.' };
   const supabase = await createClient();
-  await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+  const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+  if (error) {
+    // An unknown email is answered like a known one. Anything else (the email
+    // service refusing, too many emails) is a real failure the person should
+    // hear about, and Kyle can find the details in the Vercel logs.
+    const unknown = error.code === 'otp_disabled' || /signups? not allowed|user not found/i.test(error.message);
+    if (!unknown) {
+      console.error('sign-in: code email failed', { status: error.status, code: error.code, message: error.message });
+      const busy = error.status === 429 || error.code === 'over_email_send_rate_limit';
+      return { step: 'email', email, error: busy ? 'Too many codes sent just now. Wait a minute and try again.' : "We couldn't send your code just now. Try again in a minute; if it keeps happening, tell Kyle." };
+    }
+  }
   return { step: 'code', email };
 }
 
