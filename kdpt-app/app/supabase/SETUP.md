@@ -19,6 +19,12 @@ If you set up the database before 5 November, run one more file the same way:
 (on GitHub, click **Raw**, copy all, paste into a new query, **Run**). This is
 where each client's app data is saved. Run it once.
 
+### 1c. Let the app reach the tables (added 6 November)
+
+Run `kdpt-app/app/supabase/migrations/20261106000000_api_grants.sql` the same
+way. Newer Supabase projects don't open tables to the app by default; without
+this, signing in says your account isn't set up. Safe to run twice.
+
 ## 2. Create your coach account
 
 1. Left menu, **Authentication** → **Users** → **Add user** → **Create new user**.

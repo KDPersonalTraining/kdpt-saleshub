@@ -19,6 +19,7 @@ end $$;
 
 \ir migrations/20261030000000_initial_schema.sql
 \ir migrations/20261105000000_client_app_state.sql
+\ir migrations/20261106000000_api_grants.sql
 
 grant usage on schema public, app, auth to authenticated;
 grant select, insert, update, delete on all tables in schema public to authenticated;

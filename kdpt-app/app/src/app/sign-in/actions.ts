@@ -39,7 +39,12 @@ export async function verifyCode(prev: SignInState, form: FormData): Promise<Sig
   const supabase = await createClient();
   const { data, error } = await supabase.auth.verifyOtp({ email: prev.email, token, type: 'email' });
   if (error || !data.user) return { ...prev, step: 'code', error: "That code didn't work. Check the latest email, or send a new one." };
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
+  const { data: profile, error: pe } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
+  if (pe) {
+    console.error('sign-in: profile read failed', { code: pe.code, message: pe.message });
+    await supabase.auth.signOut();
+    return { step: 'email', email: prev.email, error: "Signed in, but your account couldn't be read. Tell Kyle (database access)." };
+  }
   if (!profile) {
     await supabase.auth.signOut();
     return { step: 'email', email: prev.email, error: 'Your account isn\'t set up yet. Ask your coach to resend your invite.' };
