@@ -8,7 +8,8 @@ import { HANDOFF_TEXT, triage } from '@/lib/kai/triage';
 import { createClient } from '@/lib/supabase/server';
 
 export type KaiReply = { to: 'kai' | 'coach' | 'urgent' | 'off'; answer: string };
-const MODEL = 'claude-opus-5-5';
+// The cheapest current model: plenty for short training and food questions.
+const MODEL = 'claude-haiku-5-5';
 // In memory per server instance: a guard against runaway use, not billing.
 const recent = new Map<string, number[]>();
 const LIMIT_PER_HOUR = 20;
@@ -40,19 +41,16 @@ export async function askKai(question: string, history: { q: string; a: string }
   const live = allowed ? await loadLive(sb, { id: me.id, orgId: me.orgId }) : null;
   const first = me.name.split(' ')[0];
 
-  const messages: Anthropic.Beta.BetaMessageParam[] = [];
+  const messages: Anthropic.MessageParam[] = [];
   for (const h of history.slice(-6)) messages.push({ role: 'user', content: h.q.slice(0, 500) }, { role: 'assistant', content: h.a.slice(0, 2000) });
   messages.push({ role: 'user', content: q });
 
   try {
     const client = new Anthropic();
-    const res = await client.beta.messages.create({
+    const res = await client.messages.create({
       model: MODEL,
       max_tokens: 4000,
       output_config: { effort: 'low' },
-      // If this model declines, the API retries on a fallback model instead of failing.
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
       system: [
         { type: 'text', text: KAI_SYSTEM, cache_control: { type: 'ephemeral' } },
         { type: 'text', text: clientContext(first, live, allowed) },
@@ -60,7 +58,7 @@ export async function askKai(question: string, history: { q: string; a: string }
       messages,
     });
     if (res.stop_reason === 'refusal') return { to: 'kai', answer: 'I can’t help with that one. Kyle can, so message him.' };
-    const text = res.content.filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === 'text').map(b => b.text).join('\n').trim();
+    const text = res.content.filter((b): b is Anthropic.TextBlock => b.type === 'text').map(b => b.text).join('\n').trim();
     return { to: 'kai', answer: text || 'Sorry, I didn’t get an answer for that. Try asking another way, or message Kyle.' };
   } catch (e) {
     console.error('kai: request failed', e instanceof Anthropic.APIError ? { status: e.status, message: e.message } : e);
