@@ -50,6 +50,14 @@ export function LiveProfile({ mine, extras, id, programme, sessions, name, added
 
       <Training mine={mine} clientId={id} name={name} programme={programme} sessions={sessions} />
       <RecordExtras clientId={id} x={extras} />
+      {(() => { const ai = ((state?.aiLog as { q: string; a: string; to: string }[] | undefined) ?? []).filter(m => m.a).slice(-8).reverse(); return ai.length > 0 && (
+        <div className="card pad"><Sec title="Questions to KAI" right="Most recent first" />
+          <div style={{ display: 'grid', gap: 10 }}>{ai.map((m, i) => (
+            <div key={i} style={{ borderTop: i ? '1px solid var(--hair)' : undefined, paddingTop: i ? 10 : 0, fontSize: 14 }}>
+              <b>{m.q}</b>{m.to === 'coach' || m.to === 'urgent' ? <Tag c="coral" style={{ marginLeft: 8 }}>Passed to you</Tag> : null}
+              <p style={{ margin: '4px 0 0', color: 'var(--fg2)', whiteSpace: 'pre-line' }}>{m.a}</p></div>
+          ))}</div></div>
+      ); })()}
 
       <div className="statrow">
         <div className="card"><b>{date(lastActive)}</b><small>Last active in the app</small></div>

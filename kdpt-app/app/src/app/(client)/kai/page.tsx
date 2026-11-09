@@ -8,6 +8,8 @@ import { Chev } from '@/components/client/ui';
 import { AI } from '@/lib/client/sample-data';
 import { setState, useClient } from '@/lib/client/store';
 import { HANDOFF_TEXT, triage } from '@/lib/kai/triage';
+import { useLive } from '@/lib/client/live';
+import { LiveKai } from '@/components/client/live-kai';
 
 // KAI answers from the client's own plan (only with their consent), and hands
 // anything about pain, injury, medical matters or plan changes to the coach.
@@ -15,6 +17,10 @@ import { HANDOFF_TEXT, triage } from '@/lib/kai/triage';
 // In demo mode only the suggested questions have answers; the live version
 // calls Claude from the server.
 export default function Kai() {
+  return useLive() ? <LiveKai /> : <DemoKai />;
+}
+
+function DemoKai() {
   const s = useClient(), { toast } = useUI();
   const [q, setQ] = useState('');
   const consent = !!s.onb.consent.kai;

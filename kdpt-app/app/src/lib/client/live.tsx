@@ -25,6 +25,7 @@ export type LiveBooking = { id: string; start: string; end: string; status: stri
 export type LiveNutrition = { mode: 'full' | 'protein' | 'simple'; kcal: number | null; P: number | null; C: number | null; F: number | null; notes: string | null };
 export type LiveData = { orgId: string; plan: LivePlan | null; sessions: SessionSummary[]; checkin: LiveCheckIn | null; progress: Progress; bookings: LiveBooking[];
   nutrition: LiveNutrition | null; weights: { date: string; kg: number }[];
+  kaiConsent: boolean;
   library: { id: string; name: string; pattern: string; measure: 'reps' | 'distance'; muscles: string[]; cues: string[] }[] };
 
 const Ctx = createContext<LiveData | null>(null);

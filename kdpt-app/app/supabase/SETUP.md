@@ -96,6 +96,19 @@ What works with real data at that point:
 Payments and Automation still show sample data, and each of those pages says
 so, until they're connected.
 
+## 5. Switch on KAI (the AI assistant)
+
+1. Go to console.anthropic.com and sign in (or create an account) with your business email.
+2. **Settings → Billing**: add a card and some credit (£10–£20 is plenty to start).
+   Set a monthly spend limit under **Limits** so it can never run away.
+3. **API keys → Create key**, name it `KDPT app`, and copy it. Don't send it to anyone, Claude included.
+4. Vercel → **kdpt-app** → **Settings** → **Environment Variables** → add
+   `ANTHROPIC_API_KEY` with the key as the value → **Save** → redeploy.
+
+Until the key is there, KAI tells clients it isn't switched on yet. Questions
+about pain, health or changing the plan never reach the AI: they go straight
+to your messages either way.
+
 ## Other things only you can do
 
 - **ICO:** register with the Information Commissioner's Office and pay the data protection fee (ico.org.uk). Add the number to the privacy notice.
