@@ -232,3 +232,34 @@ Work goes in this order. Each step is tested and pushed before the next.
 - Database checks, extended to cover pain reports and keeping logs when a programme is edited.
 - Browser runs of the new screens with test data, on desktop and phone.
 - Every demo regression script.
+
+### 12 November: bookings, the client record, your own programmes, library and community
+
+- **Bookings:**
+  - Kyle adds sessions, once or weekly for up to 12 weeks, either confirmed or for the client to confirm. Clashes are refused.
+  - Clients confirm, ask to move or cancel. Cancelling with less than 24 hours' notice counts as a used session.
+  - Kyle moves or declines requests, cancels, and marks sessions done or no-show. Both sides get a message.
+  - Sessions show on Today, Home and the client's record.
+- **Client record:**
+  - Private notes, which can be pinned.
+  - Editable details and archiving.
+  - Upcoming sessions.
+  - Nutrition targets and what the client sees in Fuel, plus their food log.
+  - Weight.
+- **Fuel:**
+  - Uses Kyle's targets, and shows no numbers until he sets them.
+  - Starts fresh each day, keeping each earlier day's totals.
+- **Weight:** logged on Progress or through a check-in.
+- **Your own programmes:**
+  - Build one from scratch or from a starter.
+  - Save any client's programme to reuse.
+  - Give them out like starters.
+  - Start a client's programme from scratch.
+- **Exercise library:** Kyle adds, edits and removes exercises. Clients see the real library, with the steps and their best on each.
+- **Community:** Kyle posts tips, meals, questions, news and challenges, and can pin, hide or delete them. Clients like and comment, and only see each other's first names.
+
+**Tested with:**
+- 116 unit tests.
+- Database checks, now covering bookings, notes, targets, weight and community.
+- Browser runs of the new screens with test data.
+- Every demo regression script.

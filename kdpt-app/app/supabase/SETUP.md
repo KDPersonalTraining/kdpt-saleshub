@@ -37,7 +37,8 @@ run twice.
 Run these two files the same way, in this order:
 `kdpt-app/app/supabase/migrations/20261110000000_cardio.sql`, then
 `kdpt-app/app/supabase/migrations/20261111000000_programme_editing.sql`.
-Both are safe to run twice. Until they're run, giving a programme and saving
+and then `kdpt-app/app/supabase/migrations/20261112000000_nutrition_mode.sql`.
+All are safe to run twice. Until they're run, giving a programme and saving
 workouts won't work.
 
 ## 2. Create your coach account
@@ -89,9 +90,11 @@ What works with real data at that point:
 - programmes: give a client a starter programme; they train from it and every set comes back to you
 - messages, both ways
 - check-ins: weekly, fortnightly or monthly, with questions you can change for any one round
+- bookings: you add sessions, clients confirm, ask to move or cancel
+- your Today page, the client record (notes, details, nutrition, weight), your own programmes, the exercise library and Community
 
-Bookings, payments, your Today page and the other coach pages still show
-sample data, and each of those pages says so, until they're connected next.
+Payments and Automation still show sample data, and each of those pages says
+so, until they're connected.
 
 ## Other things only you can do
 

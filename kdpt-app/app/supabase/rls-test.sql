@@ -26,6 +26,8 @@ end $$;
 \ir migrations/20261110000000_cardio.sql
 \ir migrations/20261111000000_programme_editing.sql
 \ir migrations/20261111000000_programme_editing.sql
+\ir migrations/20261112000000_nutrition_mode.sql
+\ir migrations/20261112000000_nutrition_mode.sql
 
 grant usage on schema public, app, auth to authenticated;
 grant select, insert, update, delete on all tables in schema public to authenticated;
@@ -351,5 +353,50 @@ delete from workout_exercises where id = '00000000-0000-0000-0000-0000000000d1';
 select pg_temp.expect('Sam''s logged sets survive the exercise being removed', (select count(*) from set_logs where session_id = '00000000-0000-0000-0000-0000000005a1' and workout_exercise_id is null), 2);
 delete from workouts where id = '00000000-0000-0000-0000-0000000000c1';
 select pg_temp.expect('Sam''s workout survives the workout being removed', (select count(*) from workout_sessions where id = '00000000-0000-0000-0000-0000000005a1' and workout_id is null), 1);
+
+-- Bookings, notes, nutrition, weight and community.
+reset role;
+insert into locations (id, org_id, name) values ('00000000-0000-0000-0000-0000000008a1', '00000000-0000-0000-0000-00000000000a', 'Studio');
+set role authenticated;
+select pg_temp.as_user('00000000-0000-0000-0000-000000000001');
+insert into bookings (id, org_id, client_id, coach_id, location_id, starts_at, ends_at, status) values
+  ('00000000-0000-0000-0000-0000000008b1', '00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001',
+   '00000000-0000-0000-0000-0000000008a1', '2027-01-20 07:00+00', '2027-01-20 08:00+00', 'held');
+insert into coach_notes (org_id, client_id, author_id, body) values ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'Private');
+insert into nutrition_settings (client_id, org_id, mode, protein_g_target) values ('00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-00000000000a', 'protein', 140);
+insert into posts (id, org_id, author_id, kind, body) values ('00000000-0000-0000-0000-0000000008c1', '00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000001', 'tip', 'Drink water');
+do $$ begin
+  insert into bookings (org_id, client_id, coach_id, location_id, starts_at, ends_at, status) values
+    ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-0000000008a1', '2027-01-20 07:30+00', '2027-01-20 08:30+00', 'confirmed');
+  raise exception 'FAIL double-booked Kyle';
+exception when exclusion_violation then raise notice 'ok   Kyle can''t be double-booked';
+end $$;
+select pg_temp.as_user('00000000-0000-0000-0000-000000000002');
+select pg_temp.expect('Sam sees his session', (select count(*) from bookings where id = '00000000-0000-0000-0000-0000000008b1'), 1);
+update bookings set status = 'confirmed' where id = '00000000-0000-0000-0000-0000000008b1';
+select pg_temp.expect('Sam cannot change a booking directly', (select count(*) from bookings where status = 'held' and id = '00000000-0000-0000-0000-0000000008b1'), 1);
+insert into booking_change_requests (org_id, client_id, booking_id, requested_starts_at, status) values
+  ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000008b1', '2027-01-21 07:00+00', 'pending');
+select pg_temp.expect('Sam asks to move his session', (select count(*) from booking_change_requests), 1);
+select pg_temp.expect('Sam cannot read Kyle''s notes', (select count(*) from coach_notes), 0);
+select pg_temp.expect('Sam reads his nutrition targets', (select protein_g_target from nutrition_settings), 140);
+insert into body_measurements (org_id, client_id, metric, value, measured_on) values ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', 'bodyweight_kg', 80.4, current_date);
+insert into post_reactions (post_id, profile_id, org_id, reaction) values ('00000000-0000-0000-0000-0000000008c1', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-00000000000a', 'like');
+insert into post_comments (org_id, post_id, author_id, body) values ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-0000000008c1', '00000000-0000-0000-0000-000000000002', 'Will do');
+select pg_temp.expect('Members see first names only', (select count(*) from community_names() where name in ('Kyle', 'Sam', 'Jo')), 3);
+select pg_temp.as_user('00000000-0000-0000-0000-000000000003');
+select pg_temp.expect('Jo cannot see Sam''s session, request, targets or weight',
+  (select count(*) from bookings) + (select count(*) from booking_change_requests) + (select count(*) from nutrition_settings) + (select count(*) from body_measurements), 0);
+do $$ begin
+  insert into booking_change_requests (org_id, client_id, booking_id, requested_starts_at, status) values
+    ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-0000000008b1', '2027-01-21 09:00+00', 'pending');
+  raise exception 'FAIL Jo asked to move Sam''s session';
+exception when insufficient_privilege then raise notice 'ok   Jo cannot ask to move Sam''s session';
+end $$;
+select pg_temp.expect('Jo sees the post and Sam''s comment', (select count(*) from posts where id = '00000000-0000-0000-0000-0000000008c1') + (select count(*) from post_comments where post_id = '00000000-0000-0000-0000-0000000008c1'), 2);
+select pg_temp.as_user('00000000-0000-0000-0000-000000000001');
+update posts set hidden_at = now() where id = '00000000-0000-0000-0000-0000000008c1';
+select pg_temp.as_user('00000000-0000-0000-0000-000000000003');
+select pg_temp.expect('A hidden post disappears for clients', (select count(*) from posts where id = '00000000-0000-0000-0000-0000000008c1'), 0);
 
 \echo 'All RLS checks passed.'

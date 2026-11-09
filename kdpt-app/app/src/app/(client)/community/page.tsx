@@ -6,12 +6,18 @@ import { useUI } from '@/components/client/shell';
 import { Chev, Li } from '@/components/client/ui';
 import { CATS, COMMUNITY_LIBRARY, FOODS, PEOPLE, POSTS, type Post } from '@/lib/client/sample-data';
 import { setState, useClient } from '@/lib/client/store';
+import { useLive } from '@/lib/client/live';
+import { LiveCommunity } from '@/components/client/live-community';
 
 const Avatar = ({ id, small }: { id: string; small?: boolean }) => id === 'kyle'
   ? <span className="kd-av" style={small ? { width: 28, height: 28 } : undefined}><img src="/kd-mark.png" alt="" /></span>
   : <span className="av" style={{ background: `hsl(${PEOPLE[id][2]} 30% 18%)`, color: `hsl(${PEOPLE[id][2]} 70% 72%)` }}>{PEOPLE[id][1]}</span>;
 
 export default function Community() {
+  return useLive() ? <LiveCommunity /> : <DemoCommunity />;
+}
+
+function DemoCommunity() {
   const [tab, setTab] = useState<'feed' | 'library'>('feed');
   const [cat, setCat] = useState<string | null>(null);
   return (
