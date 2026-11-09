@@ -89,6 +89,7 @@ function Top({ me, unread }: { me: string; unread: boolean }) {
   return (
     <div className="ds-top"><img className="logo" src="/kd-mark.png" alt="KD Personal Training" />
       <div className="right">
+        <Link className="ds-kai" href="/kai" aria-label="Ask KAI, your AI assistant"><Sparkles {...I} size={18} />KAI</Link>
         <Link className="ds-iconbtn" href="/notifications" aria-label={unread ? 'Notifications, new' : 'Notifications'}><Bell {...I} size={22} />{unread && <span className="dot" />}</Link>
         <Link className="ds-me" href="/profile" aria-label="You: profile and settings">{me}</Link>
       </div></div>
@@ -139,9 +140,10 @@ function NewClientHome() {
             {st === 'now' && <span className="end"><span className="ds-tag wait">In progress</span></span>}</li>
         ))}</ol>
       </section>
-      <div className="ds-actions">
+      <div className="ds-actions four">
         <Link href="/fuel"><Utensils {...I} />Log food</Link>
         <Link href="/chat"><MessageCircle {...I} />Message Kyle</Link>
+        <Link href="/kai"><Sparkles {...I} style={{ color: 'var(--violet)' }} />Ask KAI</Link>
         {live ? <Link href="/sessions"><CalendarClock {...I} />Sessions</Link> : <Link href="/tour"><Sparkles {...I} />App tour</Link>}
       </div>
       {!live && <Link className="ds-quote" href="/chat"><img src="/kd-mark.png" alt="" /><span><small>Kyle · just now</small><p>Welcome {me.first}! I&apos;ll have your programme ready before our first session.</p></span></Link>}
