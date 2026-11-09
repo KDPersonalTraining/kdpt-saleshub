@@ -123,3 +123,22 @@
 .demo { background: var(--raise) !important; border: 1px dashed var(--line) !important; }
 .cues li { background: none; border-bottom: 1px solid var(--line); border-radius: 0; padding-left: 0; }
 .cues li::before { border-color: var(--line); color: var(--fg2); }
+
+/* Check-in: one question per screen. */
+.ds-ci { min-height: 100%; padding: 12px var(--gut-r) 32px var(--gut); display: grid; grid-template-rows: auto 1fr auto; gap: 28px; }
+.ds-ci-top { display: flex; align-items: center; gap: 12px; }
+.ds-ci-bar { flex: 1; height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.ds-ci-bar i { display: block; height: 100%; background: var(--mint); transition: width .2s ease-out; }
+.ds-ci-q { display: grid; gap: 24px; align-content: start; }
+.ds-ci-q h1 { font: 800 28px/1.2 var(--display); letter-spacing: -.02em; }
+.ds-choices { display: grid; gap: 8px; }
+.ds-choices.row { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.ds-choice { min-height: 56px; border-radius: 12px; background: var(--raise, #121413); color: var(--fg); font: 600 16px var(--display); padding: 0 16px; text-align: left; border: 1px solid transparent; }
+.ds-choices.row .ds-choice { text-align: center; padding: 0; }
+.ds-choice[aria-pressed="true"] { border-color: var(--mint); color: var(--mint); }
+.ds-ends { display: flex; justify-content: space-between; color: var(--fg3); font-size: 14px; }
+.ds-textarea, .ds-input { width: 100%; background: #121413; border: 1px solid rgba(255,255,255,.09); border-radius: 12px; color: var(--fg); font-size: 16px; padding: 14px 16px; }
+.ds-textarea { min-height: 140px; resize: vertical; }
+.ds-ci-foot { display: grid; gap: 8px; }
+.ds-textbtn { height: 48px; color: var(--fg2); font-weight: 600; }
+.ds-err { color: var(--coral); font-size: 14px; margin: 0; }

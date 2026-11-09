@@ -2,6 +2,8 @@
 
 import { getMe } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { WEEKDAYS } from '@/lib/programmes/plan';
 
 export type OnboardingAnswers = {
   parq: (boolean | null)[]; injuries: string; goal: string; days: number; freq: string; day: string;
@@ -29,5 +31,13 @@ export async function submitOnboarding(a: OnboardingAnswers): Promise<{ ok: bool
   rows.push({ org_id: me.orgId, client_id: me.id, kind: 'privacy_notice', granted: true, document_version: DOCS });
   const { error: e2 } = await supabase.from('consents').insert(rows);
   if (e2) return { ok: false, error: 'Couldn’t save your choices. Check your signal and try again.' };
+  // Their check-in day and training days go on their coaching record, which
+  // only Kyle can change, so this one write uses the server-only key.
+  const freq = ['weekly', 'fortnightly', 'monthly'].includes(a.freq) ? a.freq : 'weekly';
+  const wd = WEEKDAYS.indexOf(a.day) + 1;
+  await createAdminClient().from('client_details').update({
+    check_in_frequency: freq, check_in_weekday: freq === 'monthly' || wd < 1 ? null : wd,
+    training_days_per_week: a.days >= 1 && a.days <= 7 ? a.days : null, goals: a.goal || null,
+  }).eq('client_id', me.id);
   return { ok: true };
 }

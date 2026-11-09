@@ -20,6 +20,8 @@ end $$;
 \ir migrations/20261030000000_initial_schema.sql
 \ir migrations/20261105000000_client_app_state.sql
 \ir migrations/20261106000000_api_grants.sql
+\ir migrations/20261109000000_programmes_messages_checkins.sql
+\ir migrations/20261109000000_programmes_messages_checkins.sql
 
 grant usage on schema public, app, auth to authenticated;
 grant select, insert, update, delete on all tables in schema public to authenticated;
@@ -234,5 +236,86 @@ select pg_temp.as_user('00000000-0000-0000-0000-000000000002');
 select pg_temp.expect('Jo''s update did not touch Sam''s data', (select (state->>'water')::int from client_app_state), 3);
 select pg_temp.as_user('00000000-0000-0000-0000-000000000001');
 select pg_temp.expect('Kyle can read Sam''s app data', (select count(*) from client_app_state), 1);
+
+-- Step 4: logged workouts, messages and check-ins, as the app writes them.
+reset role;
+update workouts set week_from = 1, week_to = 3, phase = 'Learn the basics' where id = '00000000-0000-0000-0000-0000000000c1';
+do $$ begin
+  update workouts set week_from = 4, week_to = 2 where id = '00000000-0000-0000-0000-0000000000c1';
+  raise exception 'FAIL weeks out of order accepted';
+exception when check_violation then raise notice 'ok   a workout''s weeks must be in order';
+end $$;
+insert into check_in_forms (id, org_id, name, questions, is_default) values
+  ('00000000-0000-0000-0000-0000000000f1', '00000000-0000-0000-0000-00000000000a', 'Check-in', '[{"id":"mood","type":"mood","q":"How are you?","req":true}]', true);
+do $$ begin
+  insert into check_in_forms (org_id, name, questions, is_default) values ('00000000-0000-0000-0000-00000000000a', 'Second', '[]', true);
+  raise exception 'FAIL two default forms';
+exception when unique_violation then raise notice 'ok   one usual check-in form per business';
+end $$;
+set role authenticated;
+
+-- Sam finishes a workout: the session and its sets, made on his phone.
+select pg_temp.as_user('00000000-0000-0000-0000-000000000002');
+select pg_temp.expect('Sam sees his programme''s phase', (select count(*) from workouts where phase = 'Learn the basics'), 1);
+insert into workout_sessions (id, org_id, client_id, workout_id, status, started_at, completed_at) values
+  ('00000000-0000-0000-0000-0000000005a1', '00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002',
+   '00000000-0000-0000-0000-0000000000c1', 'completed', now() - interval '50 minutes', now());
+insert into set_logs (id, org_id, client_id, session_id, workout_exercise_id, exercise_id, set_number, load_kg, reps, completed_at, device_updated_at) values
+  ('00000000-0000-0000-0000-0000000005b1', '00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000005a1',
+   '00000000-0000-0000-0000-0000000000d1', '00000000-0000-0000-0000-0000000000e1', 1, 100, 12, now(), now());
+-- Sending the same workout again (a retry from the phone) changes nothing.
+insert into set_logs (id, org_id, client_id, session_id, workout_exercise_id, exercise_id, set_number, load_kg, reps, completed_at, device_updated_at) values
+  ('00000000-0000-0000-0000-0000000005b1', '00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000005a1',
+   '00000000-0000-0000-0000-0000000000d1', '00000000-0000-0000-0000-0000000000e1', 1, 100, 12, now(), now())
+  on conflict (id) do update set reps = excluded.reps;
+select pg_temp.expect('Sam''s set is saved once', (select count(*) from set_logs where session_id = '00000000-0000-0000-0000-0000000005a1'), 1);
+select pg_temp.as_user('00000000-0000-0000-0000-000000000003');
+select pg_temp.expect('Jo cannot see Sam''s workouts', (select count(*) from workout_sessions) + (select count(*) from set_logs), 0);
+do $$ begin
+  insert into workout_sessions (id, org_id, client_id, status, started_at) values
+    ('00000000-0000-0000-0000-0000000005a2', '00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', 'completed', now());
+  raise exception 'FAIL Jo logged a workout as Sam';
+exception when insufficient_privilege then raise notice 'ok   Jo cannot log a workout as Sam';
+end $$;
+select pg_temp.as_user('00000000-0000-0000-0000-000000000001');
+select pg_temp.expect('Kyle sees Sam''s workout and sets', (select count(*) from workout_sessions where id = '00000000-0000-0000-0000-0000000005a1') + (select count(*) from set_logs where session_id = '00000000-0000-0000-0000-0000000005a1'), 2);
+
+-- Messages: Kyle and Sam write; Sam marks Kyle's as read; Jo sees none.
+insert into messages (org_id, client_id, sender_id, sender_kind, body) values
+  ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'coach', 'Great session');
+select pg_temp.as_user('00000000-0000-0000-0000-000000000002');
+insert into messages (org_id, client_id, sender_id, sender_kind, body) values
+  ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000002', 'client', 'Thanks!');
+do $$ begin
+  insert into messages (org_id, client_id, sender_id, sender_kind, body) values
+    ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000002', 'coach', 'Pretending to be Kyle');
+  raise exception 'FAIL Sam sent a message as the coach';
+exception when insufficient_privilege then raise notice 'ok   Sam cannot send as the coach';
+end $$;
+select mark_messages_read();
+select pg_temp.expect('Sam marked Kyle''s message read, not his own', (select count(*) from messages where read_by_client_at is not null), 1);
+select pg_temp.expect('Sam''s own message stays unread by him', (select count(*) from messages where sender_kind = 'client' and read_by_client_at is null), 1);
+update messages set body = 'edited' where sender_kind = 'coach';
+select pg_temp.expect('Sam cannot edit Kyle''s message', (select count(*) from messages where body = 'edited'), 0);
+select pg_temp.as_user('00000000-0000-0000-0000-000000000003');
+select mark_messages_read();
+select pg_temp.expect('Jo sees no messages', (select count(*) from messages), 0);
+
+-- Check-ins: Kyle changes Sam's next round; Sam answers it; Jo can't see it.
+select pg_temp.as_user('00000000-0000-0000-0000-000000000001');
+insert into check_ins (org_id, client_id, form_id, due_on, questions) values
+  ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000000f1', '2026-11-15',
+   '[{"id":"mood","type":"mood","q":"How are you?","req":true},{"id":"steps","type":"number","q":"Steps?","req":false}]');
+select pg_temp.as_user('00000000-0000-0000-0000-000000000002');
+select pg_temp.expect('Sam reads the usual form', (select count(*) from check_in_forms), 1);
+insert into check_ins (org_id, client_id, form_id, due_on, answers, submitted_at) values
+  ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000000f1', '2026-11-15', '{"mood":3}', now())
+  on conflict (client_id, form_id, due_on) do update set answers = excluded.answers, submitted_at = excluded.submitted_at;
+select pg_temp.expect('Sam''s answers saved on the round Kyle changed', (select count(*) from check_ins where submitted_at is not null and jsonb_array_length(questions) = 2), 1);
+select pg_temp.as_user('00000000-0000-0000-0000-000000000003');
+select pg_temp.expect('Jo cannot see Sam''s check-in', (select count(*) from check_ins), 0);
+select pg_temp.as_user('00000000-0000-0000-0000-000000000001');
+update check_ins set reviewed_at = now(), reviewed_by = auth.uid(), coach_reply = 'Nice week';
+select pg_temp.expect('Kyle replies to the check-in', (select count(*) from check_ins where coach_reply is not null), 1);
 
 \echo 'All RLS checks passed.'

@@ -21,6 +21,8 @@ export type ClientState = {
   read: boolean;
   // Training. Everything about the workout in progress is kept here, so it
   // survives leaving the screen or closing the app.
+  // wid: the workout being done (live mode); sid: its session id, made on the phone.
+  wid: string | null; sid: string | null;
   duration: number; idx: number; logs: Record<string, SetLog[]>; swaps: Record<string, string>;
   exNotes: Record<string, { rpe: number | null; note: string }>; skipped: Record<string, boolean>;
   startedAt: number | null; finishedAt: number | null;
@@ -44,6 +46,8 @@ export type ClientState = {
   // Progress
   showWeight: boolean;
   checkin: CheckIn | null; checkinsSent: number;
+  // Live check-in answers in progress, for one round (so leaving doesn't lose them).
+  ciDraft: { round: string; i: number; answers: Record<string, unknown> } | null;
   // When this copy was last changed (ms). The newer of phone and database wins.
   savedAt?: number;
   // Prototype-only previews of the offline and error states
@@ -58,6 +62,7 @@ const initial = (): ClientState => ({
   scale: 1, onbStep: 0,
   notifs: { workout: true, booking: true, session: true, payment: true, drop: true, checkin: true },
   read: false,
+  wid: null, sid: null,
   duration: 60, idx: 0, logs: {}, swaps: {}, exNotes: {}, skipped: {}, startedAt: null, finishedAt: null, rest: null, pausedAt: null, pausedMs: 0, between: null,
   pain: { area: null, sev: 3, act: null, sent: false },
   sessionCancelled: false, sessionsLeft: 6, book: { req: {}, done: false },
@@ -67,7 +72,7 @@ const initial = (): ClientState => ({
   chat: [], ai: [], handed: false, aiLog: [],
   liked: {}, comments: {},
   showWeight: false,
-  checkin: null, checkinsSent: 0,
+  checkin: null, checkinsSent: 0, ciDraft: null,
   preview: { offline: false, payFail: false, fresh: false },
 });
 
@@ -134,7 +139,7 @@ export function useClient(): ClientState {
 }
 
 // Clears the workout in progress (after finishing or abandoning it).
-export const resetWorkout = (): Partial<ClientState> => ({ idx: 0, logs: {}, swaps: {}, exNotes: {}, skipped: {}, startedAt: null, finishedAt: null, rest: null, pausedAt: null, pausedMs: 0, between: null });
+export const resetWorkout = (): Partial<ClientState> => ({ wid: null, sid: null, idx: 0, logs: {}, swaps: {}, exNotes: {}, skipped: {}, startedAt: null, finishedAt: null, rest: null, pausedAt: null, pausedMs: 0, between: null });
 
 // The phone's copy and the database's copy: use whichever was changed last.
 // On a tie, or if neither has a time, the phone wins (it's never behind itself).

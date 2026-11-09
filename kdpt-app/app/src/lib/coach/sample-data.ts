@@ -18,6 +18,8 @@ export const CLIENTS: Client[] = [
   { id: 'jen', name: 'Jen Hughes', ini: 'JH', hue: 50, type: 'In-person', pkg: '8 PT / month (duo)', prog: 'Strength Block 2 · wk 1', adh: 93, last: 'Today', status: ['mint', 'On track'] },
   { id: 'ray', name: 'Ray Patel', ini: 'RP', hue: 180, type: 'Online', pkg: 'Online coaching', prog: 'Full Body 3x · wk 5', adh: 84, last: 'Yesterday', status: ['mint', 'On track'] },
 ];
+// For "give a programme" in demo mode.
+export const DEMO_CLIENT_OPTIONS = CLIENTS.map(c => ({ id: c.id, name: c.name, programme: c.prog.split(' · ')[0] }));
 export const byId = (id: string) => CLIENTS.find(c => c.id === id) ?? CLIENTS[0];
 // Chosen by each client at onboarding.
 export const CHECKIN: Record<string, string> = { sarah: 'Weekly · Sun', tom: 'Monthly', priya: 'Weekly · Mon', dave: 'Weekly · Sun', ellie: 'Every 2 weeks · Sun', mark: 'Monthly', jen: 'Monthly', ray: 'Every 2 weeks · Fri' };

@@ -6,6 +6,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useUI } from '@/components/client/shell';
 import { Ring, fmtSecs } from '@/components/client/ui';
 import { EXLIB, type Exercise } from '@/lib/client/sample-data';
+import { useCurrentWorkout, useLive, type CurrentWorkout } from '@/lib/client/live';
+import { sessionJob, uuid } from '@/lib/client/record';
+import { queueSession } from '@/lib/client/sync';
 import { clock, elapsedMs, nextSetIndex, stepLoad, stepReps } from '@/lib/client/session';
 import { parseLoad, parseReps } from '@/lib/client/summary';
 import { setState, updateOnceLoaded, useClient, type ClientState, type SetLog } from '@/lib/client/store';
@@ -16,15 +19,23 @@ import { planFor, repRange, suggestionFor } from '@/lib/client/workout';
 // leaving, pausing or closing the app never loses anything.
 const I = { size: 22, strokeWidth: 1.75 } as const;
 
+// First time on an exercise there's no weight to suggest: the box starts empty.
 const prefill = (ex: Exercise, n: number, cur: SetLog[] = []): SetLog[] => {
-  const load = ex.inc === 0 ? '0' : String(suggestionFor(ex).load);
+  const load = ex.inc === 0 ? '0' : ex.last.reps.length ? String(suggestionFor(ex).load) : '';
   return Array.from({ length: n }, (_, i) => cur[i] ?? { load, reps: String(ex.reps[1]), done: false });
 };
 const restLeft = (r: NonNullable<ClientState['rest']>, now: number) => (r.pausedLeft ?? Math.min(r.total, Math.max(0, Math.ceil((r.endsAt - now) / 1000))));
 
 export default function Workout() {
-  const s = useClient(), { openSheet, toast } = useUI(), router = useRouter();
-  const { items } = planFor(s.duration);
+  const s = useClient(), router = useRouter();
+  const w = useCurrentWorkout(s);
+  useEffect(() => { if (!w) router.replace('/train'); }, [w, router]);
+  return w ? <WorkoutMode w={w} /> : null;
+}
+
+function WorkoutMode({ w }: { w: CurrentWorkout }) {
+  const s = useClient(), { openSheet, toast, me } = useUI(), router = useRouter(), live = useLive();
+  const { items } = planFor(s.duration, w);
   const idx = Math.min(s.idx, items.length - 1);
   const { ex, sets: n } = items[idx];
   const sets = s.logs[ex.id]?.length === n ? s.logs[ex.id] : prefill(ex, n, s.logs[ex.id]);
@@ -33,8 +44,7 @@ export default function Workout() {
   const [now, setNow] = useState(() => Date.now());
   const paused = s.pausedAt != null;
 
-  useEffect(() => { if (s.preview.fresh) router.replace('/train'); }, [s.preview.fresh, router]);
-  useEffect(() => { updateOnceLoaded(st => (st.startedAt == null && !st.preview.fresh ? { startedAt: Date.now() } : null)); }, [s]);
+  useEffect(() => { updateOnceLoaded(st => (st.startedAt == null ? { startedAt: Date.now(), wid: w.id, sid: uuid() } : null)); }, [s, w.id]);
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 500); return () => clearInterval(t); }, []);
   const left = s.rest ? restLeft(s.rest, now) : 0;
   useEffect(() => {
@@ -63,7 +73,14 @@ export default function Workout() {
     if (idx < items.length - 1) setState({ idx: idx + 1, between: null, rest: null });
     else finish();
   };
-  const finish = () => { setState({ finishedAt: Date.now(), between: null, rest: null, pausedAt: null, pausedMs: s.pausedMs + (paused ? Date.now() - s.pausedAt! : 0) }); router.push('/workout/done'); };
+  const finish = () => {
+    const now = Date.now();
+    setState({ finishedAt: now, between: null, rest: null, pausedAt: null, pausedMs: s.pausedMs + (paused ? now - s.pausedAt! : 0) });
+    // Live: send the workout to the database (it waits on the phone if there's no signal).
+    const job = live && sessionJob({ ...s, finishedAt: now }, w, { clientId: me.id, orgId: live.orgId });
+    if (job) void queueSession(job);
+    router.push('/workout/done');
+  };
   const skip = () => {
     setState({ skipped: { ...s.skipped, [ex.id]: true }, rest: null, between: null, ...(idx < items.length - 1 ? { idx: idx + 1 } : {}) });
     if (idx === items.length - 1) finish(); else toast(`${name} skipped`);
@@ -72,6 +89,9 @@ export default function Workout() {
 
   const doneSets = sets.filter(x => x.done).length;
   const lib = EXLIB.find(e => e.id === ex.lib);
+  const cues = w.exercises.find(e => e.id === ex.id)?.cues?.length ? w.exercises.find(e => e.id === ex.id)!.cues! : lib?.cues ?? [];
+  const note = w.exercises.find(e => e.id === ex.id)?.note;
+  const first = !bw && ex.last.reps.length === 0;
 
   return (
     <div className="wm">
@@ -93,6 +113,7 @@ export default function Workout() {
           <div className="wm-ex">
             <h1>{name}</h1>
             <p className="wm-meta num">{cur == null ? 'All sets done' : `Set ${cur + 1} of ${n}`} · {repRange(ex)} reps · rest {fmtSecs(ex.rest)}</p>
+            {note && <p className="wm-meta">Kyle: {note}</p>}
           </div>
 
           {cur != null && (
@@ -103,8 +124,9 @@ export default function Workout() {
               </div>
               <p className="wm-target">
                 {bw ? <>Bodyweight · aim for {repRange(ex)} reps</> : s.swaps[ex.id] ? <>Swapped exercise · pick a weight you can do {repRange(ex)} reps with</>
+                  : first ? <>First time · pick a weight you could do <b>{ex.reps[1] + 2}</b> reps with, then do {repRange(ex)}</>
                   : <>Target <b className="num">{sug.load} kg × {repRange(ex)}</b>{sug.increased ? ` · up ${ex.inc} kg` : ''}</>}
-                <br /><span className="num">Last time {bw ? 'BW' : `${ex.last.load} kg`} × {ex.last.reps.join(', ')}</span>
+                {ex.last.reps.length > 0 && <><br /><span className="num">Last time {bw ? 'BW' : `${ex.last.load} kg`} × {ex.last.reps.join(', ')}</span></>}
               </p>
               <button className="wm-primary" onClick={complete}><Check {...I} size={24} />{editing != null ? `Save set ${cur + 1}` : `Complete set ${cur + 1}`}</button>
               {editing != null && <button className="wm-text center" onClick={() => setEditing(null)}>Cancel edit</button>}
@@ -161,9 +183,9 @@ export default function Workout() {
               <button className="wm-secondary" onClick={() => { setSheet(null); finish(); }}>Finish now</button>
               <button className="wm-text center" onClick={() => setSheet(null)}>Keep going</button>
             </>) : (<>
-              <h2>{lib?.name ?? name}</h2>
+              <h2>{name}</h2>
               <div className="wm-video"><CirclePlay {...I} size={28} /><span>Kyle&apos;s video is coming soon</span></div>
-              {lib && <ol className="wm-cues">{lib.cues.map(c => <li key={c}>{c}</li>)}</ol>}
+              {cues.length > 0 && <ol className="wm-cues">{cues.map(c => <li key={c}>{c}</li>)}</ol>}
               <button className="wm-secondary" onClick={() => setSheet(null)}>Close</button>
             </>)}
           </div>
@@ -181,7 +203,7 @@ function Value({ label, value, kind, onChange, onStep }: { label: string; value:
   return (
     <div className={`wm-value ${bad ? 'bad' : ''}`}>
       <button className="step" onClick={() => onStep(-1)} aria-label={`Less ${label}`}><Minus {...I} size={26} /></button>
-      <label><input ref={ref} className="num" inputMode={kind === 'load' ? 'decimal' : 'numeric'} value={value} aria-label={label} aria-invalid={bad}
+      <label><input ref={ref} className="num" inputMode={kind === 'load' ? 'decimal' : 'numeric'} value={value} placeholder="–" aria-label={label} aria-invalid={bad}
         onFocus={select} onClick={select} onMouseUp={e => e.preventDefault()}
         onChange={e => onChange(kind === 'reps' ? e.target.value.replace(/\D/g, '').slice(0, 3) : e.target.value.replace(/[^\d.,]/g, '').slice(0, 6))} /><span>{label}</span></label>
       <button className="step" onClick={() => onStep(1)} aria-label={`More ${label}`}><Plus {...I} size={26} /></button>
