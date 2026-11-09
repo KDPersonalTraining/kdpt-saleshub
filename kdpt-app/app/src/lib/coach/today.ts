@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { weekOf } from '@/lib/programmes/plan';
+import { isoToUk, ukToIso } from '@/lib/time';
 
 const DAY = 86400000;
 export type TodayData = {
@@ -9,6 +10,8 @@ export type TodayData = {
   noProgramme: { clientId: string; name: string }[];
   quiet: { clientId: string; name: string; days: number | null; programme: string }[];
   ending: { clientId: string; name: string; programme: string; week: number; weeks: number }[];
+  sessions: { id: string; clientId: string; name: string; start: string; status: string }[];
+  moves: number;
   recent: { id: string; clientId: string; name: string; workout: string; at: string; volume: number; distance: number; sets: number }[];
   counts: { today: number; messages: number; checkins: number };
 };
@@ -23,6 +26,11 @@ export async function loadToday(sb: SupabaseClient, orgId: string, now = new Dat
     sb.from('pain_reports').select('id, client_id, body_area, severity, action_taken, created_at, exercises(name)').is('reviewed_at', null).order('created_at', { ascending: false }),
     sb.from('check_ins').select('client_id').not('submitted_at', 'is', null).is('reviewed_at', null),
     sb.from('messages').select('client_id, created_at').eq('sender_kind', 'client').is('read_by_coach_at', null).order('created_at', { ascending: false }),
+  ]);
+  const dayStart = Date.parse(ukToIso(isoToUk(now.getTime()).date, '00:00'));
+  const [{ data: bks }, { count: moves }] = await Promise.all([
+    sb.from('bookings').select('id, client_id, starts_at, status').in('status', ['held', 'confirmed']).gte('starts_at', new Date(dayStart).toISOString()).lt('starts_at', new Date(dayStart + DAY).toISOString()).order('starts_at'),
+    sb.from('booking_change_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
   ]);
   const name = (id: string) => (people ?? []).find(p => p.id === id)?.full_name ?? 'Client';
   const clients = people ?? [];
@@ -58,7 +66,8 @@ export async function loadToday(sb: SupabaseClient, orgId: string, now = new Dat
       volume: Math.round(logs.reduce((t, l) => t + Number(l.load_kg ?? 0) * (l.reps ?? 0), 0)), distance: Math.round(logs.reduce((t, l) => t + Number(l.distance_m ?? 0), 0)), sets: logs.length };
   });
   return {
-    pain, checkins, unread, noProgramme, quiet, ending, recent,
+    pain, checkins, unread, noProgramme, quiet, ending, recent, moves: moves ?? 0,
+    sessions: (bks ?? []).map(b => ({ id: b.id, clientId: b.client_id, name: name(b.client_id), start: b.starts_at, status: b.status })),
     counts: { today: pain.length + noProgramme.length + quiet.length + ending.length, messages: unread.length, checkins: (cis ?? []).length },
   };
 }

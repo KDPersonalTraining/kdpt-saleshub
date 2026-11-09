@@ -9,6 +9,7 @@ import { Head, Modal, Sec, Tag } from '@/components/coach/ui';
 import { coveredLike, liftedLike } from '@/lib/client/fun';
 import type { TodayData } from '@/lib/coach/today';
 import { shortDate } from '@/lib/programmes/plan';
+import { isoToUk } from '@/lib/time';
 import { reviewPain } from './actions';
 
 const ACTION: Record<string, string> = { continued: 'carried on', swapped: 'swapped the exercise', skipped_exercise: 'skipped the exercise', stopped_session: 'stopped the workout' };
@@ -17,15 +18,23 @@ const row = { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', gap: 1
 // Kyle's Today: what needs him, then how everyone's training is going.
 export function LiveToday({ name, data }: { name: string; data: TodayData }) {
   const [pain, setPain] = useState<TodayData['pain'][number] | null>(null);
-  const needs = data.pain.length + data.unread.length + data.checkins.length + data.noProgramme.length;
+  const needs = data.pain.length + data.unread.length + data.checkins.length + data.noProgramme.length + (data.moves ? 1 : 0);
   const watch = data.quiet.length + data.ending.length;
   return (
     <>
       <Head eyebrow={shortDate(Date.now())} title={`Hi, ${name.split(' ')[0]}`} sub={needs ? `${needs} thing${needs === 1 ? '' : 's'} need${needs === 1 ? 's' : ''} you.` : 'Nothing needs you right now.'} />
 
       <section>
+        <Sec title="Sessions today" right={<Link className="btn line" href="/coach/schedule">Schedule</Link>} />
+        <div className="card">{data.sessions.length ? data.sessions.map(b => (
+          <Link key={b.id} style={row} href={`/coach/clients/${b.clientId}`}><span><b className="num">{isoToUk(b.start).time}</b> · {b.name}</span>{b.status === 'held' ? <Tag c="amber">Not confirmed</Tag> : <Tag c="mint">Confirmed</Tag>}</Link>
+        )) : <p style={{ padding: 20, margin: 0, color: 'var(--fg3)' }}>No sessions today.</p>}</div>
+      </section>
+
+      <section>
         <Sec title="Needs you" />
         <div className="card">
+          {data.moves > 0 && <Link style={row} href="/coach/schedule"><span><b>{data.moves} request{data.moves === 1 ? '' : 's'} to move a session</b></span><Tag c="violet" icon="schedule">Answer</Tag></Link>}
           {data.pain.map(p => (
             <button key={p.id} style={row} onClick={() => setPain(p)}>
               <span><b>{p.name}: {p.area}, {p.severity}/10</b><small style={{ display: 'block', color: 'var(--fg3)', fontSize: 12 }}>{p.exercise ? `During ${p.exercise}. ` : ''}They {ACTION[p.action] ?? p.action} · {shortDate(p.at)}</small></span>

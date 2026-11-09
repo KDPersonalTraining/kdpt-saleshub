@@ -82,7 +82,15 @@ export async function loadLive(sb: SupabaseClient, me: { id: string; orgId: stri
 
   const progress = buildProgress(((logs ?? []) as unknown as LogRow[]).map(r => ({ exercise_id: r.exercise_id, name: r.exercises?.name ?? 'Exercise', session_id: r.session_id,
     load_kg: r.load_kg, reps: r.reps, distance_m: r.distance_m, completed_at: r.completed_at })), today);
-  return { orgId: me.orgId, plan, sessions, progress, checkin: await loadCheckIn(sb, me, today) };
+  // Sessions with Kyle: everything from a fortnight ago onwards.
+  const [{ data: bks }, { data: locs }, { data: reqs }] = await Promise.all([
+    sb.from('bookings').select('id, starts_at, ends_at, status, location_id').eq('client_id', me.id).gte('starts_at', new Date(today.getTime() - 14 * 86400000).toISOString()).order('starts_at').limit(60),
+    sb.from('locations').select('id, name'),
+    sb.from('booking_change_requests').select('booking_id').eq('client_id', me.id).eq('status', 'pending'),
+  ]);
+  const bookings = (bks ?? []).map(b => ({ id: b.id, start: b.starts_at, end: b.ends_at, status: b.status, location: (locs ?? []).find(l => l.id === b.location_id)?.name ?? '',
+    pending: (reqs ?? []).some(r => r.booking_id === b.id) }));
+  return { orgId: me.orgId, plan, sessions, progress, bookings, checkin: await loadCheckIn(sb, me, today) };
 }
 
 // The org's usual check-in questions. Made the first time anyone needs them.

@@ -21,7 +21,8 @@ export type LiveCheckIn = {
   formId: string; round: string; nextRound: string; freq: 'weekly' | 'fortnightly' | 'monthly';
   questions: CheckInQuestion[]; submittedAt: string | null; reply: string | null;
 };
-export type LiveData = { orgId: string; plan: LivePlan | null; sessions: SessionSummary[]; checkin: LiveCheckIn | null; progress: Progress };
+export type LiveBooking = { id: string; start: string; end: string; status: string; location: string; pending: boolean };
+export type LiveData = { orgId: string; plan: LivePlan | null; sessions: SessionSummary[]; checkin: LiveCheckIn | null; progress: Progress; bookings: LiveBooking[] };
 
 const Ctx = createContext<LiveData | null>(null);
 export const LiveProvider = ({ value, children }: { value: LiveData | null; children: React.ReactNode }) => <Ctx.Provider value={value}>{children}</Ctx.Provider>;
