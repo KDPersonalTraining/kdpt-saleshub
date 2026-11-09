@@ -203,3 +203,32 @@ Work goes in this order. Each step is tested and pushed before the next.
 - The production build in both modes.
 
 **Not yet tested:** end to end against the real database. That's the practice run.
+
+### 11 November: comparisons, cardio, programme editing, swaps, pain, Today and Progress
+
+- **Fun comparisons:** at the end of every workout, weight lifted is compared with one of 40 things and distance with one of 25 places. The pick is random but stays the same for that workout everywhere it's shown.
+- **Cardio:**
+  - Exercises logged as km and minutes.
+  - A Cardio & Conditioning starter.
+- **Editing a client's programme:**
+  - Workouts: rename, reorder, copy or remove them, and set which weeks each one runs.
+  - Exercises: add any from the library (cardio included), change, reorder or remove them, and set sets, reps or minutes, rest, short-on-time priority and notes.
+  - Logged sets are kept when anything is removed.
+- **Swaps:** a real client can swap to exercises in Kyle's library that train the same movement. The swap is logged against the exercise actually done.
+- **Pain:** a report goes to Kyle (a pain report plus a message), and the workout skips, stops or offers a swap as the client chose.
+- **Kyle's Today:**
+  - Needs you: pain, unread messages, new check-ins, sign-ups waiting for a programme.
+  - Keep an eye on: clients quiet for 7+ days, programmes in their final week.
+  - Recent workouts, with each one's comparison.
+  - The menu counts are real.
+- **Client Progress:**
+  - Totals and an all-time comparison.
+  - A trend for each lift, using estimated 1-rep max.
+  - Personal bests.
+  - Workouts per week over the last 8 weeks.
+
+**Tested with:**
+- 110 unit tests.
+- Database checks, extended to cover pain reports and keeping logs when a programme is edited.
+- Browser runs of the new screens with test data, on desktop and phone.
+- Every demo regression script.

@@ -56,7 +56,7 @@ export function ClientShell({ me, remote, children }: { me: { id: string; name: 
     setToast(m); clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setToast(null), 2200);
   }, []);
   const openSheet = useCallback((n: SheetName, arg?: string) => {
-    if (n === 'pain') setState({ pain: { area: null, sev: 3, act: null, sent: false } });
+    if (n === 'pain') setState({ pain: { area: null, sev: 3, act: null, sent: false, handled: true } });
     setSheetArg(arg ?? null); setSheet(n);
   }, []);
   const pain = useRef(s.pain);

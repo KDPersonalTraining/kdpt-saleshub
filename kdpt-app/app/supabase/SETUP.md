@@ -32,6 +32,14 @@ the same way. It lets programmes change from phase to phase, turns on instant
 messages, and lets you change a check-in's questions for one round. Safe to
 run twice.
 
+### 1e. Cardio and programme editing (added 11 November)
+
+Run these two files the same way, in this order:
+`kdpt-app/app/supabase/migrations/20261110000000_cardio.sql`, then
+`kdpt-app/app/supabase/migrations/20261111000000_programme_editing.sql`.
+Both are safe to run twice. Until they're run, giving a programme and saving
+workouts won't work.
+
 ## 2. Create your coach account
 
 1. Left menu, **Authentication** → **Users** → **Add user** → **Create new user**.

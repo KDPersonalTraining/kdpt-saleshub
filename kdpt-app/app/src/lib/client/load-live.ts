@@ -3,6 +3,8 @@ import { DEFAULT_QUESTIONS, type CheckInQuestion } from '@/lib/checkins/question
 import { currentRound, isoDay, lastResults, nextWorkout, roundAfter, weekOf, workoutsForWeek, type Frequency, type SetRow } from '@/lib/programmes/plan';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { setWords } from './format';
+import { buildProgress } from './progress';
+import { alternativesFor } from '@/lib/programmes/edit';
 import type { LiveCheckIn, LiveData, LivePlan, PlanExercise, PlanWorkout, SessionSummary } from './live';
 
 type Kit = PlanExercise['kit'];
@@ -15,12 +17,22 @@ type LogRow = SetRow & { distance_m: number | null; duration_s: number | null; e
 
 // Everything the client app shows from the database, for one client.
 export async function loadLive(sb: SupabaseClient, me: { id: string; orgId: string }, today = new Date()): Promise<LiveData> {
-  const [{ data: prog }, { data: sess }, { data: logs }] = await Promise.all([
+  const [{ data: prog }, { data: sess }, { data: logs }, { data: libRows }] = await Promise.all([
     sb.from('programmes').select('id, name, weeks, starts_on').eq('client_id', me.id).eq('status', 'active').order('created_at', { ascending: false }).limit(1).maybeSingle(),
-    sb.from('workout_sessions').select('id, workout_id, started_at, completed_at, status').eq('client_id', me.id).order('started_at', { ascending: false }).limit(40),
+    sb.from('workout_sessions').select('id, workout_id, workout_name, started_at, completed_at, status').eq('client_id', me.id).order('started_at', { ascending: false }).limit(40),
     sb.from('set_logs').select('exercise_id, session_id, set_number, load_kg, reps, distance_m, duration_s, completed_at, exercises(name)').eq('client_id', me.id).eq('deleted', false).order('completed_at', { ascending: false }).limit(1500),
+    sb.from('exercises').select('id, name, movement_pattern, measure, primary_muscles, load_type').is('archived_at', null).order('name'),
   ]);
+  // Kyle's library, for swaps: same movement, same way of logging.
+  const library = (libRows ?? []).map(e => ({ id: e.id, name: e.name, pattern: e.movement_pattern, measure: (e.measure === 'distance' ? 'distance' : 'reps') as 'reps' | 'distance', muscles: e.primary_muscles ?? [], kit: KIT[e.load_type] ?? 'machine' }));
   const last = lastResults((logs ?? []) as unknown as SetRow[]);
+
+  const ICON: Record<Kit, string> = { machine: 'machine', dumbbell: 'weight', barbell: 'weight', body: 'body' };
+  const swapsFor = (id: string) => {
+    const self = library.find(x => x.id === id);
+    const alts = self ? alternativesFor(self, library) : [];
+    return { alts: alts.map(a => [a.name, a.measure === 'distance' ? 'Same kind of cardio' : 'Same movement', ICON[a.kit]] as [string, string, string]), altIds: Object.fromEntries(alts.map(a => [a.name, a.id])) };
+  };
 
   let plan: LivePlan | null = null;
   if (prog) {
@@ -36,7 +48,8 @@ export async function loadLive(sb: SupabaseClient, me: { id: string; orgId: stri
         return {
           id: we.id, lib: e.slug, name: e.name, sets: we.working_sets, reps: [we.rep_min, we.rep_max] as [number, number], rest: we.rest_seconds,
           inc, priority: we.priority, setup: Number(e.setup_minutes), kit: KIT[e.load_type] ?? 'machine',
-          last: l && !cardio ? { load: inc === 0 ? 0 : l.load, reps: l.reps } : { load: 0, reps: [] }, alts: [], measure: cardio ? 'distance' as const : 'reps' as const,
+          last: l && !cardio ? { load: inc === 0 ? 0 : l.load, reps: l.reps } : { load: 0, reps: [] }, measure: cardio ? 'distance' as const : 'reps' as const,
+          ...swapsFor(e.id),
           exerciseId: e.id, cues: e.cues ?? [], note: we.coach_note, best: l?.best ?? 0,
         };
       }),
@@ -61,13 +74,15 @@ export async function loadLive(sb: SupabaseClient, me: { id: string; orgId: stri
     const by = new Map<string, string[]>();
     for (const r of rows) { const n = r.exercises?.name ?? 'Exercise'; by.set(n, [...(by.get(n) ?? []), setWords(r)]); }
     return {
-      id: x.id, workout: (x.workout_id && names.get(x.workout_id)) || 'Workout', startedAt: x.started_at,
+      id: x.id, workout: (x.workout_id && names.get(x.workout_id)) || x.workout_name || 'Workout', startedAt: x.started_at,
       minutes: x.completed_at ? Math.max(1, Math.round((Date.parse(x.completed_at) - Date.parse(x.started_at)) / 60000)) : null,
       volume: Math.round(rows.reduce((t, r) => t + Number(r.load_kg ?? 0) * (r.reps ?? 0), 0)), distance: Math.round(rows.reduce((t, r) => t + Number(r.distance_m ?? 0), 0)), sets: [...by.entries()],
     };
   });
 
-  return { orgId: me.orgId, plan, sessions, checkin: await loadCheckIn(sb, me, today) };
+  const progress = buildProgress(((logs ?? []) as unknown as LogRow[]).map(r => ({ exercise_id: r.exercise_id, name: r.exercises?.name ?? 'Exercise', session_id: r.session_id,
+    load_kg: r.load_kg, reps: r.reps, distance_m: r.distance_m, completed_at: r.completed_at })), today);
+  return { orgId: me.orgId, plan, sessions, progress, checkin: await loadCheckIn(sb, me, today) };
 }
 
 // The org's usual check-in questions. Made the first time anyone needs them.

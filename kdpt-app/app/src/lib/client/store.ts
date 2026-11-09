@@ -29,7 +29,8 @@ export type ClientState = {
   // Pausing stops the workout clock. between = the exercise just finished, while showing "up next".
   pausedAt: number | null; pausedMs: number; between: string | null;
   rest: { endsAt: number; total: number; pausedLeft: number | null } | null;
-  pain: { area: string | null; sev: number; act: string | null; sent: boolean };
+  // handled: the workout screen has acted on the choice (skip, stop or swap).
+  pain: { area: string | null; sev: number; act: string | null; sent: boolean; handled?: boolean };
   // Bookings and payments
   sessionCancelled: boolean; sessionsLeft: number; book: { req: Record<number, string>; done: boolean };
   avail: { days: Record<string, [number, number] | null>; note: string; sent: boolean }; paid: boolean; autopay: boolean;

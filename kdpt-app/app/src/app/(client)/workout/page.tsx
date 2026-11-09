@@ -92,6 +92,14 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
     setState({ skipped: { ...s.skipped, [ex.id]: true }, rest: null, between: null, ...(idx < items.length - 1 ? { idx: idx + 1 } : {}) });
     if (idx === items.length - 1) finish(); else toast(`${name} skipped`);
   };
+  // After a pain report: skip the exercise, stop the workout, or choose a swap.
+  useEffect(() => {
+    if (!s.pain.sent || s.pain.handled) return;
+    setState({ pain: { ...s.pain, handled: true } });
+    if (s.pain.act === 'skip') skip();
+    else if (s.pain.act === 'stop') finish();
+    else if (s.pain.act === 'swap' && ex.alts.length) openSheet('swap');
+  }, [s.pain]); // eslint-disable-line react-hooks/exhaustive-deps
   const togglePause = () => setState(paused ? { pausedMs: s.pausedMs + (Date.now() - s.pausedAt!), pausedAt: null } : { pausedAt: Date.now() });
 
   const doneSets = sets.filter(x => x.done).length;

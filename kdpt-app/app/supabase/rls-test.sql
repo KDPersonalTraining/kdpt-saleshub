@@ -24,6 +24,8 @@ end $$;
 \ir migrations/20261109000000_programmes_messages_checkins.sql
 \ir migrations/20261110000000_cardio.sql
 \ir migrations/20261110000000_cardio.sql
+\ir migrations/20261111000000_programme_editing.sql
+\ir migrations/20261111000000_programme_editing.sql
 
 grant usage on schema public, app, auth to authenticated;
 grant select, insert, update, delete on all tables in schema public to authenticated;
@@ -333,5 +335,21 @@ do $$ begin
 exception when check_violation then raise notice 'ok   exercises are measured in reps or distance only';
 end $$;
 set role authenticated;
+
+-- Pain reports: Sam reports; Jo can't see it; Kyle reviews it.
+select pg_temp.as_user('00000000-0000-0000-0000-000000000002');
+insert into pain_reports (id, org_id, client_id, exercise_id, body_area, severity, action_taken) values
+  ('00000000-0000-0000-0000-0000000007a1', '00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000000e1', 'knee', 6, 'skipped_exercise');
+select pg_temp.as_user('00000000-0000-0000-0000-000000000003');
+select pg_temp.expect('Jo cannot see Sam''s pain report', (select count(*) from pain_reports where id = '00000000-0000-0000-0000-0000000007a1'), 0);
+select pg_temp.as_user('00000000-0000-0000-0000-000000000001');
+update pain_reports set reviewed_at = now(), reviewed_by = auth.uid(), coach_response = 'Rest it' where id = '00000000-0000-0000-0000-0000000007a1';
+select pg_temp.expect('Kyle reviews the pain report', (select count(*) from pain_reports where coach_response = 'Rest it'), 1);
+
+-- Editing a programme: removing an exercise or a workout keeps Sam's logs.
+delete from workout_exercises where id = '00000000-0000-0000-0000-0000000000d1';
+select pg_temp.expect('Sam''s logged sets survive the exercise being removed', (select count(*) from set_logs where session_id = '00000000-0000-0000-0000-0000000005a1' and workout_exercise_id is null), 2);
+delete from workouts where id = '00000000-0000-0000-0000-0000000000c1';
+select pg_temp.expect('Sam''s workout survives the workout being removed', (select count(*) from workout_sessions where id = '00000000-0000-0000-0000-0000000005a1' and workout_id is null), 1);
 
 \echo 'All RLS checks passed.'

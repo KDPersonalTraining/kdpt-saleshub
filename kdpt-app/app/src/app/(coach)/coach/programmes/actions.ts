@@ -3,7 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { getMe } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
-import { EXERCISES, starterByKey } from '@/lib/programmes/starters';
+import { starterByKey } from '@/lib/programmes/starters';
+import { ensureLibrary } from '@/lib/coach/library';
 
 // Kyle gives a starter programme to a client. The starter is copied into the
 // database as that client's own programme (so it can be changed for them
@@ -21,14 +22,9 @@ export async function assignStarter(v: { clientId: string; key: string; startsOn
   const { data: client } = await sb.from('profiles').select('id').eq('id', v.clientId).eq('role', 'client').eq('org_id', org).maybeSingle();
   if (!client) return 'Client not found.';
 
-  // The exercises the starter uses, added to (or refreshed in) Kyle's library.
-  const used = new Set(starter.workouts.flatMap(w => w.items.map(i => i.slug)));
-  const rows = EXERCISES.filter(e => used.has(e.slug)).map(e => ({
-    org_id: org, slug: e.slug, name: e.name, movement_pattern: e.pattern, load_type: e.load, primary_muscles: e.muscles,
-    load_increment_kg: e.inc, setup_minutes: e.setup, cues: e.cues, measure: e.measure ?? 'reps',
-  }));
-  const { data: exs, error: e0 } = await sb.from('exercises').upsert(rows, { onConflict: 'org_id,slug' }).select('id, slug');
-  if (e0 || !exs) return 'Couldn’t set up the exercises. Try again.';
+  // Kyle's whole library, with every starter exercise in it.
+  const exs = await ensureLibrary(sb, org);
+  if (!exs) return 'Couldn’t set up the exercises. Try again.';
   const idOf = Object.fromEntries(exs.map(e => [e.slug, e.id]));
 
   const { data: prog, error: e1 } = await sb.from('programmes').insert({

@@ -1,6 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
+import { Icon } from '@/components/icon';
 import { AssignModal } from '@/components/coach/assign';
 import { Sec, Tag } from '@/components/coach/ui';
 import { prettyDate } from '@/lib/programmes/plan';
@@ -44,7 +46,9 @@ export function Training({ clientId, name, programme, sessions }: {
         {programme ? <div className="kv"><span>On</span><b>{programme.name}</b><span>Week</span><b className="num">{programme.week}{programme.weeks ? ` of ${programme.weeks}` : ''}</b>
           <span>Started</span><b>{programme.startsOn ? prettyDate(programme.startsOn) : '–'}</b></div>
           : <p style={{ margin: 0, color: 'var(--fg2)' }}>No programme yet. Their Train screen says it’s on its way.</p>}
-        <button className="btn mint" style={{ marginTop: 16 }} onClick={() => setAssign(true)}>{programme ? 'Change programme' : 'Give a programme'}</button>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
+          {programme && <Link className="btn mint" href={`/coach/clients/${clientId}/programme`}><Icon name="programmes" className="sm" />Edit programme</Link>}
+          <button className={`btn ${programme ? 'line' : 'mint'}`} onClick={() => setAssign(true)}>{programme ? 'Swap to a starter' : 'Give a programme'}</button></div>
       </div>
       {assign && <AssignModal clients={[{ id: clientId, name, programme: programme?.name ?? null }]} fixedClient={clientId} onClose={() => setAssign(false)} />}
     </div>
