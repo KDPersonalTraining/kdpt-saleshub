@@ -4,8 +4,11 @@ import { useState } from 'react';
 import { AssignModal } from '@/components/coach/assign';
 import { Sec, Tag } from '@/components/coach/ui';
 import { prettyDate } from '@/lib/programmes/plan';
+import { liftedLike } from '@/lib/client/lifted';
 
 export type CoachSession = { id: string; workout: string; date: string; minutes: number | null; rpe: number | null; note: string | null; sets: [string, [number | null, number][]][] };
+
+const volume = (x: CoachSession) => Math.round(x.sets.reduce((t, [, sets]) => t + sets.reduce((a, [w, r]) => a + (w ?? 0) * r, 0), 0));
 
 // A client's programme and their logged workouts, on their record.
 export function Training({ clientId, name, programme, sessions }: {
@@ -22,7 +25,7 @@ export function Training({ clientId, name, programme, sessions }: {
         <div style={{ display: 'grid', gap: 4 }}>{sessions.map(x => (
           <div key={x.id} style={{ borderTop: '1px solid var(--hair)', paddingTop: 10 }}>
             <button onClick={() => setOpen(open === x.id ? null : x.id)} style={{ display: 'flex', width: '100%', justifyContent: 'space-between', gap: 12, textAlign: 'left', padding: '4px 0' }} aria-expanded={open === x.id}>
-              <span><b>{x.workout}</b> <span className="muted num" style={{ fontSize: 13 }}>{x.date}{x.minutes ? ` · ${x.minutes} min` : ''}</span></span>
+              <span><b>{x.workout}</b> <span className="muted num" style={{ fontSize: 13 }}>{x.date}{x.minutes ? ` · ${x.minutes} min` : ''}{volume(x) ? ` · ${volume(x).toLocaleString('en-GB')} kg${liftedLike(volume(x)) ? ` (${liftedLike(volume(x))!.words})` : ''}` : ''}</span></span>
               {x.rpe ? <Tag c="grey">RPE {x.rpe}</Tag> : null}
             </button>
             {open === x.id && <div style={{ display: 'grid', gap: 6, padding: '6px 0 10px' }}>

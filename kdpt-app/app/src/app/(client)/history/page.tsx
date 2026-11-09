@@ -8,6 +8,7 @@ import { HISTORY } from '@/lib/client/sample-data';
 import { useClient } from '@/lib/client/store';
 import { useLive } from '@/lib/client/live';
 import { shortDate } from '@/lib/programmes/plan';
+import { liftedLike } from '@/lib/client/lifted';
 
 export default function History() {
   const s = useClient();
@@ -22,7 +23,8 @@ export default function History() {
             <span className="t"><b>{r.workout}</b><small className="num">{shortDate(r.startedAt)}{r.minutes ? ` · ${r.minutes} min` : ''}{r.volume ? ` · ${r.volume.toLocaleString('en-GB')} kg lifted` : ''}</small></span>
             <Chev open={open === i} />
           </button>
-          {open === i && <div className="hsets">{r.sets.map(([n, sets]) => <div key={n}><b>{n}</b><span className="num">{sets.map(([w, k]) => (w ? `${w} × ${k}` : `${k} reps`)).join(' · ')}</span></div>)}</div>}
+          {open === i && <div className="hsets">{r.sets.map(([n, sets]) => <div key={n}><b>{n}</b><span className="num">{sets.map(([w, k]) => (w ? `${w} × ${k}` : `${k} reps`)).join(' · ')}</span></div>)}
+            {liftedLike(r.volume) && <div><b>That&apos;s about</b><span>{liftedLike(r.volume)!.words}</span></div>}</div>}
         </div>
       ))}</div>
     </div>

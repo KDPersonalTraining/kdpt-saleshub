@@ -1,12 +1,13 @@
 'use client';
 
-import { Check, Trophy } from 'lucide-react';
+import { Check, PawPrint, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { LIFTS } from '@/lib/client/sample-data';
 import { useCurrentWorkout, useLive } from '@/lib/client/live';
 import { flushOutbox } from '@/lib/client/sync';
+import { liftedLike } from '@/lib/client/lifted';
 import { parseLoad, parseReps, summarise } from '@/lib/client/summary';
 import { resetWorkout, setState, useClient } from '@/lib/client/store';
 import { planFor } from '@/lib/client/workout';
@@ -32,6 +33,10 @@ export default function WorkoutDone() {
         <div><dt>Sets</dt><dd className="num">{sum.sets}</dd></div>
         <div><dt>Lifted</dt><dd className="num">{sum.volumeKg.toLocaleString('en-GB')}<small> kg</small></dd></div>
       </dl>
+      {(() => { const like = liftedLike(sum.volumeKg); return like && (
+        <p className="wm-like"><PawPrint size={22} strokeWidth={1.75} aria-hidden="true" />
+          <span>That&apos;s about <b>{like.words}</b><small className="num">A {like.animal.one} weighs around {like.animal.kg.toLocaleString('en-GB')} kg</small></span></p>
+      ); })()}
       {sum.records.length > 0 && (
         <section><span className="wm-cap">New personal bests</span>
           <ul className="wm-list">{sum.records.map(r => (
