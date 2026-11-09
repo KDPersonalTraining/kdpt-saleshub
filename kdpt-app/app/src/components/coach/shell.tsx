@@ -11,7 +11,7 @@ const Ctx = createContext<{ toast: (m: string) => void }>({ toast: () => {} });
 export const useToast = () => useContext(Ctx).toast;
 
 // Pages that show real data when demo mode is off. The rest say they're samples.
-const LIVE_READY = ['/coach/clients', '/coach/programmes', '/coach/messages', '/coach/checkins', '/coach/schedule'];
+const LIVE_READY = ['/coach/clients', '/coach/programmes', '/coach/messages', '/coach/checkins', '/coach/schedule', '/coach/library'];
 // Live counts replace the sample ones: Today = pain reports to see.
 const LIVE_COUNT: Record<string, ['today' | 'messages' | 'checkins', Tint]> = { '': ['today', 'coral'], messages: ['messages', 'mint'], checkins: ['checkins', 'violet'] };
 
@@ -47,7 +47,7 @@ export function CoachShell({ me, counts, children }: { me: { name: string; role:
         <main className="main"><div className="wrap"><div className="fade" style={{ display: 'grid', gap: 24 }}>
           {!me.demo && path !== '/coach' && !LIVE_READY.some(p => path.startsWith(p)) && (
             <div className="flag" style={{ borderColor: 'rgba(255,180,94,.3)', background: 'rgba(255,180,94,.06)' }}><span style={{ color: 'var(--amber)' }}><Icon name="info" /></span>
-              <span><b>Sample data.</b> This page isn&apos;t connected to your database yet. Today, Clients, Programmes, Schedule, Messages and Check-ins are.</span></div>
+              <span><b>Sample data.</b> This page isn&apos;t connected to your database yet. Today, Clients, Programmes, Schedule, Messages, Check-ins and Library are.</span></div>
           )}
           {children}</div></div></main>
       </div>

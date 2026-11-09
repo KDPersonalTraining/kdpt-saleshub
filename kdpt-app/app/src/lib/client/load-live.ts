@@ -21,10 +21,10 @@ export async function loadLive(sb: SupabaseClient, me: { id: string; orgId: stri
     sb.from('programmes').select('id, name, weeks, starts_on').eq('client_id', me.id).eq('status', 'active').order('created_at', { ascending: false }).limit(1).maybeSingle(),
     sb.from('workout_sessions').select('id, workout_id, workout_name, started_at, completed_at, status').eq('client_id', me.id).order('started_at', { ascending: false }).limit(40),
     sb.from('set_logs').select('exercise_id, session_id, set_number, load_kg, reps, distance_m, duration_s, completed_at, exercises(name)').eq('client_id', me.id).eq('deleted', false).order('completed_at', { ascending: false }).limit(1500),
-    sb.from('exercises').select('id, name, movement_pattern, measure, primary_muscles, load_type').is('archived_at', null).order('name'),
+    sb.from('exercises').select('id, name, movement_pattern, measure, primary_muscles, load_type, cues').is('archived_at', null).order('name'),
   ]);
   // Kyle's library, for swaps: same movement, same way of logging.
-  const library = (libRows ?? []).map(e => ({ id: e.id, name: e.name, pattern: e.movement_pattern, measure: (e.measure === 'distance' ? 'distance' : 'reps') as 'reps' | 'distance', muscles: e.primary_muscles ?? [], kit: KIT[e.load_type] ?? 'machine' }));
+  const library = (libRows ?? []).map(e => ({ id: e.id, name: e.name, pattern: e.movement_pattern, measure: (e.measure === 'distance' ? 'distance' : 'reps') as 'reps' | 'distance', muscles: e.primary_muscles ?? [], kit: KIT[e.load_type] ?? 'machine', cues: (e.cues ?? []) as string[] }));
   const last = lastResults((logs ?? []) as unknown as SetRow[]);
 
   const ICON: Record<Kit, string> = { machine: 'machine', dumbbell: 'weight', barbell: 'weight', body: 'body' };
@@ -94,7 +94,7 @@ export async function loadLive(sb: SupabaseClient, me: { id: string; orgId: stri
   const weights = (wts ?? []).map(w => ({ date: w.measured_on, kg: Number(w.value) }));
   const bookings = (bks ?? []).map(b => ({ id: b.id, start: b.starts_at, end: b.ends_at, status: b.status, location: (locs ?? []).find(l => l.id === b.location_id)?.name ?? '',
     pending: (reqs ?? []).some(r => r.booking_id === b.id) }));
-  return { orgId: me.orgId, plan, sessions, progress, bookings, nutrition, weights, checkin: await loadCheckIn(sb, me, today) };
+  return { orgId: me.orgId, plan, sessions, progress, bookings, nutrition, weights, library: library.map(({ kit: _, ...e }) => e), checkin: await loadCheckIn(sb, me, today) };
 }
 
 // The org's usual check-in questions. Made the first time anyone needs them.
