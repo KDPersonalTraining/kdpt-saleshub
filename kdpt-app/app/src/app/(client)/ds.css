@@ -32,6 +32,10 @@
 .ds-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .ds-actions a, .ds-actions button { display: grid; justify-items: center; gap: 8px; padding: 16px 4px; border-radius: 12px; background: var(--raise); color: var(--fg); font-size: 14px; font-weight: 500; text-align: center; }
 .ds-actions svg { color: var(--fg2); }
+.ds-actions.four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ds-actions.four a { grid-auto-flow: column; justify-content: start; padding: 16px; text-align: left; }
+/* KAI in the top bar: the one place it's always a tap away. */
+.ds-kai { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 18px; border: 1px solid rgba(169,155,255,.35); color: var(--violet); font: 700 13px var(--display); margin-right: 4px; }
 .ds-quote { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; align-items: start; text-align: left; }
 .ds-quote img { width: 36px; height: 36px; border-radius: 50%; background: #000; border: 1px solid var(--line); object-fit: contain; padding: 9px 6px; }
 .ds-quote small { color: var(--fg3); font-size: 12px; }
