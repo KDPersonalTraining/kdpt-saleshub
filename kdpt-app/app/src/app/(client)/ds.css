@@ -168,3 +168,19 @@
 .ds-scrim { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.6); display: flex; align-items: flex-end; justify-content: center; }
 .ds-sheet { width: min(560px, 100%); background: #121413; border-radius: 20px 20px 0 0; padding: 24px var(--gut-r, 20px) calc(24px + env(safe-area-inset-bottom, 0px)) var(--gut, 20px); display: grid; gap: 12px; max-height: 90vh; overflow-y: auto; }
 .ds-btn[disabled] { opacity: .5; }
+
+/* ---- Phones ------------------------------------------------------------
+   The menu stays fixed to the bottom of the screen, above Safari's toolbar,
+   and everything is a little more compact than on the big preview. */
+@media (max-width: 699px) {
+  .tabbar.ds-tabbar { position: fixed; }
+  .ds-page { gap: 24px; padding-top: 4px; }
+  .ds-title { font-size: 26px; }
+  .ds-h2 { font-size: 18px; }
+  .ds-row { min-height: 56px; padding: 8px 0; }
+  .ds-card { padding: 16px; gap: 14px; }
+  .ds-btn { height: 52px; }
+  .ds-actions a, .ds-actions button { padding: 12px 4px; }
+  .ds-actions.four a { padding: 12px 14px; }
+  .page { gap: 18px; }
+}

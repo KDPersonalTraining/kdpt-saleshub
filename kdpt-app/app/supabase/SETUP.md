@@ -38,8 +38,9 @@ Run these two files the same way, in this order:
 `kdpt-app/app/supabase/migrations/20261110000000_cardio.sql`, then
 `kdpt-app/app/supabase/migrations/20261111000000_programme_editing.sql`.
 and then `kdpt-app/app/supabase/migrations/20261112000000_nutrition_mode.sql`.
-All are safe to run twice. Until they're run, giving a programme and saving
-workouts won't work.
+and `kdpt-app/app/supabase/migrations/20261113000000_set_plans.sql`.
+All are safe to run twice. Until they're run, giving a programme, the Train
+screen and saving workouts won't work.
 
 ## 2. Create your coach account
 

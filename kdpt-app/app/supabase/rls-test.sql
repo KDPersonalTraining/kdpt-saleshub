@@ -28,6 +28,8 @@ end $$;
 \ir migrations/20261111000000_programme_editing.sql
 \ir migrations/20261112000000_nutrition_mode.sql
 \ir migrations/20261112000000_nutrition_mode.sql
+\ir migrations/20261113000000_set_plans.sql
+\ir migrations/20261113000000_set_plans.sql
 
 grant usage on schema public, app, auth to authenticated;
 grant select, insert, update, delete on all tables in schema public to authenticated;

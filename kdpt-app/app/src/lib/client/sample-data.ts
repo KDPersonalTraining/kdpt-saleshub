@@ -9,6 +9,8 @@ export type Exercise = {
   last: { load: number; reps: number[] }; alts: [string, string, string][];
   // 'distance': a run, row or ride, logged as km and minutes (reps holds the target minutes).
   measure?: 'reps' | 'distance';
+  // Set by set (warm-ups, a rep range per set, drop sets), and Kyle's starting weight.
+  plan?: import('@/lib/programmes/sets').PlannedSet[] | null; start?: number | null;
 };
 
 export const WORKOUT: { name: string; exercises: Exercise[] } = {

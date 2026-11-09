@@ -23,7 +23,7 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; }
+html, body { height: 100%; height: 100dvh; }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.45; }
 h1, h2, h3, .d { font-family: var(--display); margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
@@ -32,7 +32,7 @@ svg { display: block; }
 .num { font-variant-numeric: tabular-nums; }
 
 /* ---- Device ------------------------------------------------------------ */
-.device { position: relative; height: 100%; overflow: hidden; background: var(--bg); }
+.device { position: relative; height: 100%; height: 100dvh; overflow: hidden; background: var(--bg); }
 .screen { height: 100%; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
 .screen::-webkit-scrollbar { display: none; }
 .statusbar { display: none; }
@@ -344,7 +344,7 @@ svg { display: block; }
 .stamp { text-align: center; font-size: 11px; color: var(--fg3); margin: 8px 0 2px; }
 .composer { display: flex; gap: 8px; align-items: center; }
 .composer label { flex: 1; min-width: 0; height: 50px; border-radius: 25px; background: var(--s2); display: flex; align-items: center; padding: 0 18px; }
-.composer input { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: 15px var(--body); }
+.composer input { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: 16px var(--body); }
 .composer input:focus { outline: none; }
 .composer .round { flex: none; width: 50px; height: 50px; background: var(--mint); color: var(--mint-ink); }
 
@@ -1054,3 +1054,33 @@ button.food { width: 100%; text-align: left; }
 .wm-list b { display: block; font-weight: 600; font-size: 16px; }
 .wm-list small { color: var(--fg3); font-size: 14px; }
 .wm-summary .wm-primary { margin-top: auto; }
+
+/* Workout: every set of the exercise, and the list of exercises. */
+.wm-progress button { flex: 1; height: 14px; padding: 5px 0; background: none; }
+.wm-progress button::after { content: ""; display: block; height: 4px; border-radius: 2px; background: var(--line); }
+.wm-progress button.done::after { background: var(--mint); }
+.wm-progress button.now::after { background: var(--fg); }
+.wm-progress button.skip::after { background: rgba(255,180,94,.5); }
+.wm-where { background: none; color: inherit; }
+.wm-sets { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.wm-sets li button { width: 100%; display: grid; grid-template-columns: 30px minmax(0, 1fr) auto 40px; gap: 10px; align-items: center; min-height: 48px; border-bottom: 1px solid var(--line); text-align: left; font-size: 15px; color: var(--fg2); }
+.wm-sets li.now button { color: var(--fg); background: rgba(126,213,151,.06); }
+.wm-sets li.done button { color: var(--fg); }
+.wm-sets .n { color: var(--fg3); font: 700 14px var(--display); text-align: center; }
+.wm-sets .n em { font-style: normal; font-size: 12px; padding: 2px 6px; border-radius: 6px; }
+.wm-sets .n em.warmup { color: var(--amber); background: rgba(255,180,94,.12); }
+.wm-sets .n em.drop, .wm-sets .n em.amrap { color: var(--violet); background: rgba(169,155,255,.12); }
+.wm-sets .tgt { color: var(--fg3); font-size: 14px; }
+.wm-sets .ok { color: var(--mint); justify-self: center; }
+.wm-sets .nowtag, .wm-list-ex .nowtag { color: var(--mint); font: 700 12px var(--display); justify-self: center; }
+.wm-list-ex { list-style: none; margin: 0; padding: 0; max-height: 55vh; overflow-y: auto; }
+.wm-list-ex button { width: 100%; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 12px; align-items: center; min-height: 56px; border-bottom: 1px solid var(--line); text-align: left; }
+.wm-list-ex button[aria-current] { color: var(--mint); }
+.wm-list-ex .n { color: var(--fg3); font: 700 14px var(--display); }
+.wm-list-ex b { display: block; font-weight: 600; }
+.wm-list-ex small { color: var(--fg3); font-size: 13px; }
+@media (max-width: 699px) {
+  .wm-value input { font-size: 52px; }
+  .wm-main { gap: 18px; }
+  .wm-progress { margin-bottom: 18px; }
+}

@@ -49,7 +49,7 @@ export async function saveProgramme(clientId: string | null, input: EdProgramme)
     }
     for (const [j, it] of w.items.entries()) {
       const r = { org_id: org, workout_id: wid, exercise_id: it.exerciseId, position: j + 1, working_sets: it.sets, rep_min: it.repMin, rep_max: it.repMax,
-        rest_seconds: it.rest, priority: it.priority, coach_note: it.note || null };
+        rest_seconds: it.rest, priority: it.priority, coach_note: it.note || null, set_plan: it.plan ?? null, start_load_kg: it.startLoad ?? null };
       const { error } = it.id ? await sb.from('workout_exercises').update(r).eq('id', it.id) : await sb.from('workout_exercises').insert(r);
       if (error) return fail;
     }
