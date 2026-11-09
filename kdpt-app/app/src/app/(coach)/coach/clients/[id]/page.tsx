@@ -8,6 +8,7 @@ import { shortDate, weekOf } from '@/lib/programmes/plan';
 import type { CoachSession } from './training';
 import { setWords } from '@/lib/client/format';
 import type { Extras } from './record-extras';
+import { myProgrammes } from '@/lib/coach/live';
 import type { Nutrition } from './actions';
 
 export default async function ClientPage({ params }: { params: Promise<{ id: string }> }) {
@@ -52,7 +53,7 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
       volume: Math.round(live.reduce((t, l) => t + Number(l.load_kg ?? 0) * (l.reps ?? 0), 0)), distance: Math.round(live.reduce((t, l) => t + Number(l.distance_m ?? 0), 0)) };
   });
   const programme = prog ? { name: prog.name, weeks: prog.weeks, startsOn: prog.starts_on, week: weekOf(prog.starts_on, prog.weeks, new Date()) } : null;
-  return <LiveProfile extras={extras} id={id} programme={programme} sessions={sessions} name={p.full_name} added={p.created_at} type={d?.coaching_type ?? null} lastActive={st?.updated_at ?? null}
+  return <LiveProfile mine={await myProgrammes()} extras={extras} id={id} programme={programme} sessions={sessions} name={p.full_name} added={p.created_at} type={d?.coaching_type ?? null} lastActive={st?.updated_at ?? null}
     state={(st?.state ?? null) as Record<string, unknown> | null} answers={(onb?.answers ?? null) as Record<string, unknown> | null} submitted={onb?.submitted_at ?? null}
     consents={(cons ?? []) as { kind: string; granted: boolean }[]} />;
 }

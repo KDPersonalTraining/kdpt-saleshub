@@ -8,12 +8,13 @@ import { createClient } from '@/lib/supabase/server';
 // Saves Kyle's changes to one client's programme. Workouts and exercises he
 // removed are deleted (the client's logged sets are kept); changed ones are
 // updated in place; new ones are added. Returns an error message, or null.
-export async function saveProgramme(clientId: string, input: EdProgramme): Promise<string | null> {
+export async function saveProgramme(clientId: string | null, input: EdProgramme): Promise<string | null> {
   const me = await getMe();
   if (!me || me.demo || me.role !== 'coach' || !me.orgId) return 'Only the coach can change programmes.';
   const sb = await createClient(), org = me.orgId;
 
-  const { data: prog } = await sb.from('programmes').select('id').eq('id', input.id).eq('client_id', clientId).eq('org_id', org).maybeSingle();
+  const q = sb.from('programmes').select('id').eq('id', input.id).eq('org_id', org);
+  const { data: prog } = await (clientId ? q.eq('client_id', clientId) : q.is('client_id', null)).maybeSingle();
   if (!prog) return 'Programme not found. Reload the page.';
   const { data: lib } = await sb.from('exercises').select('id, measure').eq('org_id', org);
   const c = checkProgramme(input, lib ?? []);
@@ -53,7 +54,7 @@ export async function saveProgramme(clientId: string, input: EdProgramme): Promi
       if (error) return fail;
     }
   }
-  revalidatePath(`/coach/clients/${clientId}`);
-  revalidatePath(`/coach/clients/${clientId}/programme`);
+  if (clientId) { revalidatePath(`/coach/clients/${clientId}`); revalidatePath(`/coach/clients/${clientId}/programme`); }
+  else { revalidatePath('/coach/programmes'); revalidatePath(`/coach/programmes/mine/${p.id}`); }
   return null;
 }

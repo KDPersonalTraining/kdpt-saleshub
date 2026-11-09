@@ -4,6 +4,7 @@ import { Sec, Tag } from '@/components/coach/ui';
 import { PARQ } from '@/lib/client/sample-data';
 import { Training, type CoachSession } from './training';
 import { RecordExtras, type Extras } from './record-extras';
+import type { MyProgramme } from '@/components/coach/assign';
 
 const TYPE: Record<string, string> = { in_person: 'In-person', hybrid: 'Hybrid', online: 'Online' };
 const GOAL: Record<string, string> = { strength: 'Get stronger', fat: 'Lose fat', fit: 'Feel fitter', pain: 'Move pain-free' };
@@ -12,8 +13,8 @@ const date = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('en
 
 // A real client's record: their sign-up answers (health first), consents and
 // recent activity. More tabs arrive as each part moves into the database.
-export function LiveProfile({ extras, id, programme, sessions, name, added, type, lastActive, state, answers, submitted, consents }: {
-  extras: Extras; id: string; programme: { name: string; week: number; weeks: number | null; startsOn: string | null } | null; sessions: CoachSession[];
+export function LiveProfile({ mine, extras, id, programme, sessions, name, added, type, lastActive, state, answers, submitted, consents }: {
+  mine: MyProgramme[]; extras: Extras; id: string; programme: { name: string; week: number; weeks: number | null; startsOn: string | null } | null; sessions: CoachSession[];
   name: string; added: string; type: string | null; lastActive: string | null; state: Record<string, unknown> | null;
   answers: Record<string, unknown> | null; submitted: string | null; consents: { kind: string; granted: boolean }[];
 }) {
@@ -47,7 +48,7 @@ export function LiveProfile({ extras, id, programme, sessions, name, added, type
         </div>
       )}
 
-      <Training clientId={id} name={name} programme={programme} sessions={sessions} />
+      <Training mine={mine} clientId={id} name={name} programme={programme} sessions={sessions} />
       <RecordExtras clientId={id} x={extras} />
 
       <div className="statrow">

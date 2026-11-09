@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Icon } from '@/components/icon';
-import { AssignModal } from '@/components/coach/assign';
+import { AssignModal, type MyProgramme } from '@/components/coach/assign';
+import { useRouter } from 'next/navigation';
+import { blankForClient } from '../../programmes/actions';
 import { Sec, Tag } from '@/components/coach/ui';
 import { prettyDate } from '@/lib/programmes/plan';
 import { coveredLike, liftedLike } from '@/lib/client/fun';
@@ -17,10 +19,11 @@ const fun = (x: CoachSession) => [
 ].filter(Boolean).join(' · ');
 
 // A client's programme and their logged workouts, on their record.
-export function Training({ clientId, name, programme, sessions }: {
-  clientId: string; name: string; programme: { name: string; week: number; weeks: number | null; startsOn: string | null } | null; sessions: CoachSession[];
+export function Training({ clientId, name, programme, sessions, mine = [] }: {
+  mine?: MyProgramme[]; clientId: string; name: string; programme: { name: string; week: number; weeks: number | null; startsOn: string | null } | null; sessions: CoachSession[];
 }) {
   const [assign, setAssign] = useState(false);
+  const router = useRouter();
   const [open, setOpen] = useState<string | null>(sessions[0]?.id ?? null);
   const first = name.split(' ')[0];
   return (
@@ -48,9 +51,10 @@ export function Training({ clientId, name, programme, sessions }: {
           : <p style={{ margin: 0, color: 'var(--fg2)' }}>No programme yet. Their Train screen says it’s on its way.</p>}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
           {programme && <Link className="btn mint" href={`/coach/clients/${clientId}/programme`}><Icon name="programmes" className="sm" />Edit programme</Link>}
-          <button className={`btn ${programme ? 'line' : 'mint'}`} onClick={() => setAssign(true)}>{programme ? 'Swap to a starter' : 'Give a programme'}</button></div>
+          <button className={`btn ${programme ? 'line' : 'mint'}`} onClick={() => setAssign(true)}>{programme ? 'Swap to another programme' : 'Give a programme'}</button>
+          {!programme && <button className="btn line" onClick={async () => { const r = await blankForClient(clientId); if (!r.error) router.push(`/coach/clients/${clientId}/programme`); }}>Build from scratch</button>}</div>
       </div>
-      {assign && <AssignModal clients={[{ id: clientId, name, programme: programme?.name ?? null }]} fixedClient={clientId} onClose={() => setAssign(false)} />}
+      {assign && <AssignModal clients={[{ id: clientId, name, programme: programme?.name ?? null }]} fixedClient={clientId} mine={mine} onClose={() => setAssign(false)} />}
     </div>
   );
 }

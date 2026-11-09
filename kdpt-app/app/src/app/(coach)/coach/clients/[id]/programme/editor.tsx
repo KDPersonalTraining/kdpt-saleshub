@@ -18,7 +18,8 @@ const field = { background: 'var(--s1)', border: '1px solid var(--hair)', border
 
 // Kyle edits one client's programme: its workouts and, in each, the
 // exercises, sets, reps (or minutes for cardio), rest, priority and notes.
-export function ProgrammeEditor({ clientId, clientName, start, library }: { clientId: string; clientName: string; start: EdProgramme; library: LibExercise[] }) {
+// clientId null: one of Kyle's own programmes (a template), not a client's.
+export function ProgrammeEditor({ clientId, clientName, start, library, backHref, extra }: { clientId: string | null; clientName: string; start: EdProgramme; library: LibExercise[]; backHref?: string; extra?: React.ReactNode }) {
   const toast = useToast(), router = useRouter();
   const [p, setP] = useState<EdProgramme>(start);
   const [wi, setWi] = useState(0);
@@ -28,7 +29,7 @@ export function ProgrammeEditor({ clientId, clientName, start, library }: { clie
   const dirty = JSON.stringify(p) !== JSON.stringify(start);
   const lib = useMemo(() => new Map(library.map(e => [e.id, e])), [library]);
   const w = p.workouts[Math.min(wi, p.workouts.length - 1)];
-  const first = clientName.split(' ')[0];
+  const first = clientId ? clientName.split(' ')[0] : 'the client';
 
   const setW = (patch: Partial<EdWorkout>) => setP({ ...p, workouts: p.workouts.map((x, i) => (i === wi ? { ...x, ...patch } : x)) });
   const setItem = (j: number, patch: Partial<EdItem>) => setW({ items: w.items.map((x, k) => (k === j ? { ...x, ...patch } : x)) });
@@ -48,20 +49,20 @@ export function ProgrammeEditor({ clientId, clientName, start, library }: { clie
     const e = await saveProgramme(clientId, p);
     setBusy(false);
     if (e) { setErr(e); return; }
-    toast(`Saved. ${first} sees the changes next time they open the app.`);
+    toast(clientId ? `Saved. ${first} sees the changes next time they open the app.` : 'Saved. Clients already on it keep their own copy.');
     router.refresh();
   };
 
   return (
     <>
-      <div className="head"><div><Link className="crumb" href={`/coach/clients/${clientId}`}><Icon name="back" className="sm" />{clientName}</Link>
+      <div className="head"><div><Link className="crumb" href={backHref ?? `/coach/clients/${clientId}`}><Icon name="back" className="sm" />{clientName}</Link>
         <input className="tname" value={p.name} onChange={e => setP({ ...p, name: e.target.value })} aria-label="Programme name" /></div>
-        <button className="btn mint" disabled={!dirty || busy} onClick={save}><Icon name="check" className="sm" />{busy ? 'Saving…' : dirty ? 'Save changes' : 'Saved'}</button></div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{extra}<button className="btn mint" disabled={!dirty || busy} onClick={save}><Icon name="check" className="sm" />{busy ? 'Saving…' : dirty ? 'Save changes' : 'Saved'}</button></div></div>
       {err && <div className="flag" role="alert"><Icon name="info" /><span>{err}</span></div>}
 
       <div className="card pad"><div className="fields">
         <label>Length (weeks)<input type="number" min={1} max={52} value={p.weeks} onChange={e => setP({ ...p, weeks: Math.max(1, Math.min(52, +e.target.value || 1)) })} /></label>
-        <label>Week 1 starts<input type="date" value={p.startsOn} onChange={e => setP({ ...p, startsOn: e.target.value })} /></label>
+        {clientId && <label>Week 1 starts<input type="date" value={p.startsOn} onChange={e => setP({ ...p, startsOn: e.target.value })} /></label>}
       </div></div>
 
       <div className="toolbar">
@@ -117,7 +118,7 @@ export function ProgrammeEditor({ clientId, clientName, start, library }: { clie
       )}
       {dirty && (
         <div style={{ position: 'sticky', bottom: 12, zIndex: 5, display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderRadius: 12, background: 'var(--s3)', border: '1px solid var(--hair)' }}>
-          <span className="muted" style={{ fontSize: 13 }}>Not saved yet. {first}’s logged workouts are kept whatever you change.</span>
+          <span className="muted" style={{ fontSize: 13 }}>Not saved yet.{clientId ? ` ${first}’s logged workouts are kept whatever you change.` : ''}</span>
           <button className="btn mint" disabled={busy} onClick={save}>{busy ? 'Saving…' : 'Save changes'}</button></div>
       )}
       {picker && <Picker library={library} title={picker.replace != null ? 'Change exercise' : 'Add an exercise'} onPick={pick} onClose={() => setPicker(null)} />}
