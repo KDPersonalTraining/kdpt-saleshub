@@ -22,7 +22,9 @@ export type LiveCheckIn = {
   questions: CheckInQuestion[]; submittedAt: string | null; reply: string | null;
 };
 export type LiveBooking = { id: string; start: string; end: string; status: string; location: string; pending: boolean };
-export type LiveData = { orgId: string; plan: LivePlan | null; sessions: SessionSummary[]; checkin: LiveCheckIn | null; progress: Progress; bookings: LiveBooking[] };
+export type LiveNutrition = { mode: 'full' | 'protein' | 'simple'; kcal: number | null; P: number | null; C: number | null; F: number | null; notes: string | null };
+export type LiveData = { orgId: string; plan: LivePlan | null; sessions: SessionSummary[]; checkin: LiveCheckIn | null; progress: Progress; bookings: LiveBooking[];
+  nutrition: LiveNutrition | null; weights: { date: string; kg: number }[] };
 
 const Ctx = createContext<LiveData | null>(null);
 export const LiveProvider = ({ value, children }: { value: LiveData | null; children: React.ReactNode }) => <Ctx.Provider value={value}>{children}</Ctx.Provider>;

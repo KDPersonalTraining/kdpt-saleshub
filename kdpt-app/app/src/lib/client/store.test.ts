@@ -20,3 +20,16 @@ describe('pickNewest', () => {
     expect(pickNewest({ savedAt: 5, v: 'phone' }, { savedAt: 5, v: 'db' })).toMatchObject({ v: 'phone' });
   });
 });
+
+describe('a new day of food', () => {
+  it('starts the log empty and keeps the day before as totals', async () => {
+    const { rollFoodDay } = await import('./store');
+    const log = { Breakfast: [{ food: 'eggs', qty: 1 }], Lunch: [], Snacks: [], Dinner: [] };
+    expect(rollFoodDay({ log, water: 3, logDay: undefined, foodHistory: undefined }, '2026-11-12')).toEqual({ logDay: '2026-11-12' });
+    expect(rollFoodDay({ log, water: 3, logDay: '2026-11-12', foodHistory: undefined }, '2026-11-12')).toEqual({});
+    const next = rollFoodDay({ log, water: 3, logDay: '2026-11-12', foodHistory: {} }, '2026-11-13');
+    expect(next.log).toEqual({ Breakfast: [], Lunch: [], Snacks: [], Dinner: [] });
+    expect(next.water).toBe(0);
+    expect(next.foodHistory?.['2026-11-12'].kcal).toBe(150);
+  });
+});

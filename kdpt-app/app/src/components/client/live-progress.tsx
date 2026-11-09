@@ -1,7 +1,11 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useUI } from '@/components/client/shell';
+import { localDay } from '@/lib/client/store';
+import { browserClient } from '@/lib/supabase/browser';
 import { Empty } from '@/components/client/ui';
 import { coveredLike, liftedLike } from '@/lib/client/fun';
 import { useLive } from '@/lib/client/live';
@@ -10,12 +14,13 @@ import { shortDate } from '@/lib/programmes/plan';
 // A real client's progress: totals, how each lift is going, personal bests
 // and the last 8 weeks.
 export function LiveProgress() {
-  const p = useLive()!.progress;
+  const live = useLive()!, p = live.progress;
   const [lift, setLift] = useState(0);
   if (!p.totals.sessions) return (
     <div className="ds ds-page fade">
       <div><div className="ds-eyebrow">Your progress</div><h1 className="ds-title">Progress</h1></div>
       <Empty icon="progress" color="var(--mint)" title="Your progress starts here">Your lifts, bests and weekly totals appear after your first workout.</Empty>
+      <Weight />
     </div>
   );
   const l = p.lifts[lift], first = l?.points[0], last = l?.points[l.points.length - 1];
@@ -54,6 +59,8 @@ export function LiveProgress() {
         </section>
       )}
 
+      <Weight />
+
       <section className="ds-section">
         <header><h2 className="ds-h2">Last 8 weeks</h2></header>
         <div className="ds-weeks" role="img" aria-label={`Workouts per week: ${p.weeks.map(w => w.sessions).join(', ')}`}>{p.weeks.map(w => (
@@ -61,6 +68,34 @@ export function LiveProgress() {
         ))}</div>
       </section>
     </div>
+  );
+}
+
+// Weigh-ins: optional, private to the client and Kyle.
+function Weight() {
+  const live = useLive()!, { me, toast } = useUI(), router = useRouter();
+  const w = live.weights, [kg, setKg] = useState(''), [busy, setBusy] = useState(false);
+  const last = w[w.length - 1], change = w.length > 1 ? Math.round((last.kg - w[0].kg) * 10) / 10 : null;
+  const save = async () => {
+    const v = Number(kg.replace(',', '.'));
+    if (!(v >= 25 && v <= 300)) { toast('Enter your weight in kg, e.g. 72.4'); return; }
+    const sb = browserClient(); if (!sb) return;
+    setBusy(true);
+    const today = localDay();
+    await sb.from('body_measurements').delete().eq('client_id', me.id).eq('metric', 'bodyweight_kg').eq('measured_on', today);
+    const { error } = await sb.from('body_measurements').insert({ org_id: live.orgId, client_id: me.id, metric: 'bodyweight_kg', value: Math.round(v * 10) / 10, measured_on: today });
+    setBusy(false);
+    if (error) { toast('Couldn’t save it. Check your signal.'); return; }
+    setKg(''); toast('Saved'); router.refresh();
+  };
+  return (
+    <section className="ds-section">
+      <header><h2 className="ds-h2">Weight</h2><span style={{ color: 'var(--fg3)', fontSize: 14 }}>Optional</span></header>
+      {w.length > 1 && <Trend values={w.slice(-30).map(x => x.kg)} />}
+      {last && <p style={{ margin: 0, color: 'var(--fg2)', fontSize: 14 }}>Latest {last.kg} kg on {shortDate(last.date)}{change !== null ? ` · ${change > 0 ? '+' : ''}${change} kg since ${shortDate(w[0].date)}` : ''}. Day-to-day changes are mostly water, so look at the trend.</p>}
+      <div style={{ display: 'flex', gap: 8 }}><input className="ds-input num" inputMode="decimal" placeholder="Today’s weight, kg" value={kg} onChange={e => setKg(e.target.value.replace(/[^\d.,]/g, '').slice(0, 6))} aria-label="Weight in kg" />
+        <button className="ds-btn secondary" style={{ width: 'auto' }} disabled={busy || !kg} onClick={save}>Save</button></div>
+    </section>
   );
 }
 
