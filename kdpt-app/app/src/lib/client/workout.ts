@@ -3,7 +3,7 @@ import { WORKOUT, type Exercise } from './sample-data';
 
 // Today's workout, cut to fit the time the client has.
 export function planFor<E extends Exercise>(minutes: number, workout: { exercises: E[] } = WORKOUT as unknown as { exercises: E[] }) {
-  const fitted = fitToTime(workout.exercises.map(e => ({ id: e.id, sets: e.sets, restSeconds: e.rest, setupMinutes: e.setup, priority: e.priority })), minutes);
+  const fitted = fitToTime(workout.exercises.map(e => ({ id: e.id, sets: e.sets, restSeconds: e.rest, setupMinutes: e.setup, priority: e.priority, ...(e.measure === 'distance' ? { workSeconds: e.reps[0] * 60 } : {}) })), minutes);
   return { minutes: fitted.minutes, items: fitted.items.map(it => ({ ex: workout.exercises.find(e => e.id === it.exercise.id)!, sets: it.sets })) };
 }
 

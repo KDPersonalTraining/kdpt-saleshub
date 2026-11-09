@@ -19,10 +19,13 @@ export function stepLoad(value: string, by: number): string {
   const next = Math.min(500, Math.max(0, (isFinite(n) ? n : 0) + by));
   return String(Math.round(next * 100) / 100);
 }
-export function stepReps(value: string, by: number): string {
+export function stepReps(value: string, by: number, max = 100): string {
   const n = parseInt(value, 10);
-  return String(Math.min(100, Math.max(1, (isFinite(n) ? n : 0) + by)));
+  return String(Math.min(max, Math.max(1, (isFinite(n) ? n : 0) + by)));
 }
+// Cardio: distance by 0.1 km (0 to 100), minutes by 1 (1 to 600).
+export const stepKm = (value: string, by: number) => { const n = Number(String(value).replace(',', '.')); return String(Math.round(Math.min(100, Math.max(0, (isFinite(n) ? n : 0) + by)) * 10) / 10); };
+export const stepMins = (value: string, by: number) => stepReps(value, by, 600);
 
 // The set to log next: the first one not done, or null when all are done.
 export const nextSetIndex = (sets: { done: boolean }[]) => { const i = sets.findIndex(x => !x.done); return i < 0 ? null : i; };

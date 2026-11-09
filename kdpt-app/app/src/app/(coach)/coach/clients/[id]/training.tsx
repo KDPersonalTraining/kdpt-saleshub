@@ -4,11 +4,15 @@ import { useState } from 'react';
 import { AssignModal } from '@/components/coach/assign';
 import { Sec, Tag } from '@/components/coach/ui';
 import { prettyDate } from '@/lib/programmes/plan';
-import { liftedLike } from '@/lib/client/lifted';
+import { coveredLike, liftedLike } from '@/lib/client/fun';
 
-export type CoachSession = { id: string; workout: string; date: string; minutes: number | null; rpe: number | null; note: string | null; sets: [string, [number | null, number][]][] };
+export type CoachSession = { id: string; workout: string; date: string; minutes: number | null; rpe: number | null; note: string | null; sets: [string, string[]][]; volume: number; distance: number };
 
-const volume = (x: CoachSession) => Math.round(x.sets.reduce((t, [, sets]) => t + sets.reduce((a, [w, r]) => a + (w ?? 0) * r, 0), 0));
+// "4,620 kg (3 hippos) · 2.4 km (7 times the height of the Eiffel Tower)"
+const fun = (x: CoachSession) => [
+  x.volume ? `${x.volume.toLocaleString('en-GB')} kg${liftedLike(x.volume, x.id) ? ` (${liftedLike(x.volume, x.id)!.words})` : ''}` : '',
+  x.distance ? `${Math.round(x.distance / 100) / 10} km${coveredLike(x.distance, x.id) ? ` (${coveredLike(x.distance, x.id)!.words})` : ''}` : '',
+].filter(Boolean).join(' · ');
 
 // A client's programme and their logged workouts, on their record.
 export function Training({ clientId, name, programme, sessions }: {
@@ -25,11 +29,11 @@ export function Training({ clientId, name, programme, sessions }: {
         <div style={{ display: 'grid', gap: 4 }}>{sessions.map(x => (
           <div key={x.id} style={{ borderTop: '1px solid var(--hair)', paddingTop: 10 }}>
             <button onClick={() => setOpen(open === x.id ? null : x.id)} style={{ display: 'flex', width: '100%', justifyContent: 'space-between', gap: 12, textAlign: 'left', padding: '4px 0' }} aria-expanded={open === x.id}>
-              <span><b>{x.workout}</b> <span className="muted num" style={{ fontSize: 13 }}>{x.date}{x.minutes ? ` · ${x.minutes} min` : ''}{volume(x) ? ` · ${volume(x).toLocaleString('en-GB')} kg${liftedLike(volume(x)) ? ` (${liftedLike(volume(x))!.words})` : ''}` : ''}</span></span>
+              <span><b>{x.workout}</b> <span className="muted num" style={{ fontSize: 13 }}>{x.date}{x.minutes ? ` · ${x.minutes} min` : ''}{fun(x) ? ` · ${fun(x)}` : ''}</span></span>
               {x.rpe ? <Tag c="grey">RPE {x.rpe}</Tag> : null}
             </button>
             {open === x.id && <div style={{ display: 'grid', gap: 6, padding: '6px 0 10px' }}>
-              {x.sets.map(([n, sets]) => <div key={n} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 13 }}><span>{n}</span><span className="num" style={{ color: 'var(--fg2)' }}>{sets.map(([w, r]) => (w ? `${w}×${r}` : `${r} reps`)).join('  ')}</span></div>)}
+              {x.sets.map(([n, sets]) => <div key={n} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 13 }}><span>{n}</span><span className="num" style={{ color: 'var(--fg2)' }}>{sets.join('  ')}</span></div>)}
               {x.note && <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--amber)', whiteSpace: 'pre-line' }}>{x.note}</p>}
             </div>}
           </div>

@@ -2,39 +2,41 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { DEFAULT_QUESTIONS, type CheckInQuestion } from '@/lib/checkins/questions';
 import { currentRound, isoDay, lastResults, nextWorkout, roundAfter, weekOf, workoutsForWeek, type Frequency, type SetRow } from '@/lib/programmes/plan';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { setWords } from './format';
 import type { LiveCheckIn, LiveData, LivePlan, PlanExercise, PlanWorkout, SessionSummary } from './live';
 
 type Kit = PlanExercise['kit'];
 const KIT: Record<string, Kit> = { barbell: 'barbell', smith: 'barbell', dumbbell: 'dumbbell', kettlebell: 'dumbbell', bodyweight: 'body', band: 'body' };
 
-type ExRow = { id: string; slug: string; name: string; load_type: string; load_increment_kg: number; setup_minutes: number; cues: string[] };
+type ExRow = { id: string; slug: string; name: string; load_type: string; load_increment_kg: number; setup_minutes: number; cues: string[]; measure?: string };
 type WeRow = { id: string; position: number; working_sets: number; rep_min: number; rep_max: number; rest_seconds: number; priority: PlanExercise['priority']; coach_note: string | null; exercises: ExRow | null };
 type WoRow = { id: string; name: string; focus: string | null; phase: string | null; day_order: number; week_from: number | null; week_to: number | null; workout_exercises: WeRow[] };
-type LogRow = SetRow & { exercises: { name: string } | null };
+type LogRow = SetRow & { distance_m: number | null; duration_s: number | null; exercises: { name: string } | null };
 
 // Everything the client app shows from the database, for one client.
 export async function loadLive(sb: SupabaseClient, me: { id: string; orgId: string }, today = new Date()): Promise<LiveData> {
   const [{ data: prog }, { data: sess }, { data: logs }] = await Promise.all([
     sb.from('programmes').select('id, name, weeks, starts_on').eq('client_id', me.id).eq('status', 'active').order('created_at', { ascending: false }).limit(1).maybeSingle(),
     sb.from('workout_sessions').select('id, workout_id, started_at, completed_at, status').eq('client_id', me.id).order('started_at', { ascending: false }).limit(40),
-    sb.from('set_logs').select('exercise_id, session_id, set_number, load_kg, reps, completed_at, exercises(name)').eq('client_id', me.id).eq('deleted', false).order('completed_at', { ascending: false }).limit(1500),
+    sb.from('set_logs').select('exercise_id, session_id, set_number, load_kg, reps, distance_m, duration_s, completed_at, exercises(name)').eq('client_id', me.id).eq('deleted', false).order('completed_at', { ascending: false }).limit(1500),
   ]);
   const last = lastResults((logs ?? []) as unknown as SetRow[]);
 
   let plan: LivePlan | null = null;
   if (prog) {
     const { data: wos } = await sb.from('workouts')
-      .select('id, name, focus, phase, day_order, week_from, week_to, workout_exercises(id, position, working_sets, rep_min, rep_max, rest_seconds, priority, coach_note, exercises(id, slug, name, load_type, load_increment_kg, setup_minutes, cues))')
+      .select('id, name, focus, phase, day_order, week_from, week_to, workout_exercises(id, position, working_sets, rep_min, rep_max, rest_seconds, priority, coach_note, exercises(id, slug, name, load_type, load_increment_kg, setup_minutes, cues, measure))')
       .eq('programme_id', prog.id).order('day_order');
     const workouts: PlanWorkout[] = ((wos ?? []) as unknown as WoRow[]).map(w => ({
       id: w.id, name: w.name, focus: w.focus, phase: w.phase, order: w.day_order, weekFrom: w.week_from, weekTo: w.week_to,
       exercises: [...w.workout_exercises].sort((a, b) => a.position - b.position).filter(we => we.exercises).map(we => {
         const e = we.exercises!, l = last[e.id];
-        const inc = e.load_type === 'bodyweight' ? 0 : Number(e.load_increment_kg);
+        const cardio = e.measure === 'distance';
+        const inc = e.load_type === 'bodyweight' || cardio ? 0 : Number(e.load_increment_kg);
         return {
           id: we.id, lib: e.slug, name: e.name, sets: we.working_sets, reps: [we.rep_min, we.rep_max] as [number, number], rest: we.rest_seconds,
           inc, priority: we.priority, setup: Number(e.setup_minutes), kit: KIT[e.load_type] ?? 'machine',
-          last: l ? { load: inc === 0 ? 0 : l.load, reps: l.reps } : { load: 0, reps: [] }, alts: [],
+          last: l && !cardio ? { load: inc === 0 ? 0 : l.load, reps: l.reps } : { load: 0, reps: [] }, alts: [], measure: cardio ? 'distance' as const : 'reps' as const,
           exerciseId: e.id, cues: e.cues ?? [], note: we.coach_note, best: l?.best ?? 0,
         };
       }),
@@ -56,12 +58,12 @@ export async function loadLive(sb: SupabaseClient, me: { id: string; orgId: stri
   if (plan) for (const w of plan.workouts) names.set(w.id, w.name);
   const sessions: SessionSummary[] = (sess ?? []).filter(x => x.status === 'completed').slice(0, 20).map(x => {
     const rows = ((logs ?? []) as unknown as LogRow[]).filter(r => r.session_id === x.id).sort((a, b) => a.set_number - b.set_number);
-    const by = new Map<string, [number, number][]>();
-    for (const r of rows) { const n = r.exercises?.name ?? 'Exercise'; by.set(n, [...(by.get(n) ?? []), [Number(r.load_kg ?? 0), r.reps ?? 0]]); }
+    const by = new Map<string, string[]>();
+    for (const r of rows) { const n = r.exercises?.name ?? 'Exercise'; by.set(n, [...(by.get(n) ?? []), setWords(r)]); }
     return {
       id: x.id, workout: (x.workout_id && names.get(x.workout_id)) || 'Workout', startedAt: x.started_at,
       minutes: x.completed_at ? Math.max(1, Math.round((Date.parse(x.completed_at) - Date.parse(x.started_at)) / 60000)) : null,
-      volume: Math.round(rows.reduce((t, r) => t + Number(r.load_kg ?? 0) * (r.reps ?? 0), 0)), sets: [...by.entries()],
+      volume: Math.round(rows.reduce((t, r) => t + Number(r.load_kg ?? 0) * (r.reps ?? 0), 0)), distance: Math.round(rows.reduce((t, r) => t + Number(r.distance_m ?? 0), 0)), sets: [...by.entries()],
     };
   });
 

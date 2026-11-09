@@ -9,8 +9,8 @@ import { EXLIB, type Exercise } from '@/lib/client/sample-data';
 import { useCurrentWorkout, useLive, type CurrentWorkout } from '@/lib/client/live';
 import { sessionJob, uuid } from '@/lib/client/record';
 import { queueSession } from '@/lib/client/sync';
-import { clock, elapsedMs, nextSetIndex, stepLoad, stepReps } from '@/lib/client/session';
-import { parseLoad, parseReps } from '@/lib/client/summary';
+import { clock, elapsedMs, nextSetIndex, stepKm, stepLoad, stepMins, stepReps } from '@/lib/client/session';
+import { parseKm, parseLoad, parseMins, parseReps } from '@/lib/client/summary';
 import { setState, updateOnceLoaded, useClient, type ClientState, type SetLog } from '@/lib/client/store';
 import { planFor, repRange, suggestionFor } from '@/lib/client/workout';
 
@@ -21,7 +21,8 @@ const I = { size: 22, strokeWidth: 1.75 } as const;
 
 // First time on an exercise there's no weight to suggest: the box starts empty.
 const prefill = (ex: Exercise, n: number, cur: SetLog[] = []): SetLog[] => {
-  const load = ex.inc === 0 ? '0' : ex.last.reps.length ? String(suggestionFor(ex).load) : '';
+  // Cardio: distance starts empty (read it off the machine), minutes at the target.
+  const load = ex.measure === 'distance' ? '' : ex.inc === 0 ? '0' : ex.last.reps.length ? String(suggestionFor(ex).load) : '';
   return Array.from({ length: n }, (_, i) => cur[i] ?? { load, reps: String(ex.reps[1]), done: false });
 };
 const restLeft = (r: NonNullable<ClientState['rest']>, now: number) => (r.pausedLeft ?? Math.min(r.total, Math.max(0, Math.ceil((r.endsAt - now) / 1000))));
@@ -52,15 +53,21 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
   }, [left, s.rest]);
 
   const cur = editing ?? nextSetIndex(sets);
-  const bw = ex.inc === 0, name = s.swaps[ex.id] ?? ex.name, sug = suggestionFor(ex);
+  const dist = ex.measure === 'distance', bw = ex.inc === 0 && !dist, name = s.swaps[ex.id] ?? ex.name, sug = suggestionFor(ex);
+  const unit = dist ? 'min' : 'reps';
   const save = (next: SetLog[]) => setState({ logs: { ...s.logs, [ex.id]: next } });
   const change = (i: number, patch: Partial<SetLog>) => save(sets.map((x, j) => (j === i ? { ...x, ...patch } : x)));
 
   const complete = () => {
     if (cur == null) return;
     const x = sets[cur];
-    if (!bw && parseLoad(x.load) === null) { toast('Check the weight: a number up to 500 kg'); return; }
-    if (parseReps(x.reps) === null) { toast('Check the reps: a whole number from 1 to 100'); return; }
+    if (dist) {
+      if (parseKm(x.load) === null) { toast('Check the distance: in km, e.g. 2.4'); return; }
+      if (parseMins(x.reps) === null) { toast('Check the time: whole minutes, 1 to 600'); return; }
+    } else {
+      if (!bw && parseLoad(x.load) === null) { toast('Check the weight: a number up to 500 kg'); return; }
+      if (parseReps(x.reps) === null) { toast('Check the reps: a whole number from 1 to 100'); return; }
+    }
     const next = sets.map((y, j) => (j === cur ? { ...y, done: true } : y));
     const wasEditing = editing != null;
     setEditing(null);
@@ -91,7 +98,7 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
   const lib = EXLIB.find(e => e.id === ex.lib);
   const cues = w.exercises.find(e => e.id === ex.id)?.cues?.length ? w.exercises.find(e => e.id === ex.id)!.cues! : lib?.cues ?? [];
   const note = w.exercises.find(e => e.id === ex.id)?.note;
-  const first = !bw && ex.last.reps.length === 0;
+  const first = !bw && !dist && ex.last.reps.length === 0;
 
   return (
     <div className="wm">
@@ -112,23 +119,29 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
         <main className="wm-main" key={ex.id}>
           <div className="wm-ex">
             <h1>{name}</h1>
-            <p className="wm-meta num">{cur == null ? 'All sets done' : `Set ${cur + 1} of ${n}`} · {repRange(ex)} reps · rest {fmtSecs(ex.rest)}</p>
+            <p className="wm-meta num">{cur == null ? (dist ? 'All rounds done' : 'All sets done') : `${dist ? 'Round' : 'Set'} ${cur + 1} of ${n}`} · {repRange(ex)} {unit} · rest {fmtSecs(ex.rest)}</p>
             {note && <p className="wm-meta">Kyle: {note}</p>}
           </div>
 
           {cur != null && (
             <section className="wm-set" aria-label={`Set ${cur + 1}`}>
               <div className="wm-values">
+                {dist ? (<>
+                  <Value label="km" value={sets[cur].load} kind="km" onChange={v => change(cur, { load: v })} onStep={d => change(cur, { load: stepKm(sets[cur].load, d * 0.1) })} />
+                  <Value label="min" value={sets[cur].reps} kind="mins" onChange={v => change(cur, { reps: v })} onStep={d => change(cur, { reps: stepMins(sets[cur].reps, d) })} />
+                </>) : (<>
                 {!bw && <Value label="kg" value={sets[cur].load} kind="load" onChange={v => change(cur, { load: v })} onStep={d => change(cur, { load: stepLoad(sets[cur].load, d * (ex.inc || 2.5)) })} />}
                 <Value label="reps" value={sets[cur].reps} kind="reps" onChange={v => change(cur, { reps: v })} onStep={d => change(cur, { reps: stepReps(sets[cur].reps, d) })} />
+                </>)}
               </div>
               <p className="wm-target">
-                {bw ? <>Bodyweight · aim for {repRange(ex)} reps</> : s.swaps[ex.id] ? <>Swapped exercise · pick a weight you can do {repRange(ex)} reps with</>
+                {dist ? <>Aim for {repRange(ex)} minutes · log the distance from the machine or your watch</>
+                  : bw ? <>Bodyweight · aim for {repRange(ex)} reps</> : s.swaps[ex.id] ? <>Swapped exercise · pick a weight you can do {repRange(ex)} reps with</>
                   : first ? <>First time · pick a weight you could do <b>{ex.reps[1] + 2}</b> reps with, then do {repRange(ex)}</>
                   : <>Target <b className="num">{sug.load} kg × {repRange(ex)}</b>{sug.increased ? ` · up ${ex.inc} kg` : ''}</>}
                 {ex.last.reps.length > 0 && <><br /><span className="num">Last time {bw ? 'BW' : `${ex.last.load} kg`} × {ex.last.reps.join(', ')}</span></>}
               </p>
-              <button className="wm-primary" onClick={complete}><Check {...I} size={24} />{editing != null ? `Save set ${cur + 1}` : `Complete set ${cur + 1}`}</button>
+              <button className="wm-primary" onClick={complete}><Check {...I} size={24} />{`${editing != null ? 'Save' : 'Complete'} ${dist ? 'round' : 'set'} ${cur + 1}`}</button>
               {editing != null && <button className="wm-text center" onClick={() => setEditing(null)}>Cancel edit</button>}
             </section>
           )}
@@ -137,7 +150,7 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
           {doneSets > 0 && (
             <ol className="wm-done">{sets.map((x, i) => x.done && (
               <li key={i}><button onClick={() => setEditing(i)} aria-label={`Edit set ${i + 1}`}>
-                <span className="n">{i + 1}</span><span className="num">{bw ? 'BW' : `${x.load} kg`} × {x.reps}</span><Check {...I} size={18} className="ok" /><span className="edit">Edit</span></button></li>
+                <span className="n">{i + 1}</span><span className="num">{dist ? `${x.load} km · ${x.reps} min` : <>{bw ? 'BW' : `${x.load} kg`} × {x.reps}</>}</span><Check {...I} size={18} className="ok" /><span className="edit">Edit</span></button></li>
             ))}</ol>
           )}
 
@@ -155,7 +168,7 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
           <span className="wm-cap">{s.rest.pausedLeft !== null ? 'Rest paused' : 'Rest'}</span>
           <div className="wm-ring"><svg viewBox="0 0 260 260" width="260" height="260"><Ring size={260} stroke={6} pct={left / s.rest.total} color="var(--mint)" track="rgba(255,255,255,.08)" /></svg>
             <b className="num">{fmtSecs(left)}</b></div>
-          {cur != null && <p className="wm-next num">Next: set {cur + 1} · {bw ? 'bodyweight' : `${sets[cur].load} kg`} × {sets[cur].reps}</p>}
+          {cur != null && <p className="wm-next num">Next: {dist ? `round ${cur + 1} · ${sets[cur].reps} min` : <>set {cur + 1} · {bw ? 'bodyweight' : `${sets[cur].load} kg`} × {sets[cur].reps}</>}</p>}
           <div className="wm-rest-btns">
             <button onClick={() => setState({ rest: { ...s.rest!, endsAt: s.rest!.endsAt + 30000, total: s.rest!.total + 30, pausedLeft: s.rest!.pausedLeft === null ? null : s.rest!.pausedLeft + 30 } })}>+30 s</button>
             <button onClick={() => setState({ rest: s.rest!.pausedLeft === null ? { ...s.rest!, pausedLeft: left } : { ...s.rest!, endsAt: Date.now() + s.rest!.pausedLeft * 1000, pausedLeft: null } })}>{s.rest.pausedLeft === null ? 'Pause' : 'Resume'}</button>
@@ -196,16 +209,17 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
 }
 
 // A big number with − and + either side. Tapping the number lets you type it.
-function Value({ label, value, kind, onChange, onStep }: { label: string; value: string; kind: 'load' | 'reps'; onChange: (v: string) => void; onStep: (d: number) => void }) {
+const CHECK = { load: parseLoad, reps: parseReps, km: parseKm, mins: parseMins };
+function Value({ label, value, kind, onChange, onStep }: { label: string; value: string; kind: keyof typeof CHECK; onChange: (v: string) => void; onStep: (d: number) => void }) {
   const ref = useRef<HTMLInputElement>(null);
-  const bad = value !== '' && (kind === 'load' ? parseLoad(value) : parseReps(value)) === null;
+  const bad = value !== '' && CHECK[kind](value) === null;
   const select = () => { const el = ref.current; if (!el) return; const v = el.value; el.select(); requestAnimationFrame(() => { if (el.value === v && document.activeElement === el) el.setSelectionRange(0, v.length); }); };
   return (
     <div className={`wm-value ${bad ? 'bad' : ''}`}>
       <button className="step" onClick={() => onStep(-1)} aria-label={`Less ${label}`}><Minus {...I} size={26} /></button>
-      <label><input ref={ref} className="num" inputMode={kind === 'load' ? 'decimal' : 'numeric'} value={value} placeholder="–" aria-label={label} aria-invalid={bad}
+      <label><input ref={ref} className="num" inputMode={kind === 'load' || kind === 'km' ? 'decimal' : 'numeric'} value={value} placeholder="–" aria-label={label} aria-invalid={bad}
         onFocus={select} onClick={select} onMouseUp={e => e.preventDefault()}
-        onChange={e => onChange(kind === 'reps' ? e.target.value.replace(/\D/g, '').slice(0, 3) : e.target.value.replace(/[^\d.,]/g, '').slice(0, 6))} /><span>{label}</span></label>
+        onChange={e => onChange(kind === 'reps' || kind === 'mins' ? e.target.value.replace(/\D/g, '').slice(0, 3) : e.target.value.replace(/[^\d.,]/g, '').slice(0, 6))} /><span>{label}</span></label>
       <button className="step" onClick={() => onStep(1)} aria-label={`More ${label}`}><Plus {...I} size={26} /></button>
     </div>
   );
@@ -216,12 +230,14 @@ function Between({ ex, name, sets, rest, isLast, next, nextName, onNext, onBack 
   ex: Exercise; name: string; sets: SetLog[]; rest: number; isLast: boolean; next?: Exercise; nextName: string; onNext: () => void; onBack: () => void;
 }) {
   const s = useClient(), meta = s.exNotes[ex.id] ?? { rpe: null, note: '' };
-  const vol = Math.round(sets.filter(x => x.done).reduce((t, x) => t + (parseLoad(x.load) ?? 0) * (parseReps(x.reps) ?? 0), 0));
+  const dist = ex.measure === 'distance';
+  const vol = dist ? 0 : Math.round(sets.filter(x => x.done).reduce((t, x) => t + (parseLoad(x.load) ?? 0) * (parseReps(x.reps) ?? 0), 0));
+  const km = dist ? Math.round(sets.filter(x => x.done).reduce((t, x) => t + (parseKm(x.load) ?? 0), 0) * 10) / 10 : 0;
   const setMeta = (patch: Partial<typeof meta>) => setState({ exNotes: { ...s.exNotes, [ex.id]: { ...meta, ...patch } } });
   return (
     <main className="wm-main wm-between">
       <div className="wm-ex"><span className="wm-cap ok"><Check {...I} size={16} />Done</span><h1>{name}</h1>
-        <p className="wm-meta num">{sets.filter(x => x.done).length} sets{vol ? ` · ${vol.toLocaleString('en-GB')} kg lifted` : ''}</p></div>
+        <p className="wm-meta num">{sets.filter(x => x.done).length} {dist ? 'rounds' : 'sets'}{vol ? ` · ${vol.toLocaleString('en-GB')} kg lifted` : ''}{km ? ` · ${km} km` : ''}</p></div>
       <div className="wm-rpe">
         <span className="wm-cap">How hard was it? Optional</span>
         <div>{[6, 7, 8, 9, 10].map(v => <button key={v} aria-pressed={meta.rpe === v} onClick={() => setMeta({ rpe: meta.rpe === v ? null : v })}>{v}</button>)}</div>
@@ -231,7 +247,7 @@ function Between({ ex, name, sets, rest, isLast, next, nextName, onNext, onBack 
       <div className="wm-upnext">
         {isLast ? <><span className="wm-cap">That was the last exercise</span><h2>Ready to finish?</h2></>
           : <><span className="wm-cap">Up next{rest > 0 ? <> · rest <b className="num">{fmtSecs(rest)}</b></> : ''}</span><h2>{nextName}</h2>
-            {next && <p className="num">{next.sets} sets · {repRange(next)} reps</p>}</>}
+            {next && <p className="num">{next.sets} {next.measure === 'distance' ? (next.sets === 1 ? 'round' : 'rounds') : next.sets === 1 ? 'set' : 'sets'} · {repRange(next)} {next.measure === 'distance' ? 'min' : 'reps'}</p>}</>}
       </div>
       <button className="wm-primary" onClick={onNext}>{isLast ? 'Finish workout' : `Start ${nextName}`}</button>
       <button className="wm-text center" onClick={onBack}>Back to {name}</button>

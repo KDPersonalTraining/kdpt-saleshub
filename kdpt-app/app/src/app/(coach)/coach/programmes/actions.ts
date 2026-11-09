@@ -25,7 +25,7 @@ export async function assignStarter(v: { clientId: string; key: string; startsOn
   const used = new Set(starter.workouts.flatMap(w => w.items.map(i => i.slug)));
   const rows = EXERCISES.filter(e => used.has(e.slug)).map(e => ({
     org_id: org, slug: e.slug, name: e.name, movement_pattern: e.pattern, load_type: e.load, primary_muscles: e.muscles,
-    load_increment_kg: e.inc, setup_minutes: e.setup, cues: e.cues,
+    load_increment_kg: e.inc, setup_minutes: e.setup, cues: e.cues, measure: e.measure ?? 'reps',
   }));
   const { data: exs, error: e0 } = await sb.from('exercises').upsert(rows, { onConflict: 'org_id,slug' }).select('id, slug');
   if (e0 || !exs) return 'Couldn’t set up the exercises. Try again.';

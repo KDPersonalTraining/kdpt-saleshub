@@ -1,6 +1,6 @@
 import type { CurrentWorkout } from './live';
 import type { ClientState } from './store';
-import { parseLoad, parseReps } from './summary';
+import { parseKm, parseLoad, parseMins, parseReps } from './summary';
 import { suggestionFor } from './workout';
 import type { SessionJob } from './sync';
 
@@ -23,6 +23,15 @@ export function sessionJob(s: ClientState, w: CurrentWorkout, who: { clientId: s
     const done = (s.logs[ex.id] ?? []).filter(x => x.done);
     let n = 0;
     for (const x of done) {
+      if (ex.measure === 'distance') {
+        const km = parseKm(x.load), min = parseMins(x.reps);
+        if (km === null || min === null) continue;
+        n += 1;
+        sets.push({ id: uuid(), org_id: who.orgId, client_id: who.clientId, session_id: sid, workout_exercise_id: ex.id, exercise_id: ex.exerciseId,
+          set_number: n, kind: 'working', load_kg: null, reps: null, distance_m: Math.round(km * 1000), duration_s: min * 60,
+          completed_at: finished, device_updated_at: finished });
+        continue;
+      }
       const reps = parseReps(x.reps), load = ex.inc === 0 ? 0 : parseLoad(x.load);
       if (reps === null || load === null) continue;
       n += 1;

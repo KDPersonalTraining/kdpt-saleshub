@@ -7,6 +7,8 @@ export type Exercise = {
   id: string; lib: string; name: string; sets: number; reps: [number, number]; rest: number; inc: number;
   priority: Priority; setup: number; kit: 'machine' | 'dumbbell' | 'barbell' | 'body';
   last: { load: number; reps: number[] }; alts: [string, string, string][];
+  // 'distance': a run, row or ride, logged as km and minutes (reps holds the target minutes).
+  measure?: 'reps' | 'distance';
 };
 
 export const WORKOUT: { name: string; exercises: Exercise[] } = {

@@ -7,7 +7,8 @@
 // "must_keep" exercises are never removed.
 
 export type Priority = 'must_keep' | 'keep_if_time' | 'first_to_cut';
-export type PlannedExercise = { id: string; sets: number; restSeconds: number; setupMinutes: number; priority: Priority };
+// workSeconds: how long one set takes (cardio: its minutes). Default 50 seconds.
+export type PlannedExercise = { id: string; sets: number; restSeconds: number; setupMinutes: number; priority: Priority; workSeconds?: number };
 export type PlanItem = { exercise: PlannedExercise; sets: number };
 export type FittedPlan = { items: PlanItem[]; minutes: number; fits: boolean; removed: string[]; trimmed: string[] };
 
@@ -16,7 +17,7 @@ const WORK_SECONDS_PER_SET = 50;
 const MIN_SETS = 2;
 
 export function exerciseMinutes(ex: PlannedExercise, sets: number): number {
-  return ex.setupMinutes + (sets * WORK_SECONDS_PER_SET + (sets - 1) * ex.restSeconds) / 60 + 1;
+  return ex.setupMinutes + (sets * (ex.workSeconds ?? WORK_SECONDS_PER_SET) + (sets - 1) * ex.restSeconds) / 60 + 1;
 }
 
 export function planMinutes(items: PlanItem[]): number {

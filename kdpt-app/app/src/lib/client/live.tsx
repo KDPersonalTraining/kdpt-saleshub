@@ -10,7 +10,7 @@ import type { CheckInQuestion } from '@/lib/checkins/questions';
 // server for each visit (see the client layout) and shared with every screen.
 export type PlanExercise = Exercise & { exerciseId: string; cues: string[]; note: string | null; best: number };
 export type PlanWorkout = { id: string; name: string; focus: string | null; phase: string | null; order: number; weekFrom: number | null; weekTo: number | null; exercises: PlanExercise[] };
-export type SessionSummary = { id: string; workout: string; startedAt: string; minutes: number | null; volume: number; sets: [string, [number, number][]][] };
+export type SessionSummary = { id: string; workout: string; startedAt: string; minutes: number | null; volume: number; distance: number; sets: [string, string[]][] };
 export type LivePlan = {
   id: string; name: string; weeks: number | null; startsOn: string | null; week: number;
   workouts: PlanWorkout[]; thisWeek: string[]; nextId: string | null; doneThisWeek: string[];

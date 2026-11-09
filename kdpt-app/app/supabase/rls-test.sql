@@ -22,6 +22,8 @@ end $$;
 \ir migrations/20261106000000_api_grants.sql
 \ir migrations/20261109000000_programmes_messages_checkins.sql
 \ir migrations/20261109000000_programmes_messages_checkins.sql
+\ir migrations/20261110000000_cardio.sql
+\ir migrations/20261110000000_cardio.sql
 
 grant usage on schema public, app, auth to authenticated;
 grant select, insert, update, delete on all tables in schema public to authenticated;
@@ -317,5 +319,19 @@ select pg_temp.expect('Jo cannot see Sam''s check-in', (select count(*) from che
 select pg_temp.as_user('00000000-0000-0000-0000-000000000001');
 update check_ins set reviewed_at = now(), reviewed_by = auth.uid(), coach_reply = 'Nice week';
 select pg_temp.expect('Kyle replies to the check-in', (select count(*) from check_ins where coach_reply is not null), 1);
+
+-- Cardio: a row logged as distance and time.
+select pg_temp.as_user('00000000-0000-0000-0000-000000000002');
+insert into set_logs (id, org_id, client_id, session_id, exercise_id, set_number, distance_m, duration_s, completed_at, device_updated_at) values
+  ('00000000-0000-0000-0000-0000000005b2', '00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000005a1',
+   '00000000-0000-0000-0000-0000000000e2', 2, 1250, 300, now(), now());
+select pg_temp.expect('Sam logs a distance and time', (select count(*) from set_logs where distance_m = 1250 and duration_s = 300), 1);
+reset role;
+do $$ begin
+  update exercises set measure = 'laps';
+  raise exception 'FAIL unknown measure accepted';
+exception when check_violation then raise notice 'ok   exercises are measured in reps or distance only';
+end $$;
+set role authenticated;
 
 \echo 'All RLS checks passed.'
