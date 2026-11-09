@@ -7,6 +7,8 @@ import { useUI } from '@/components/client/shell';
 import { Chev, Empty, Li, Switch } from '@/components/client/ui';
 import { CONSISTENCY, LIFTS, MEASUREMENTS, RECORDS, WEEKLY_TOTALS } from '@/lib/client/sample-data';
 import { setState, useClient } from '@/lib/client/store';
+import { useLive } from '@/lib/client/live';
+import { LiveProgress } from '@/components/client/live-progress';
 import { estimateOneRepMax } from '@/lib/rules';
 import { describe, isoFromShort, movingAverage, windowChange, type Point } from '@/lib/client/trends';
 
@@ -24,7 +26,7 @@ const e1rm = (w: number, r: number) => Math.round(estimateOneRepMax(w, r) ?? w);
 const TABS = ['Strength', 'Records', 'Body', 'Consistency'];
 
 export default function ProgressPage() {
-  return <Suspense><Progress /></Suspense>;
+  return useLive() ? <LiveProgress /> : <Suspense><Progress /></Suspense>;
 }
 
 function Progress() {

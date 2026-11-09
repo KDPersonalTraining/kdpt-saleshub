@@ -3,13 +3,15 @@
 // changing a starter here never changes a plan someone is already on.
 
 export type Pattern = 'squat' | 'hinge' | 'lunge' | 'horizontal_push' | 'vertical_push' | 'horizontal_pull' | 'vertical_pull'
-  | 'carry' | 'core_anti_extension' | 'core_anti_rotation' | 'core_flexion' | 'isolation_upper' | 'isolation_lower';
-export type LoadType = 'barbell' | 'dumbbell' | 'kettlebell' | 'machine_stack' | 'machine_plate' | 'cable' | 'bodyweight';
+  | 'carry' | 'core_anti_extension' | 'core_anti_rotation' | 'core_flexion' | 'isolation_upper' | 'isolation_lower' | 'conditioning';
+export type LoadType = 'barbell' | 'dumbbell' | 'kettlebell' | 'machine_stack' | 'machine_plate' | 'cable' | 'bodyweight' | 'other';
 
 export type StarterExercise = {
   slug: string; name: string; pattern: Pattern; load: LoadType; muscles: string[];
   // Smallest sensible weight jump in kg. 0 = bodyweight (no weight to log).
   inc: number; setup: number; cues: string[];
+  // Cardio is logged as distance and time; its reps are the target minutes.
+  measure?: 'distance';
 };
 
 const x = (slug: string, name: string, pattern: Pattern, load: LoadType, muscles: string, inc: number, cues: string[], setup = 1): StarterExercise =>
@@ -60,6 +62,13 @@ export const EXERCISES: StarterExercise[] = [
   x('plank', 'Plank', 'core_anti_extension', 'bodyweight', 'Core, shoulders', 0, ['Elbows under shoulders', 'Squeeze glutes, ribs down', 'Stop when your hips drop'], 0.5),
   x('side-plank', 'Side Plank', 'core_anti_rotation', 'bodyweight', 'Obliques', 0, ['Elbow under your shoulder', 'Hips high, body in one line', 'Breathe steadily'], 0.5),
   x('pallof-press', 'Pallof Press', 'core_anti_rotation', 'cable', 'Core', 2.5, ['Stand side-on to the cable', 'Press straight out from your chest', 'Don’t let it pull you round'], 0.5),
+  // Cardio: logged as distance and time
+  { ...x('treadmill-walk', 'Incline Treadmill Walk', 'conditioning', 'other', 'Heart and lungs, legs', 0, ['Incline 6–12%, a pace you could chat at', 'Don’t hold the handrails', 'Log the distance from the screen'], 1), measure: 'distance' },
+  { ...x('treadmill-run', 'Treadmill Run', 'conditioning', 'other', 'Heart and lungs, legs', 0, ['Start easy for 2 minutes', 'Short, light steps', 'Log the distance from the screen'], 1), measure: 'distance' },
+  { ...x('outdoor-run', 'Outdoor Run or Walk', 'conditioning', 'other', 'Heart and lungs, legs', 0, ['Use your phone or watch for the distance', 'Easy enough to talk in short sentences', 'Walk breaks are fine'], 0.5), measure: 'distance' },
+  { ...x('rower', 'Rowing Machine', 'conditioning', 'other', 'Heart and lungs, back, legs', 0, ['Legs, then body, then arms', 'Damper around 4–5', 'Log the metres from the screen'], 1), measure: 'distance' },
+  { ...x('bike', 'Exercise Bike', 'conditioning', 'other', 'Heart and lungs, legs', 0, ['Seat at hip height', 'Steady cadence', 'Log the distance from the screen'], 1), measure: 'distance' },
+  { ...x('skierg', 'SkiErg', 'conditioning', 'other', 'Heart and lungs, back, arms', 0, ['Hinge and pull down together', 'Arms finish by your thighs', 'Log the metres from the screen'], 1), measure: 'distance' },
   x('farmers-carry', 'Farmer’s Carry', 'carry', 'dumbbell', 'Grip, core, upper back', 2, ['Heavy dumbbells by your sides', 'Walk tall, short quick steps', 'Don’t let them swing'], 1),
 ];
 export const exerciseBySlug = (slug: string) => EXERCISES.find(e => e.slug === slug);
@@ -103,6 +112,19 @@ export const STARTERS: Starter[] = [
       { name: 'Full Body B', focus: 'Full body', weeks: [10, 12], phase: 'Barbell skills', items: items([
         ['trap-bar-deadlift', 3, 6, 8, 150, M, 'New: Kyle will coach this first.'], ['lat-pulldown', 3, 8, 10, 90, M], ['ohp', 3, 6, 8, 120, K, 'New: start with the bar.'],
         ['hip-thrust', 3, 8, 10, 90, K], ['split-squat', 2, 8, 10, 60, K], ['farmers-carry', 3, 1, 1, 60, C, 'New: walk 30 metres. Log 1 rep per carry.']]) },
+    ],
+  },
+  {
+    key: 'cardio-conditioning', name: 'Cardio & Conditioning', level: 'Beginner', weeks: 6, daysPerWeek: '3 days',
+    summary: 'Steady cardio, intervals and a full-body circuit. Cardio is logged as distance and time, so every session shows how far they went.',
+    workouts: [
+      { name: 'Steady Cardio', focus: 'Easy, chatty pace', items: items([
+        ['treadmill-walk', 1, 20, 30, 60, M, 'Minutes. A pace you could hold a conversation at.'], ['bike', 1, 10, 15, 60, K, 'Minutes.'], ['plank', 2, 1, 1, 45, C, 'Hold 30 seconds.']]) },
+      { name: 'Intervals', focus: 'Harder efforts with rests', items: items([
+        ['rower', 4, 3, 4, 120, M, 'Minutes per piece. Hard but steady; log each one.'], ['bike', 4, 1, 2, 90, K, 'Minutes per effort. Fast legs.'], ['dead-bug', 2, 10, 12, 45, C]]) },
+      { name: 'Strength Circuit', focus: 'Full body', items: items([
+        ['goblet-squat', 3, 10, 12, 60, M], ['push-up', 3, 8, 12, 60, M], ['seated-row', 3, 10, 12, 60, K],
+        ['db-rdl', 3, 10, 12, 60, K], ['skierg', 2, 3, 5, 90, C, 'Minutes. Finish strong.']]) },
     ],
   },
   {

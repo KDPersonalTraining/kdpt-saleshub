@@ -5,8 +5,14 @@ import { useState } from 'react';
 import { Icon } from '@/components/icon';
 import { Chev, Empty, Li, SubTop } from '@/components/client/ui';
 import { EXLIB, KIT, PATTERNS, patternOf } from '@/lib/client/sample-data';
+import { useLive } from '@/lib/client/live';
+import { LiveLibrary } from '@/components/client/live-library';
 
 export default function Library() {
+  return useLive() ? <LiveLibrary /> : <DemoLibrary />;
+}
+
+function DemoLibrary() {
   const [q, setQ] = useState('');
   const [pat, setPat] = useState('all');
   const list = EXLIB.filter(e => (pat === 'all' || e.pattern === pat) && e.name.toLowerCase().includes(q.toLowerCase()));

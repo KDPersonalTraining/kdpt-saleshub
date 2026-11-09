@@ -36,11 +36,11 @@ export function StarterDetail({ k, clients, demo }: { k: string; clients: Client
         <section key={w.name + a}>
           <Sec title={w.name} right={w.focus} />
           <div className="card">
-            <div className="crow th" style={{ gridTemplateColumns: 'minmax(180px,1.6fr) 60px 80px 70px 120px minmax(0,1.4fr)', minWidth: 720 }}><span>Exercise</span><span>Sets</span><span>Reps</span><span>Rest</span><span>Short on time</span><span>Note for the client</span></div>
+            <div className="crow th" style={{ gridTemplateColumns: 'minmax(180px,1.6fr) 60px 80px 70px 120px minmax(0,1.4fr)', minWidth: 720 }}><span>Exercise</span><span>Sets</span><span>Reps / min</span><span>Rest</span><span>Short on time</span><span>Note for the client</span></div>
             {w.items.map((it, i) => { const e = exerciseBySlug(it.slug)!; return (
               <div key={i} className="crow" style={{ gridTemplateColumns: 'minmax(180px,1.6fr) 60px 80px 70px 120px minmax(0,1.4fr)', minWidth: 720 }}>
                 <span><b>{e.name}</b><small style={{ display: 'block', color: 'var(--fg3)', fontSize: 12 }}>{e.muscles.join(', ')}</small></span>
-                <span className="num">{it.sets}</span><span className="num">{it.reps[0] === it.reps[1] ? it.reps[0] : `${it.reps[0]}–${it.reps[1]}`}</span>
+                <span className="num">{it.sets}</span><span className="num">{it.reps[0] === it.reps[1] ? it.reps[0] : `${it.reps[0]}–${it.reps[1]}`}{e.measure === 'distance' ? ' min' : ''}</span>
                 <span className="num">{rest(it.rest)}</span><span style={{ color: 'var(--fg2)' }}>{PRIO[it.priority]}</span>
                 <span style={{ color: 'var(--fg2)', fontSize: 13 }}>{it.note ?? ''}</span>
               </div>

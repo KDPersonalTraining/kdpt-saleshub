@@ -6,6 +6,9 @@ import { Icon } from '@/components/icon';
 import { FOODS, FREQ, HOURS, MOMENTUM, NOTIF_TYPES, NOV, hm, type Food, type Slot } from '@/lib/client/sample-data';
 import { setState, useClient } from '@/lib/client/store';
 import { planFor } from '@/lib/client/workout';
+import { useCurrentWorkout, useLive } from '@/lib/client/live';
+import { uuid } from '@/lib/client/record';
+import { browserClient } from '@/lib/supabase/browser';
 import { clampQty, resolveFood, scaled } from '@/lib/client/food';
 import { AccBars, Chev, Li, MomentumRings, Sent, Switch } from './ui';
 import { useUI, type SheetName } from './shell';
@@ -196,12 +199,12 @@ function TimeSheet() {
 }
 
 function SwapSheet() {
-  const s = useClient(), { closeSheet, toast } = useUI(), router = useRouter();
-  const ex = planFor(s.duration).items[s.idx]?.ex;
+  const s = useClient(), { closeSheet, toast } = useUI(), router = useRouter(), w = useCurrentWorkout(s);
+  const ex = w ? planFor(s.duration, w).items[s.idx]?.ex : undefined;
   if (!ex || !ex.alts.length) return <><div><h3>No swaps yet</h3><div className="sub">Skip this one or ask your coach.</div></div><button className="pill-btn dark" onClick={() => router.push('/kai')}>Ask KAI</button></>;
   return (
     <>
-      <div><h3>Swap {ex.name}</h3><div className="sub">Your coach&apos;s approved options · today only</div></div>
+      <div><h3>Swap {ex.name}</h3><div className="sub">Same movement, so it works the same muscles · today only</div></div>
       <div className="opts">{ex.alts.map(([n, w, k]) => (
         <button key={n} className="opt" onClick={() => { setState({ swaps: { ...s.swaps, [ex.id]: n } }); closeSheet(); toast(`Swapped to ${n}`); }}>
           <span className="tile"><Icon name={k} /></span><span><b>{n}</b><span>{w}</span></span></button>
@@ -210,9 +213,28 @@ function SwapSheet() {
   );
 }
 
+const ACTION: Record<string, string> = { swap: 'swapped', skip: 'skipped_exercise', stop: 'stopped_session' };
+const ACT_WORDS: Record<string, string> = { swap: 'I’m swapping it', skip: 'I’m skipping it', stop: 'I’ve stopped for today' };
+
 function PainSheet() {
-  const s = useClient(), p = s.pain, { closeSheet } = useUI();
+  const s = useClient(), p = s.pain, { closeSheet, me, toast } = useUI(), live = useLive(), w = useCurrentWorkout(s);
+  const [busy, setBusy] = useState(false);
   const set = (patch: Partial<typeof p>) => setState({ pain: { ...p, ...patch } });
+  // Live: a pain report for Kyle, and a message so it lands in his inbox too.
+  const send = async () => {
+    const ex = w ? planFor(s.duration, w).items[s.idx]?.ex : undefined;
+    const sb = live && browserClient();
+    if (sb && live) {
+      setBusy(true);
+      const exId = ex && (('exerciseId' in ex && (ex as { exerciseId?: string }).exerciseId) || null);
+      const { error } = await sb.from('pain_reports').insert({ id: uuid(), org_id: live.orgId, client_id: me.id, exercise_id: exId, body_area: p.area!.toLowerCase(), severity: p.sev, action_taken: ACTION[p.act!] });
+      await sb.from('messages').insert({ org_id: live.orgId, client_id: me.id, sender_id: me.id, sender_kind: 'client',
+        body: `Pain report: ${p.area}, ${p.sev}/10${ex ? ` during ${s.swaps[ex.id] ?? ex.name}` : ''}. ${ACT_WORDS[p.act!]}.` });
+      setBusy(false);
+      if (error) { toast('Couldn’t send it. Check your signal, or message Kyle.'); return; }
+    }
+    set({ sent: true, handled: false });
+  };
   if (p.sent) return <><Sent title="Your coach has been told">If it&apos;s sharp or sudden, stop and get it checked.</Sent>
     <button className="pill-btn white" onClick={closeSheet}>{p.act === 'swap' ? 'Choose a swap' : 'Done'}</button></>;
   const ready = p.area && p.act;
@@ -227,7 +249,7 @@ function PainSheet() {
           <button key={k} aria-pressed={p.act === k} onClick={() => set({ act: k })}><Icon name={i} />{l}</button>
         ))}
       </div>
-      <button className={`pill-btn ${ready ? 'mint' : 'dark'}`} disabled={!ready} style={ready ? undefined : { opacity: .5 }} onClick={() => set({ sent: true })}>Send to your coach</button>
+      <button className={`pill-btn ${ready ? 'mint' : 'dark'}`} disabled={!ready || busy} style={ready ? undefined : { opacity: .5 }} onClick={send}>{busy ? 'Sending…' : 'Send to your coach'}</button>
     </>
   );
 }

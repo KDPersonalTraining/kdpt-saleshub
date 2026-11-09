@@ -6,7 +6,8 @@ import { Icon } from '@/components/icon';
 import { useUI } from '@/components/client/shell';
 import { Li, Ring } from '@/components/client/ui';
 import { portionLabel, resolveFood, scaled, totals } from '@/lib/client/food';
-import { MACROS, SLOTS, TARGET } from '@/lib/client/sample-data';
+import { MACROS, SLOTS, TARGET as SAMPLE_TARGET } from '@/lib/client/sample-data';
+import { useLive } from '@/lib/client/live';
 import { setState, useClient } from '@/lib/client/store';
 
 const r0 = Math.round;
@@ -14,14 +15,17 @@ const r0 = Math.round;
 // What the client sees depends on what Kyle has chosen for them: calories and
 // macros, protein only, or no numbers at all (just log what you eat).
 export default function Fuel() {
-  const s = useClient(), { openSheet } = useUI(), mode = s.fuelMode;
+  const s = useClient(), { openSheet } = useUI(), live = useLive(), n = live?.nutrition;
+  // Live: what Kyle set. Until he sets targets, no numbers, just what they ate.
+  const mode = live ? (n?.mode ?? 'simple') : s.fuelMode;
+  const TARGET = live && n ? { kcal: n.kcal ?? SAMPLE_TARGET.kcal, P: n.P ?? SAMPLE_TARGET.P, C: n.C ?? SAMPLE_TARGET.C, F: n.F ?? SAMPLE_TARGET.F } : SAMPLE_TARGET;
   const [day, setDay] = useState(2);
   const t = totals(s.log), left = TARGET.kcal - t.kcal;
   const days: [string, number][] = [['M', 19], ['T', 20], ['W', 21], ['T', 22], ['F', 23], ['S', 24], ['S', 25]];
   return (
     <div className="page fade">
       <div className="greet" style={{ paddingTop: 6 }}><div className="eyebrow">Nutrition</div><h1>Fuel</h1></div>
-      <div className="days7">{days.map(([d, n], i) => <button key={i} className={day === i ? 'on' : ''} onClick={() => setDay(i)} aria-label={`${d} ${n}`}>{d}<b className="num">{n}</b><i className={i < 3 ? '' : 'none'} /></button>)}</div>
+      {live ? (n?.notes ? <p style={{ margin: 0, color: 'var(--fg2)', fontSize: 14 }}>Kyle: {n.notes}</p> : null) : <div className="days7">{days.map(([d, n], i) => <button key={i} className={day === i ? 'on' : ''} onClick={() => setDay(i)} aria-label={`${d} ${n}`}>{d}<b className="num">{n}</b><i className={i < 3 ? '' : 'none'} /></button>)}</div>}
       {mode === 'full' && (
         <div className="card fsum">
           <svg viewBox="0 0 132 132" width="132" height="132" aria-label={`${r0(t.kcal)} of ${TARGET.kcal} calories`}>

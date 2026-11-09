@@ -1,6 +1,6 @@
 import type { CurrentWorkout } from './live';
 import type { ClientState } from './store';
-import { parseLoad, parseReps } from './summary';
+import { parseKm, parseLoad, parseMins, parseReps } from './summary';
 import { suggestionFor } from './workout';
 import type { SessionJob } from './sync';
 
@@ -21,23 +21,34 @@ export function sessionJob(s: ClientState, w: CurrentWorkout, who: { clientId: s
   for (const ex of w.exercises) {
     if (!ex.exerciseId) continue;
     const done = (s.logs[ex.id] ?? []).filter(x => x.done);
+    // A swap is logged against the exercise really done.
+    const swapped = s.swaps[ex.id], did = (swapped && ex.altIds?.[swapped]) || ex.exerciseId;
     let n = 0;
     for (const x of done) {
+      if (ex.measure === 'distance') {
+        const km = parseKm(x.load), min = parseMins(x.reps);
+        if (km === null || min === null) continue;
+        n += 1;
+        sets.push({ id: uuid(), org_id: who.orgId, client_id: who.clientId, session_id: sid, workout_exercise_id: ex.id, exercise_id: did,
+          set_number: n, kind: 'working', load_kg: null, reps: null, distance_m: Math.round(km * 1000), duration_s: min * 60,
+          completed_at: finished, device_updated_at: finished });
+        continue;
+      }
       const reps = parseReps(x.reps), load = ex.inc === 0 ? 0 : parseLoad(x.load);
       if (reps === null || load === null) continue;
       n += 1;
-      sets.push({ id: uuid(), org_id: who.orgId, client_id: who.clientId, session_id: sid, workout_exercise_id: ex.id, exercise_id: ex.exerciseId,
+      sets.push({ id: uuid(), org_id: who.orgId, client_id: who.clientId, session_id: sid, workout_exercise_id: ex.id, exercise_id: did,
         set_number: n, kind: 'working', load_kg: ex.inc === 0 ? null : load, reps, suggested_load_kg: ex.inc === 0 || !ex.last.reps.length ? null : suggestionFor(ex).load,
         completed_at: finished, device_updated_at: finished });
     }
     const m = s.exNotes[ex.id];
     if (m?.rpe) rpes.push(m.rpe);
-    const bits = [s.skipped[ex.id] ? 'skipped' : '', m?.rpe ? `RPE ${m.rpe}` : '', m?.note?.trim() ?? ''].filter(Boolean);
+    const bits = [swapped ? `swapped to ${swapped}` : '', s.skipped[ex.id] ? 'skipped' : '', m?.rpe ? `RPE ${m.rpe}` : '', m?.note?.trim() ?? ''].filter(Boolean);
     if (bits.length) notes.push(`${ex.name}: ${bits.join(' · ')}`);
   }
   const minutes = [30, 45, 60, 90].includes(s.duration) ? s.duration : null;
   return {
-    session: { id: sid, org_id: who.orgId, client_id: who.clientId, workout_id: w.id, chosen_minutes: minutes, status: 'completed',
+    session: { id: sid, org_id: who.orgId, client_id: who.clientId, workout_id: w.id, workout_name: w.name, chosen_minutes: minutes, status: 'completed',
       started_at: new Date(s.startedAt).toISOString(), completed_at: finished,
       session_rpe: rpes.length ? Math.round(rpes.reduce((a, b) => a + b, 0) / rpes.length) : null, client_note: notes.join('\n') || null },
     sets,

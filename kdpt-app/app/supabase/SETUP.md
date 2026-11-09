@@ -32,6 +32,15 @@ the same way. It lets programmes change from phase to phase, turns on instant
 messages, and lets you change a check-in's questions for one round. Safe to
 run twice.
 
+### 1e. Cardio and programme editing (added 11 November)
+
+Run these two files the same way, in this order:
+`kdpt-app/app/supabase/migrations/20261110000000_cardio.sql`, then
+`kdpt-app/app/supabase/migrations/20261111000000_programme_editing.sql`.
+and then `kdpt-app/app/supabase/migrations/20261112000000_nutrition_mode.sql`.
+All are safe to run twice. Until they're run, giving a programme and saving
+workouts won't work.
+
 ## 2. Create your coach account
 
 1. Left menu, **Authentication** → **Users** → **Add user** → **Create new user**.
@@ -81,9 +90,24 @@ What works with real data at that point:
 - programmes: give a client a starter programme; they train from it and every set comes back to you
 - messages, both ways
 - check-ins: weekly, fortnightly or monthly, with questions you can change for any one round
+- bookings: you add sessions, clients confirm, ask to move or cancel
+- your Today page, the client record (notes, details, nutrition, weight), your own programmes, the exercise library and Community
 
-Bookings, payments, your Today page and the other coach pages still show
-sample data, and each of those pages says so, until they're connected next.
+Payments and Automation still show sample data, and each of those pages says
+so, until they're connected.
+
+## 5. Switch on KAI (the AI assistant)
+
+1. Go to console.anthropic.com and sign in (or create an account) with your business email.
+2. **Settings → Billing**: add a card and some credit (£10–£20 is plenty to start).
+   Set a monthly spend limit under **Limits** so it can never run away.
+3. **API keys → Create key**, name it `KDPT app`, and copy it. Don't send it to anyone, Claude included.
+4. Vercel → **kdpt-app** → **Settings** → **Environment Variables** → add
+   `ANTHROPIC_API_KEY` with the key as the value → **Save** → redeploy.
+
+Until the key is there, KAI tells clients it isn't switched on yet. Questions
+about pain, health or changing the plan never reach the AI: they go straight
+to your messages either way.
 
 ## Other things only you can do
 

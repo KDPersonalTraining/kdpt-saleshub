@@ -45,3 +45,16 @@ describe('summarise', () => {
     expect(summarise({ exercises: [], skipped: {}, startedAt: null, finishedAt: 5, logs: {} }).minutes).toBeNull();
   });
 });
+
+describe('cardio', () => {
+  it('counts distance, not weight, and never a record', async () => {
+    const { summarise, parseKm, parseMins } = await import('./summary');
+    const sum = summarise({ exercises: [{ id: 'row', name: 'Rowing Machine', last: { load: 0, reps: [] }, measure: 'distance' }, { id: 'lp', name: 'Leg Press', last: { load: 100, reps: [12] } }],
+      logs: { row: [{ load: '1.2', reps: '5', done: true }, { load: '1,1', reps: '5', done: true }, { load: 'x', reps: '5', done: true }], lp: [{ load: '100', reps: '10', done: true }] },
+      skipped: {}, startedAt: null, finishedAt: null });
+    expect(sum.distanceM).toBe(2300);
+    expect(sum.volumeKg).toBe(1000);
+    expect(sum.sets).toBe(3);
+    expect(parseKm('0')).toBeNull(); expect(parseKm('101')).toBeNull(); expect(parseMins('601')).toBeNull(); expect(parseMins('45')).toBe(45);
+  });
+});

@@ -24,5 +24,11 @@ export async function submitCheckIn(answers: Record<string, unknown>): Promise<s
   const { error } = await sb.from('check_ins').upsert({
     org_id: me.orgId, client_id: me.id, form_id: form.id, due_on: round, questions, answers: c.answers, submitted_at: new Date().toISOString(),
   }, { onConflict: 'client_id,form_id,due_on' });
-  return error ? 'Couldn’t send it. Check your signal and try again.' : null;
+  if (error) return 'Couldn’t send it. Check your signal and try again.';
+  // A weight given in the check-in also goes on their weight chart.
+  const kg = c.answers.weight;
+  if (typeof kg === 'number' && kg >= 25 && kg <= 300) {
+    await sb.from('body_measurements').insert({ org_id: me.orgId, client_id: me.id, metric: 'bodyweight_kg', value: Math.round(kg * 10) / 10, measured_on: new Date().toISOString().slice(0, 10), source: 'check_in' });
+  }
+  return null;
 }

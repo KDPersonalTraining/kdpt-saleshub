@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { assignStarter } from '@/app/(coach)/coach/programmes/actions';
+import { assignStarter, assignTemplate } from '@/app/(coach)/coach/programmes/actions';
 import { STARTERS, starterByKey } from '@/lib/programmes/starters';
 import { useToast } from './shell';
 import { Modal } from './ui';
 
 export type ClientOption = { id: string; name: string; programme: string | null };
+export type MyProgramme = { id: string; name: string; weeks: number | null; workouts: number };
 
 // Next Monday, or today if it is Monday: the natural day to start a week 1.
 const nextMonday = () => {
@@ -17,8 +18,9 @@ const nextMonday = () => {
 
 // Give a starter programme to a client. Either can be fixed in advance (from a
 // starter's page, or a client's record).
-export function AssignModal({ clients, fixedKey, fixedClient, demo, onClose }: {
-  clients: ClientOption[]; fixedKey?: string; fixedClient?: string; demo?: boolean; onClose: () => void;
+// Keys: a starter's key, or "mine:<id>" for one of Kyle's own programmes.
+export function AssignModal({ clients, fixedKey, fixedClient, demo, mine = [], onClose }: {
+  clients: ClientOption[]; fixedKey?: string; fixedClient?: string; demo?: boolean; mine?: MyProgramme[]; onClose: () => void;
 }) {
   const toast = useToast(), router = useRouter();
   const [key, setKey] = useState(fixedKey ?? STARTERS[0].key);
@@ -26,11 +28,12 @@ export function AssignModal({ clients, fixedKey, fixedClient, demo, onClose }: {
   const [start, setStart] = useState(nextMonday);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const cur = clients.find(c => c.id === client), st = starterByKey(key)!;
+  const own = key.startsWith('mine:') ? mine.find(m => `mine:${m.id}` === key) : null;
+  const cur = clients.find(c => c.id === client), st = own ? { name: own.name } : starterByKey(key) ?? { name: 'programme' };
   const go = async () => {
     if (demo) { toast('Demo: nothing is saved. In the live app, this gives them the programme.'); onClose(); return; }
     setBusy(true); setErr(null);
-    const e = await assignStarter({ clientId: client, key, startsOn: start });
+    const e = own ? await assignTemplate({ clientId: client, templateId: own.id, startsOn: start }) : await assignStarter({ clientId: client, key, startsOn: start });
     setBusy(false);
     if (e) { setErr(e); return; }
     toast(`${st.name} given to ${cur?.name.split(' ')[0] ?? 'your client'}. It’s on their Train screen now.`);
@@ -39,7 +42,9 @@ export function AssignModal({ clients, fixedKey, fixedClient, demo, onClose }: {
   return (
     <Modal title="Give a programme" onClose={onClose}>
       <div className="fields">
-        {!fixedKey && <label className="full">Programme<select value={key} onChange={e => setKey(e.target.value)}>{STARTERS.map(s => <option key={s.key} value={s.key}>{s.name} · {s.weeks} weeks · {s.daysPerWeek}</option>)}</select></label>}
+        {!fixedKey && <label className="full">Programme<select value={key} onChange={e => setKey(e.target.value)}>
+          {mine.length > 0 && <optgroup label="My programmes">{mine.map(m => <option key={m.id} value={`mine:${m.id}`}>{m.name}{m.weeks ? ` · ${m.weeks} weeks` : ''}</option>)}</optgroup>}
+          <optgroup label="Starters">{STARTERS.map(s => <option key={s.key} value={s.key}>{s.name} · {s.weeks} weeks · {s.daysPerWeek}</option>)}</optgroup></select></label>}
         {!fixedClient && <label className="full">Client<select value={client} onChange={e => setClient(e.target.value)}>
           {clients.map(c => <option key={c.id} value={c.id}>{c.name}{c.programme ? ` (on ${c.programme})` : ''}</option>)}</select></label>}
         <label className="full">Week 1 starts<input type="date" value={start} onChange={e => setStart(e.target.value)} /></label>

@@ -8,6 +8,7 @@ import { HISTORY } from '@/lib/client/sample-data';
 import { useClient } from '@/lib/client/store';
 import { useLive } from '@/lib/client/live';
 import { shortDate } from '@/lib/programmes/plan';
+import { coveredLike, liftedLike } from '@/lib/client/fun';
 
 export default function History() {
   const s = useClient();
@@ -19,10 +20,12 @@ export default function History() {
       <div className="group" style={{ '--inset': '14px' } as React.CSSProperties}>{live.sessions.map((r, i) => (
         <div key={r.id}>
           <button className="hrow" onClick={() => setOpen(open === i ? null : i)} aria-expanded={open === i}>
-            <span className="t"><b>{r.workout}</b><small className="num">{shortDate(r.startedAt)}{r.minutes ? ` · ${r.minutes} min` : ''}{r.volume ? ` · ${r.volume.toLocaleString('en-GB')} kg lifted` : ''}</small></span>
+            <span className="t"><b>{r.workout}</b><small className="num">{shortDate(r.startedAt)}{r.minutes ? ` · ${r.minutes} min` : ''}{r.volume ? ` · ${r.volume.toLocaleString('en-GB')} kg lifted` : ''}{r.distance ? ` · ${Math.round(r.distance / 100) / 10} km` : ''}</small></span>
             <Chev open={open === i} />
           </button>
-          {open === i && <div className="hsets">{r.sets.map(([n, sets]) => <div key={n}><b>{n}</b><span className="num">{sets.map(([w, k]) => (w ? `${w} × ${k}` : `${k} reps`)).join(' · ')}</span></div>)}</div>}
+          {open === i && <div className="hsets">{r.sets.map(([n, sets]) => <div key={n}><b>{n}</b><span className="num">{sets.join(' · ')}</span></div>)}
+            {liftedLike(r.volume, r.id) && <div><b>Lifted about</b><span>{liftedLike(r.volume, r.id)!.words}</span></div>}
+            {coveredLike(r.distance, r.id) && <div><b>Covered</b><span>{coveredLike(r.distance, r.id)!.words}</span></div>}</div>}
         </div>
       ))}</div>
     </div>

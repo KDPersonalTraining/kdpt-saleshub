@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from 'react';
 import type { Slot } from './sample-data';
-import { normaliseLog, type LogItem } from './food';
+import { normaliseLog, totals, type LogItem } from './food';
 import { queueSave } from './sync';
 
 // The client app's local state. In demo mode it is the only copy and lives
@@ -29,12 +29,15 @@ export type ClientState = {
   // Pausing stops the workout clock. between = the exercise just finished, while showing "up next".
   pausedAt: number | null; pausedMs: number; between: string | null;
   rest: { endsAt: number; total: number; pausedLeft: number | null } | null;
-  pain: { area: string | null; sev: number; act: string | null; sent: boolean };
+  // handled: the workout screen has acted on the choice (skip, stop or swap).
+  pain: { area: string | null; sev: number; act: string | null; sent: boolean; handled?: boolean };
   // Bookings and payments
   sessionCancelled: boolean; sessionsLeft: number; book: { req: Record<number, string>; done: boolean };
   avail: { days: Record<string, [number, number] | null>; note: string; sent: boolean }; paid: boolean; autopay: boolean;
   // Food
   log: Record<Slot, LogItem[]>; water: number; favs: string[]; recent: string[];
+  // The day the food log is for, and each earlier day's totals (last 30).
+  logDay?: string; foodHistory?: Record<string, { kcal: number; P: number; C: number; F: number }>;
   // How much of the numbers this client sees, set by Kyle: everything, protein only, or none.
   fuelMode: 'full' | 'protein' | 'simple';
   // Messages
@@ -103,6 +106,7 @@ export function loadStore(personId: string, isNew: boolean, remote?: { orgId: st
     state = newest ? { ...fresh, ...newest } : fresh;
     if (remote) state.preview = { ...state.preview, fresh: true };
     state.log = normaliseLog(state.log as unknown as Record<string, unknown[]>);
+    Object.assign(state, rollFoodDay(state, localDay()));
   } catch {
     state = fresh;
   }
@@ -140,6 +144,16 @@ export function useClient(): ClientState {
 
 // Clears the workout in progress (after finishing or abandoning it).
 export const resetWorkout = (): Partial<ClientState> => ({ wid: null, sid: null, idx: 0, logs: {}, swaps: {}, exNotes: {}, skipped: {}, startedAt: null, finishedAt: null, rest: null, pausedAt: null, pausedMs: 0, between: null });
+
+export const localDay = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+// A new day: the food log starts empty and yesterday's totals are kept.
+export function rollFoodDay(s: Pick<ClientState, 'log' | 'water' | 'logDay' | 'foodHistory'>, today: string): Partial<ClientState> {
+  if (!s.logDay) return { logDay: today };
+  if (s.logDay === today) return {};
+  const history = { ...(s.foodHistory ?? {}), [s.logDay]: totals(s.log) };
+  const keep = Object.keys(history).sort().slice(-30);
+  return { logDay: today, log: { Breakfast: [], Lunch: [], Snacks: [], Dinner: [] }, water: 0, foodHistory: Object.fromEntries(keep.map(k => [k, history[k]])) };
+}
 
 // The phone's copy and the database's copy: use whichever was changed last.
 // On a tie, or if neither has a time, the phone wins (it's never behind itself).
