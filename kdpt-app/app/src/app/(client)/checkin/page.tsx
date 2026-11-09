@@ -9,10 +9,16 @@ import { freqInfo } from '@/components/client/sheets';
 import { Eyebrow, Li } from '@/components/client/ui';
 import { MOODS, SUPPORT, WEEK_SCALES, WINS } from '@/lib/client/sample-data';
 import { newCheckin, setState, updateOnceLoaded, useClient, type CheckIn } from '@/lib/client/store';
+import { useLive } from '@/lib/client/live';
+import { LiveCheckIn } from '@/components/client/live-checkin';
 
 const TITLES = ['', 'How are you feeling?', 'How was your week?', 'Wins beyond the scale', 'How can your coach help?'];
 
 export default function CheckinPage() {
+  return useLive() ? <LiveCheckIn /> : <DemoCheckin />;
+}
+
+function DemoCheckin() {
   const s = useClient(), router = useRouter(), { toast } = useUI();
   useEffect(() => { updateOnceLoaded(st => (st.checkin ? null : { checkin: newCheckin() })); }, [s]);
   const c = s.checkin;

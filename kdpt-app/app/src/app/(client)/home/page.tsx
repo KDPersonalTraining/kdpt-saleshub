@@ -7,6 +7,8 @@ import { useEffect } from 'react';
 import { useUI } from '@/components/client/shell';
 import { MomentumRings } from '@/components/client/ui';
 import { MOMENTUM, WORKOUT } from '@/lib/client/sample-data';
+import { useCurrentWorkout, useLive } from '@/lib/client/live';
+import { prettyDate } from '@/lib/programmes/plan';
 import { useClient } from '@/lib/client/store';
 import { planFor } from '@/lib/client/workout';
 
@@ -94,18 +96,38 @@ function Top({ me, unread }: { me: string; unread: boolean }) {
 // A brand-new client has no programme, sessions or history yet. Show what
 // happens next instead of empty versions of an established client's screen.
 function NewClientHome() {
-  const s = useClient(), { me } = useUI();
+  const s = useClient(), { me } = useUI(), live = useLive(), w = useCurrentWorkout(s);
+  const plan = live?.plan, ci = live?.checkin;
   const steps: [string, string, 'done' | 'now' | 'next'][] = [
     ['Health questions', 'Done. Kyle reads them before you start', 'done'],
-    ['Your programme', 'Kyle builds it around your goal', 'now'],
+    plan ? ['Your programme', `${plan.name} is ready`, 'done'] : ['Your programme', 'Kyle builds it around your goal', 'now'],
     ['First session', 'Kyle will send you a time to accept', 'next'],
   ];
+  const inProgress = s.startedAt != null;
   return (
     <div className="ds ds-page fade">
       <Top me={me.initials} unread={!s.read} />
-      <div><div className="ds-eyebrow">Getting started</div><h1 className="ds-title">Hi, {me.first}</h1></div>
+      <div><div className="ds-eyebrow">{plan ? `Week ${plan.week}${plan.weeks ? ` of ${plan.weeks}` : ''}` : 'Getting started'}</div><h1 className="ds-title">Hi, {me.first}</h1></div>
+      {plan && w && (
+        <section className="ds-card" aria-label="Your next workout">
+          <div><div className="ds-eyebrow" style={{ color: inProgress ? 'var(--amber)' : 'var(--mint)' }}>{inProgress ? 'In progress' : 'Up next'}</div>
+            <h2 className="ds-h2" style={{ marginTop: 6, fontSize: 24 }}>{w.name}</h2>
+            <p style={{ margin: '4px 0 0', color: 'var(--fg2)', fontSize: 14 }} className="num">{planFor(s.duration, w).items.length} exercises · about {planFor(s.duration, w).minutes} min</p></div>
+          <Link className="ds-btn primary" href="/workout"><Dumbbell {...I} />{inProgress ? 'Carry on' : 'Start workout'}</Link>
+        </section>
+      )}
+      {ci && (
+        <section className="ds-section">
+          <header><h2 className="ds-h2">Coming up</h2></header>
+          <div className="ds-list">
+            {ci.submittedAt
+              ? <Link className="ds-row" href="/checkin"><ClipboardCheck {...I} /><span className="t"><b>Check-in sent</b><small>{ci.reply ? 'Kyle replied' : `Next one ${prettyDate(ci.nextRound)}`}</small></span><span className="end">{ci.reply && <span className="ds-tag ok">Reply</span>}<ChevronRight {...I} /></span></Link>
+              : <Link className="ds-row" href="/checkin"><ClipboardCheck {...I} /><span className="t"><b>Check-in</b><small>Due {prettyDate(ci.round)} · 2 minutes</small></span><span className="end"><span className="ds-tag wait">To do</span><ChevronRight {...I} /></span></Link>}
+          </div>
+        </section>
+      )}
       <section className="ds-section">
-        <header><h2 className="ds-h2">What happens next</h2></header>
+        <header><h2 className="ds-h2">{plan ? 'Getting started' : 'What happens next'}</h2></header>
         <ol className="ds-list ds-steps">{steps.map(([t, d, st], i) => (
           <li key={t} className={`ds-row noicon ${st}`}><span className="t"><b><span className="n num">{st === 'done' ? '✓' : i + 1}</span>{t}</b><small>{d}</small></span>
             {st === 'now' && <span className="end"><span className="ds-tag wait">In progress</span></span>}</li>
@@ -116,7 +138,7 @@ function NewClientHome() {
         <Link href="/chat"><MessageCircle {...I} />Message Kyle</Link>
         <Link href="/tour"><Sparkles {...I} />App tour</Link>
       </div>
-      <Link className="ds-quote" href="/chat"><img src="/kd-mark.png" alt="" /><span><small>Kyle · just now</small><p>Welcome {me.first}! I&apos;ll have your programme ready before our first session.</p></span></Link>
+      {!live && <Link className="ds-quote" href="/chat"><img src="/kd-mark.png" alt="" /><span><small>Kyle · just now</small><p>Welcome {me.first}! I&apos;ll have your programme ready before our first session.</p></span></Link>}
     </div>
   );
 }

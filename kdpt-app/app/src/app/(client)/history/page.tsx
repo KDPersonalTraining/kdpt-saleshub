@@ -6,13 +6,30 @@ import { Icon } from '@/components/icon';
 import { Chev, Empty, SubTop } from '@/components/client/ui';
 import { HISTORY } from '@/lib/client/sample-data';
 import { useClient } from '@/lib/client/store';
+import { useLive } from '@/lib/client/live';
+import { shortDate } from '@/lib/programmes/plan';
 
 export default function History() {
   const s = useClient();
   const [open, setOpen] = useState<number | null>(0);
+  const live = useLive();
+  if (live && live.sessions.length) return (
+    <div className="page fade">
+      <SubTop title="History" back="/train" />
+      <div className="group" style={{ '--inset': '14px' } as React.CSSProperties}>{live.sessions.map((r, i) => (
+        <div key={r.id}>
+          <button className="hrow" onClick={() => setOpen(open === i ? null : i)} aria-expanded={open === i}>
+            <span className="t"><b>{r.workout}</b><small className="num">{shortDate(r.startedAt)}{r.minutes ? ` · ${r.minutes} min` : ''}{r.volume ? ` · ${r.volume.toLocaleString('en-GB')} kg lifted` : ''}</small></span>
+            <Chev open={open === i} />
+          </button>
+          {open === i && <div className="hsets">{r.sets.map(([n, sets]) => <div key={n}><b>{n}</b><span className="num">{sets.map(([w, k]) => (w ? `${w} × ${k}` : `${k} reps`)).join(' · ')}</span></div>)}</div>}
+        </div>
+      ))}</div>
+    </div>
+  );
   if (s.preview.fresh) return (
     <div className="page fade"><SubTop title="History" back="/train" />
-      <Empty icon="clock" color="var(--sky)" title="No sessions yet" cta={<Link className="pill-btn mint" href="/workout">Start your first workout</Link>}>
+      <Empty icon="clock" color="var(--sky)" title="No sessions yet" cta={live && !live.plan ? undefined : <Link className="pill-btn mint" href="/workout">Start your first workout</Link>}>
         Finished workouts show up here.</Empty>
     </div>
   );

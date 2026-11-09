@@ -11,7 +11,7 @@ const Ctx = createContext<{ toast: (m: string) => void }>({ toast: () => {} });
 export const useToast = () => useContext(Ctx).toast;
 
 // Pages that show real data when demo mode is off. The rest say they're samples.
-const LIVE_READY = ['/coach/clients'];
+const LIVE_READY = ['/coach/clients', '/coach/programmes', '/coach/messages', '/coach/checkins'];
 
 const NAV: [string, string, string, number?, Tint?][] = [
   ['', 'Today', 'today', 6, 'coral'], ['clients', 'Clients', 'clients'], ['programmes', 'Programmes', 'programmes'], ['checkins', 'Check-ins', 'checkins'],
@@ -33,7 +33,7 @@ export function CoachShell({ me, children }: { me: { name: string; role: string;
           <div className="logo"><img src="/kd-mark.png" alt="KD" /><span>Coach</span>{me.demo && <span className="demotag">Demo</span>}</div>
           {NAV.map(([k, l, icon, n, c]) => { const t = c && tint(c); return (
             <Link key={k} href={`/coach${k ? '/' + k : ''}`} className={`nav ${section === k ? 'on' : ''}`}>
-              <Icon name={icon} />{l}{n ? <span className="count" style={{ background: t![0], color: t![1] }}>{n}</span> : null}
+              <Icon name={icon} />{l}{n && me.demo ? <span className="count" style={{ background: t![0], color: t![1] }}>{n}</span> : null}
             </Link>
           ); })}
           <div className="me" style={{ marginTop: 'auto' }}>
@@ -45,7 +45,7 @@ export function CoachShell({ me, children }: { me: { name: string; role: string;
         <main className="main"><div className="wrap"><div className="fade" style={{ display: 'grid', gap: 24 }}>
           {!me.demo && !LIVE_READY.some(p => path.startsWith(p)) && (
             <div className="flag" style={{ borderColor: 'rgba(255,180,94,.3)', background: 'rgba(255,180,94,.06)' }}><span style={{ color: 'var(--amber)' }}><Icon name="info" /></span>
-              <span><b>Sample data.</b> This page isn&apos;t connected to your database yet. <Link href="/coach/clients" style={{ textDecoration: 'underline' }}>Clients</Link> is.</span></div>
+              <span><b>Sample data.</b> This page isn&apos;t connected to your database yet. Clients, Programmes, Messages and Check-ins are.</span></div>
           )}
           {children}</div></div></main>
       </div>

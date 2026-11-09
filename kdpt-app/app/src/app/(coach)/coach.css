@@ -558,3 +558,13 @@ button.arow:hover { background: var(--s3); }
 .nav.on { color: var(--fg); }
 .nav.on svg { color: var(--mint); }
 .crow.live { grid-template-columns: minmax(200px, 2fr) 1fr 1fr 1fr 24px; min-width: 640px; }
+
+/* Live inbox: on a phone, the list or one conversation at a time. */
+.msgs-wrap.live .thread .body { max-height: 60vh; overflow-y: auto; }
+.msgs-wrap.live .back-mobile { display: none; }
+@media (max-width: 800px) {
+  .msgs-wrap.live .list { display: block; }
+  .msgs-wrap.live.picked .list { display: none; }
+  .msgs-wrap.live:not(.picked) .thread { display: none; }
+  .msgs-wrap.live .back-mobile { display: inline-flex; }
+}

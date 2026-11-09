@@ -171,3 +171,35 @@ Work goes in this order. Each step is tested and pushed before the next.
 - 65 unit tests, including bookings, food, trends and KAI triage.
 - Browser runs of a workout, food logging, KAI, Hannah's sign-up, coach Today, the month planner and client profiles.
 - The production build.
+
+### 9 November: programmes, messages and check-ins connected
+
+- **Starter programmes:**
+  - Beginner Foundations: 12 weeks in four phases, bringing in new moves every three weeks.
+  - Upper / Lower: 8 weeks, 4 days.
+  - Push / Pull / Legs: 8 weeks, 3 or 6 days.
+  - 40 exercises, each with cues.
+- **Giving a programme:** Kyle gives one to a client. The client gets their own copy, and their previous programme is archived, not deleted.
+- **Training from it:**
+  - Train shows the week, the phase and this week's workouts, in rotation.
+  - Workout mode uses the client's real exercises and Kyle's notes.
+  - First time on an exercise: no invented weight.
+  - Finished workouts go to the database, through an outbox on the phone, so a workout finished with no signal is sent later and never twice.
+  - Kyle sees every set, RPE and note on the client's record.
+- **Messages:**
+  - Real chat both ways.
+  - New messages arrive instantly, with a 20-second check as a fallback.
+  - Read marks, and an inbox that works on a phone.
+- **Check-ins:**
+  - Weekly, fortnightly or monthly, on the client's chosen day, open until 3 days after it's due.
+  - Kyle edits the usual questions, or changes one client's next round only.
+  - The client answers one question per screen; required questions can't be skipped, and answers survive leaving.
+  - Kyle reads each check-in, and a reply also goes to the client's messages.
+
+**Tested with:**
+- 92 unit tests: weeks, rotation, check-in dates, answer checks and the starter programmes.
+- 64 database access checks, including the new tables and functions. The new migration runs twice safely.
+- Demo regression runs, and a browser run of the live screens with test data.
+- The production build in both modes.
+
+**Not yet tested:** end to end against the real database. That's the practice run.

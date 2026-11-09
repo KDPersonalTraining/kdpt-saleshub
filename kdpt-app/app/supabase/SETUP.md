@@ -25,6 +25,13 @@ Run `kdpt-app/app/supabase/migrations/20261106000000_api_grants.sql` the same
 way. Newer Supabase projects don't open tables to the app by default; without
 this, signing in says your account isn't set up. Safe to run twice.
 
+### 1d. Programmes, messages and check-ins (added 9 November)
+
+Run `kdpt-app/app/supabase/migrations/20261109000000_programmes_messages_checkins.sql`
+the same way. It lets programmes change from phase to phase, turns on instant
+messages, and lets you change a check-in's questions for one round. Safe to
+run twice.
+
 ## 2. Create your coach account
 
 1. Left menu, **Authentication** → **Users** → **Add user** → **Create new user**.
@@ -68,11 +75,15 @@ When Claude confirms they're ready: Vercel → **kdpt-app** → **Settings** →
 **Deployments** → **Redeploy**. From then on the sign-in page sends a real
 code to your email.
 
-What works with real data at that point: your sign-in, adding clients (they
-get a code by email), their sign-up answers and consents, and their app data
-saved to the database (food log, check-ins, settings). Your Clients page shows
-them. Programmes, workouts, bookings, messages and payments still show sample
-data, and each of those pages says so, until they're connected next.
+What works with real data at that point:
+- your sign-in, and adding clients (they get a code by email)
+- their sign-up answers and consents
+- programmes: give a client a starter programme; they train from it and every set comes back to you
+- messages, both ways
+- check-ins: weekly, fortnightly or monthly, with questions you can change for any one round
+
+Bookings, payments, your Today page and the other coach pages still show
+sample data, and each of those pages says so, until they're connected next.
 
 ## Other things only you can do
 
