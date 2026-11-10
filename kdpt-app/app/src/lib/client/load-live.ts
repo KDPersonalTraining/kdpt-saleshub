@@ -3,6 +3,7 @@ import { DEFAULT_QUESTIONS, type CheckInQuestion } from '@/lib/checkins/question
 import { currentRound, isoDay, lastResults, nextWorkout, roundAfter, weekOf, workoutsForWeek, type Frequency, type SetRow } from '@/lib/programmes/plan';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { setWords } from './format';
+import type { PlannedSet } from '@/lib/programmes/sets';
 import { buildProgress } from './progress';
 import { alternativesFor } from '@/lib/programmes/edit';
 import type { LiveCheckIn, LiveData, LivePlan, PlanExercise, PlanWorkout, SessionSummary } from './live';
@@ -11,7 +12,7 @@ type Kit = PlanExercise['kit'];
 const KIT: Record<string, Kit> = { barbell: 'barbell', smith: 'barbell', dumbbell: 'dumbbell', kettlebell: 'dumbbell', bodyweight: 'body', band: 'body' };
 
 type ExRow = { id: string; slug: string; name: string; load_type: string; load_increment_kg: number; setup_minutes: number; cues: string[]; measure?: string };
-type WeRow = { id: string; position: number; working_sets: number; rep_min: number; rep_max: number; rest_seconds: number; priority: PlanExercise['priority']; coach_note: string | null; exercises: ExRow | null };
+type WeRow = { id: string; position: number; working_sets: number; rep_min: number; rep_max: number; rest_seconds: number; priority: PlanExercise['priority']; coach_note: string | null; set_plan: PlannedSet[] | null; start_load_kg: number | null; exercises: ExRow | null };
 type WoRow = { id: string; name: string; focus: string | null; phase: string | null; day_order: number; week_from: number | null; week_to: number | null; workout_exercises: WeRow[] };
 type LogRow = SetRow & { distance_m: number | null; duration_s: number | null; exercises: { name: string } | null };
 
@@ -20,7 +21,7 @@ export async function loadLive(sb: SupabaseClient, me: { id: string; orgId: stri
   const [{ data: prog }, { data: sess }, { data: logs }, { data: libRows }] = await Promise.all([
     sb.from('programmes').select('id, name, weeks, starts_on').eq('client_id', me.id).eq('status', 'active').order('created_at', { ascending: false }).limit(1).maybeSingle(),
     sb.from('workout_sessions').select('id, workout_id, workout_name, started_at, completed_at, status').eq('client_id', me.id).order('started_at', { ascending: false }).limit(40),
-    sb.from('set_logs').select('exercise_id, session_id, set_number, load_kg, reps, distance_m, duration_s, completed_at, exercises(name)').eq('client_id', me.id).eq('deleted', false).order('completed_at', { ascending: false }).limit(1500),
+    sb.from('set_logs').select('exercise_id, session_id, set_number, load_kg, reps, distance_m, duration_s, completed_at, kind, exercises(name)').eq('client_id', me.id).eq('deleted', false).order('completed_at', { ascending: false }).limit(1500),
     sb.from('exercises').select('id, name, movement_pattern, measure, primary_muscles, load_type, cues').is('archived_at', null).order('name'),
   ]);
   // Kyle's library, for swaps: same movement, same way of logging.
@@ -37,7 +38,7 @@ export async function loadLive(sb: SupabaseClient, me: { id: string; orgId: stri
   let plan: LivePlan | null = null;
   if (prog) {
     const { data: wos } = await sb.from('workouts')
-      .select('id, name, focus, phase, day_order, week_from, week_to, workout_exercises(id, position, working_sets, rep_min, rep_max, rest_seconds, priority, coach_note, exercises(id, slug, name, load_type, load_increment_kg, setup_minutes, cues, measure))')
+      .select('id, name, focus, phase, day_order, week_from, week_to, workout_exercises(id, position, working_sets, rep_min, rep_max, rest_seconds, priority, coach_note, set_plan, start_load_kg, exercises(id, slug, name, load_type, load_increment_kg, setup_minutes, cues, measure))')
       .eq('programme_id', prog.id).order('day_order');
     const workouts: PlanWorkout[] = ((wos ?? []) as unknown as WoRow[]).map(w => ({
       id: w.id, name: w.name, focus: w.focus, phase: w.phase, order: w.day_order, weekFrom: w.week_from, weekTo: w.week_to,
@@ -46,7 +47,7 @@ export async function loadLive(sb: SupabaseClient, me: { id: string; orgId: stri
         const cardio = e.measure === 'distance';
         const inc = e.load_type === 'bodyweight' || cardio ? 0 : Number(e.load_increment_kg);
         return {
-          id: we.id, lib: e.slug, name: e.name, sets: we.working_sets, reps: [we.rep_min, we.rep_max] as [number, number], rest: we.rest_seconds,
+          id: we.id, lib: e.slug, name: e.name, sets: we.set_plan?.length || we.working_sets, plan: we.set_plan?.length ? we.set_plan : null, start: we.start_load_kg == null ? null : Number(we.start_load_kg), reps: [we.rep_min, we.rep_max] as [number, number], rest: we.rest_seconds,
           inc, priority: we.priority, setup: Number(e.setup_minutes), kit: KIT[e.load_type] ?? 'machine',
           last: l && !cardio ? { load: inc === 0 ? 0 : l.load, reps: l.reps } : { load: 0, reps: [] }, measure: cardio ? 'distance' as const : 'reps' as const,
           ...swapsFor(e.id),

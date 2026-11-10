@@ -8,6 +8,9 @@ import { useToast } from '@/components/coach/shell';
 import { Modal, Sec } from '@/components/coach/ui';
 import type { EdItem, EdProgramme, EdWorkout, LibExercise } from '@/lib/programmes/edit';
 import { saveProgramme } from './actions';
+import { setsOf, type SetKind } from '@/lib/programmes/sets';
+
+const KIND_OPTION: Record<SetKind, string> = { warmup: 'Warm-up', working: 'Working', drop: 'Drop set', amrap: 'Max reps' };
 
 const PRIO: [EdItem['priority'], string][] = [['must_keep', 'Always keep'], ['keep_if_time', 'Keep if time'], ['first_to_cut', 'Cut first']];
 const REST = [0, 30, 45, 60, 75, 90, 120, 150, 180, 240, 300];
@@ -103,11 +106,32 @@ export function ProgrammeEditor({ clientId, clientName, start, library, backHref
                   <button className="iconbtn" onClick={() => setW({ items: w.items.filter((_, k) => k !== j) })} aria-label="Remove"><Icon name="trash" className="sm" /></button>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 8, fontSize: 12, color: 'var(--fg3)' }}>
-                  <label style={{ display: 'grid', gap: 4 }}>{cardio ? 'Rounds' : 'Sets'}<input style={field} type="number" min={1} max={10} value={it.sets} onChange={ev => setItem(j, { sets: +ev.target.value })} /></label>
-                  <label style={{ display: 'grid', gap: 4 }}>{cardio ? 'Minutes, from' : 'Reps, from'}<input style={field} type="number" min={1} value={it.repMin} onChange={ev => setItem(j, { repMin: +ev.target.value })} /></label>
+                  {!it.plan && <label style={{ display: 'grid', gap: 4 }}>{cardio ? 'Rounds' : 'Sets'}<input style={field} type="number" min={1} max={10} value={it.sets} onChange={ev => setItem(j, { sets: +ev.target.value })} /></label>}
+                  <label style={{ display: 'grid', gap: 4 }}>{cardio ? 'Minutes, from' : it.plan ? 'Target reps, from' : 'Reps, from'}<input style={field} type="number" min={1} value={it.repMin} onChange={ev => setItem(j, { repMin: +ev.target.value })} /></label>
                   <label style={{ display: 'grid', gap: 4 }}>to<input style={field} type="number" min={1} value={it.repMax} onChange={ev => setItem(j, { repMax: +ev.target.value })} /></label>
                   <label style={{ display: 'grid', gap: 4 }}>Rest<select style={field} value={it.rest} onChange={ev => setItem(j, { rest: +ev.target.value })}>{[...new Set([...REST, it.rest])].sort((a, b) => a - b).map(r => <option key={r} value={r}>{restLabel(r)}</option>)}</select></label>
                   <label style={{ display: 'grid', gap: 4 }}>Short on time<select style={field} value={it.priority} onChange={ev => setItem(j, { priority: ev.target.value as EdItem['priority'] })}>{PRIO.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
+                </div>
+                {it.plan && <div style={{ display: 'grid', gap: 6 }}>{it.plan.map((ps, k) => (
+                  <div key={k} style={{ display: 'grid', gridTemplateColumns: '18px minmax(96px,1.6fr) minmax(0,.8fr) minmax(0,.8fr) 30px', gap: 6, alignItems: 'center', fontSize: 12, color: 'var(--fg3)' }}>
+                    <span className="num">{k + 1}</span>
+                    <select style={field} value={ps.kind} aria-label={`Set ${k + 1} type`} onChange={ev => setItem(j, { plan: it.plan!.map((x, m) => (m === k ? { ...x, kind: ev.target.value as SetKind } : x)) })}>
+                      {(Object.keys(KIND_OPTION) as SetKind[]).map(kd => <option key={kd} value={kd}>{KIND_OPTION[kd]}</option>)}</select>
+                    <input style={field} type="number" min={1} value={ps.reps[0]} aria-label={`Set ${k + 1} reps from`} onChange={ev => setItem(j, { plan: it.plan!.map((x, m) => (m === k ? { ...x, reps: [+ev.target.value, x.reps[1]] as [number, number] } : x)) })} />
+                    <input style={field} type="number" min={1} value={ps.reps[1]} aria-label={`Set ${k + 1} reps to`} onChange={ev => setItem(j, { plan: it.plan!.map((x, m) => (m === k ? { ...x, reps: [x.reps[0], +ev.target.value] as [number, number] } : x)) })} />
+                    <button className="iconbtn" aria-label={`Remove set ${k + 1}`} onClick={() => setItem(j, { plan: it.plan!.length > 1 ? it.plan!.filter((_, m) => m !== k) : it.plan })}><Icon name="trash" className="sm" /></button>
+                  </div>
+                ))}
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    <button className="btn line" style={{ height: 32 }} onClick={() => setItem(j, { plan: [...it.plan!, { kind: 'working', reps: [it.repMin, it.repMax] }] })}><Icon name="plus" className="sm" />Add set</button>
+                    <button className="btn line" style={{ height: 32 }} onClick={() => setItem(j, { plan: [{ kind: 'warmup', reps: [10, 10] }, ...it.plan!] })}>+ Warm-up first</button>
+                  </div></div>}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                  {!cardio && <button className="btn line" style={{ height: 32 }} onClick={() => setItem(j, { plan: it.plan ? null : setsOf(it.sets, [it.repMin, it.repMax]), ...(it.plan ? { sets: it.plan.length } : {}) })}>
+                    {it.plan ? 'Same for every set' : 'Plan each set (warm-ups, pyramids, drop sets)'}</button>}
+                  {!cardio && <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: 'var(--fg3)' }}>Starting weight
+                    <input style={{ ...field, width: 80 }} inputMode="decimal" value={it.startLoad ?? ''} placeholder="kg" aria-label="Starting weight in kg"
+                      onChange={ev => { const v = ev.target.value.replace(',', '.').replace(/[^\d.]/g, ''); setItem(j, { startLoad: v === '' ? null : Number(v) }); }} /></label>}
                 </div>
                 <input style={{ ...field, width: '100%' }} value={it.note} maxLength={300} placeholder={`Note for ${first} (optional)`} onChange={ev => setItem(j, { note: ev.target.value })} aria-label="Note" />
               </div>

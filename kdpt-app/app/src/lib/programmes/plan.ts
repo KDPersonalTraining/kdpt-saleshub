@@ -31,13 +31,15 @@ export function nextWorkout<T extends WeekScoped>(thisWeek: T[], lastDoneId: str
 // From every logged set (newest first), each exercise's most recent session
 // (its first set's weight and every set's reps, in order) and its best
 // estimated 1-rep max.
-export type SetRow = { exercise_id: string; session_id: string; set_number: number; load_kg: number | null; reps: number | null; completed_at: string };
+export type SetRow = { exercise_id: string; session_id: string; set_number: number; load_kg: number | null; reps: number | null; completed_at: string; kind?: string | null };
 export type LastResult = { load: number; reps: number[]; best: number };
 export function lastResults(rows: SetRow[]): Record<string, LastResult> {
   const out: Record<string, LastResult & { session: string }> = {};
   const sorted = [...rows].sort((a, b) => b.completed_at.localeCompare(a.completed_at));
+  // Only working sets count: warm-ups and drop sets would skew "last time".
+  const working = (r: SetRow) => r.reps != null && (!r.kind || r.kind === 'working');
   for (const r of sorted) {
-    if (r.reps == null) continue;
+    if (!working(r) || r.reps == null) continue;
     const e = estimateOneRepMax(r.load_kg ?? 0, r.reps) ?? 0;
     const cur = out[r.exercise_id];
     if (!cur) out[r.exercise_id] = { session: r.session_id, load: r.load_kg ?? 0, reps: [], best: e };
@@ -47,7 +49,7 @@ export function lastResults(rows: SetRow[]): Record<string, LastResult> {
   }
   // Sets were collected newest first; put them back in set order.
   for (const [id, o] of Object.entries(out)) {
-    const sets = sorted.filter(r => r.exercise_id === id && r.session_id === o.session && r.reps != null).sort((a, b) => a.set_number - b.set_number);
+    const sets = sorted.filter(r => r.exercise_id === id && r.session_id === o.session && working(r)).sort((a, b) => a.set_number - b.set_number);
     o.reps = sets.map(s => s.reps!);
     o.load = sets[0]?.load_kg ?? 0;
   }

@@ -1,8 +1,12 @@
 // A client's programme as the coach edits it, and the checks before saving.
-export type EdItem = { id?: string; exerciseId: string; sets: number; repMin: number; repMax: number; rest: number; priority: 'must_keep' | 'keep_if_time' | 'first_to_cut'; note: string };
+// plan: set by set (null = every set the same). startLoad: Kyle's starting weight for their first time.
+export type EdItem = { id?: string; exerciseId: string; sets: number; repMin: number; repMax: number; rest: number; priority: 'must_keep' | 'keep_if_time' | 'first_to_cut'; note: string;
+  plan?: PlannedSet[] | null; startLoad?: number | null };
 export type EdWorkout = { id?: string; name: string; focus: string; phase: string; weekFrom: number | null; weekTo: number | null; items: EdItem[] };
 export type EdProgramme = { id: string; name: string; weeks: number; startsOn: string; workouts: EdWorkout[] };
 export type LibExercise = { id: string; name: string; pattern: string; measure: 'reps' | 'distance'; muscles: string[] };
+
+import { cleanPlan, type PlannedSet } from './sets';
 
 const PRIOS = ['must_keep', 'keep_if_time', 'first_to_cut'];
 const int = (v: unknown) => (typeof v === 'number' && Number.isInteger(v) ? v : NaN);
@@ -35,7 +39,11 @@ export function checkProgramme(p: EdProgramme, library: { id: string; measure: s
       if (!(lo >= 1 && hi >= lo && hi <= cap)) return { ok: false, error: `${wn}: ${m === 'distance' ? 'minutes' : 'reps'} must be 1 to ${cap}, lowest first.` };
       if (!(rest >= 0 && rest <= 600)) return { ok: false, error: `${wn}: rest must be 0 to 10 minutes.` };
       if (!PRIOS.includes(it.priority)) return { ok: false, error: `${wn}: choose what happens when short on time.` };
-      items.push({ ...(it.id ? { id: it.id } : {}), exerciseId: it.exerciseId, sets, repMin: lo, repMax: hi, rest, priority: it.priority, note: String(it.note ?? '').trim().slice(0, 300) });
+      const plan = cleanPlan(it.plan ?? null, cap);
+      if (typeof plan === 'string') return { ok: false, error: `${wn}: ${plan}` };
+      const start = it.startLoad == null || (it.startLoad as unknown) === '' ? null : Number(it.startLoad);
+      if (start !== null && !(start >= 0 && start <= 500)) return { ok: false, error: `${wn}: starting weight must be 0 to 500 kg.` };
+      items.push({ ...(it.id ? { id: it.id } : {}), exerciseId: it.exerciseId, sets: plan ? plan.length : sets, repMin: lo, repMax: hi, rest, priority: it.priority, note: String(it.note ?? '').trim().slice(0, 300), plan, startLoad: start });
     }
     workouts.push({ ...(w.id ? { id: w.id } : {}), name: wn, focus: String(w.focus ?? '').trim().slice(0, 80), phase: String(w.phase ?? '').trim().slice(0, 60), weekFrom: from, weekTo: to, items });
   }

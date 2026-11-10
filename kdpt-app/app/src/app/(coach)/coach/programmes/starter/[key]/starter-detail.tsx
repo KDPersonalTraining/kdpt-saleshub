@@ -6,6 +6,7 @@ import { Icon } from '@/components/icon';
 import { AssignModal, type ClientOption } from '@/components/coach/assign';
 import { Sec } from '@/components/coach/ui';
 import { exerciseBySlug, phasesOf, starterByKey } from '@/lib/programmes/starters';
+import { KIND_LABEL } from '@/lib/programmes/sets';
 
 const PRIO = { must_keep: 'Always keep', keep_if_time: 'Keep if time', first_to_cut: 'Cut first' } as const;
 const rest = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
@@ -36,11 +37,11 @@ export function StarterDetail({ k, clients, demo }: { k: string; clients: Client
         <section key={w.name + a}>
           <Sec title={w.name} right={w.focus} />
           <div className="card">
-            <div className="crow th" style={{ gridTemplateColumns: 'minmax(180px,1.6fr) 60px 80px 70px 120px minmax(0,1.4fr)', minWidth: 720 }}><span>Exercise</span><span>Sets</span><span>Reps / min</span><span>Rest</span><span>Short on time</span><span>Note for the client</span></div>
+            <div className="crow th" style={{ gridTemplateColumns: 'minmax(180px,1.6fr) 60px 150px 70px 120px minmax(0,1.4fr)', minWidth: 720 }}><span>Exercise</span><span>Sets</span><span>Reps / min</span><span>Rest</span><span>Short on time</span><span>Note for the client</span></div>
             {w.items.map((it, i) => { const e = exerciseBySlug(it.slug)!; return (
-              <div key={i} className="crow" style={{ gridTemplateColumns: 'minmax(180px,1.6fr) 60px 80px 70px 120px minmax(0,1.4fr)', minWidth: 720 }}>
+              <div key={i} className="crow" style={{ gridTemplateColumns: 'minmax(180px,1.6fr) 60px 150px 70px 120px minmax(0,1.4fr)', minWidth: 720 }}>
                 <span><b>{e.name}</b><small style={{ display: 'block', color: 'var(--fg3)', fontSize: 12 }}>{e.muscles.join(', ')}</small></span>
-                <span className="num">{it.sets}</span><span className="num">{it.reps[0] === it.reps[1] ? it.reps[0] : `${it.reps[0]}–${it.reps[1]}`}{e.measure === 'distance' ? ' min' : ''}</span>
+                <span className="num">{it.sets}</span><span className="num" title={it.plan ? it.plan.map(p => `${KIND_LABEL[p.kind]} ${p.reps[0]}–${p.reps[1]}`).join(', ') : undefined}>{it.plan ? it.plan.map(p => `${p.kind === 'warmup' ? 'W' : p.kind === 'drop' ? 'D' : p.kind === 'amrap' ? 'Max ' : ''}${p.reps[0] === p.reps[1] ? p.reps[0] : `${p.reps[0]}–${p.reps[1]}`}`).join(' · ') : it.reps[0] === it.reps[1] ? it.reps[0] : `${it.reps[0]}–${it.reps[1]}`}{e.measure === 'distance' ? ' min' : ''}</span>
                 <span className="num">{rest(it.rest)}</span><span style={{ color: 'var(--fg2)' }}>{PRIO[it.priority]}</span>
                 <span style={{ color: 'var(--fg2)', fontSize: 13 }}>{it.note ?? ''}</span>
               </div>

@@ -7,7 +7,8 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: 'KDPT', statusBarStyle: 'black-translucent' },
 };
 
-export const viewport: Viewport = { themeColor: '#000000', width: 'device-width', initialScale: 1, viewportFit: 'cover' };
+// maximumScale stops iPhones zooming the page when a text box is tapped; Safari still allows pinch-zoom.
+export const viewport: Viewport = { themeColor: '#000000', width: 'device-width', initialScale: 1, maximumScale: 1, viewportFit: 'cover' };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

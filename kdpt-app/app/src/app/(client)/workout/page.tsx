@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeftRight, Check, CirclePlay, Minus, Pause, Play, Plus, SkipForward, TriangleAlert, X } from 'lucide-react';
+import { ArrowLeftRight, Check, ChevronDown, CirclePlay, Minus, Pause, Play, Plus, SkipForward, TriangleAlert, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useUI } from '@/components/client/shell';
@@ -10,6 +10,7 @@ import { useCurrentWorkout, useLive, type CurrentWorkout } from '@/lib/client/li
 import { sessionJob, uuid } from '@/lib/client/record';
 import { queueSession } from '@/lib/client/sync';
 import { clock, elapsedMs, nextSetIndex, stepKm, stepLoad, stepMins, stepReps } from '@/lib/client/session';
+import { KIND_LABEL, KIND_SHORT, firstStep, setLoad, setsOf, type PlannedSet } from '@/lib/programmes/sets';
 import { parseKm, parseLoad, parseMins, parseReps } from '@/lib/client/summary';
 import { setState, updateOnceLoaded, useClient, type ClientState, type SetLog } from '@/lib/client/store';
 import { planFor, repRange, suggestionFor } from '@/lib/client/workout';
@@ -19,12 +20,18 @@ import { planFor, repRange, suggestionFor } from '@/lib/client/workout';
 // leaving, pausing or closing the app never loses anything.
 const I = { size: 22, strokeWidth: 1.75 } as const;
 
-// First time on an exercise there's no weight to suggest: the box starts empty.
+// Each set starts filled in: the suggested weight from last time (or Kyle's
+// starting weight), lighter for warm-ups and drop sets, and the set's target
+// reps. Cardio distance starts empty, to read off the machine.
 const prefill = (ex: Exercise, n: number, cur: SetLog[] = []): SetLog[] => {
-  // Cardio: distance starts empty (read it off the machine), minutes at the target.
-  const load = ex.measure === 'distance' ? '' : ex.inc === 0 ? '0' : ex.last.reps.length ? String(suggestionFor(ex).load) : '';
-  return Array.from({ length: n }, (_, i) => cur[i] ?? { load, reps: String(ex.reps[1]), done: false });
+  const plan = setsOf(n, ex.reps, ex.plan);
+  const base = ex.inc === 0 ? 0 : ex.last.reps.length ? suggestionFor(ex).load : ex.start ?? null;
+  return Array.from({ length: n }, (_, i) => cur[i] ?? {
+    load: ex.measure === 'distance' ? '' : ex.inc === 0 ? '0' : String(setLoad(plan[i]?.kind ?? 'working', base, ex.inc) ?? ''),
+    reps: String(plan[i] ? (plan[i].kind === 'amrap' ? plan[i].reps[0] : plan[i].reps[1]) : ex.reps[1]), done: false,
+  });
 };
+const target = (p: PlannedSet, unit: string) => (p.kind === 'amrap' ? `${p.reps[0]}+ ${unit}` : `${p.reps[0] === p.reps[1] ? p.reps[0] : `${p.reps[0]}–${p.reps[1]}`} ${unit}`);
 const restLeft = (r: NonNullable<ClientState['rest']>, now: number) => (r.pausedLeft ?? Math.min(r.total, Math.max(0, Math.ceil((r.endsAt - now) / 1000))));
 
 export default function Workout() {
@@ -41,7 +48,7 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
   const { ex, sets: n } = items[idx];
   const sets = s.logs[ex.id]?.length === n ? s.logs[ex.id] : prefill(ex, n, s.logs[ex.id]);
   const [editing, setEditing] = useState<number | null>(null);
-  const [sheet, setSheet] = useState<'exit' | 'howto' | null>(null);
+  const [sheet, setSheet] = useState<'exit' | 'howto' | 'list' | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const paused = s.pausedAt != null;
 
@@ -55,6 +62,7 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
   const cur = editing ?? nextSetIndex(sets);
   const dist = ex.measure === 'distance', bw = ex.inc === 0 && !dist, name = s.swaps[ex.id] ?? ex.name, sug = suggestionFor(ex);
   const unit = dist ? 'min' : 'reps';
+  const plan = setsOf(n, ex.reps, ex.plan), ps = cur != null ? plan[cur] : null;
   const save = (next: SetLog[]) => setState({ logs: { ...s.logs, [ex.id]: next } });
   const change = (i: number, patch: Partial<SetLog>) => save(sets.map((x, j) => (j === i ? { ...x, ...patch } : x)));
 
@@ -68,7 +76,17 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
       if (!bw && parseLoad(x.load) === null) { toast('Check the weight: a number up to 500 kg'); return; }
       if (parseReps(x.reps) === null) { toast('Check the reps: a whole number from 1 to 100'); return; }
     }
-    const next = sets.map((y, j) => (j === cur ? { ...y, done: true } : y));
+    // The weight just lifted carries into the sets still to do (a drop set
+    // gets about 20% less). Warm-up weights don't carry forward.
+    // Sets still showing the starting suggestion (or empty) follow the change;
+    // anything the client typed themselves is left alone.
+    const k = plan[cur]?.kind ?? 'working', carry = parseLoad(x.load), defaults = prefill(ex, n);
+    const next = sets.map((y, j) => {
+      if (j === cur) return { ...y, done: true };
+      const kj = plan[j]?.kind ?? 'working', untouched = y.load === '' || y.load === defaults[j]?.load;
+      if (j > cur && !y.done && untouched && carry !== null && k !== 'warmup' && kj !== 'warmup') return { ...y, load: String(kj === 'drop' ? setLoad('drop', carry, ex.inc) : carry) };
+      return y;
+    });
     const wasEditing = editing != null;
     setEditing(null);
     if (wasEditing) { save(next); return; }
@@ -100,6 +118,8 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
     else if (s.pain.act === 'stop') finish();
     else if (s.pain.act === 'swap' && ex.alts.length) openSheet('swap');
   }, [s.pain]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Jump to any exercise, back or forward. Nothing logged is lost.
+  const go = (i: number) => { setEditing(null); setSheet(null); setState({ idx: i, between: null, rest: null, skipped: { ...s.skipped, [items[i].ex.id]: false } }); };
   const togglePause = () => setState(paused ? { pausedMs: s.pausedMs + (Date.now() - s.pausedAt!), pausedAt: null } : { pausedAt: Date.now() });
 
   const doneSets = sets.filter(x => x.done).length;
@@ -112,11 +132,12 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
     <div className="wm">
       <header className="wm-top">
         <button className="wm-text" onClick={() => setSheet('exit')}><X {...I} />Exit</button>
-        <div className="wm-where"><span className="num">{clock(elapsedMs(s, now))}</span><small>Exercise {idx + 1} of {items.length}</small></div>
+        <button className="wm-where" onClick={() => setSheet('list')} aria-label="All exercises in this workout"><span className="num">{clock(elapsedMs(s, now))}</span><small>Exercise {idx + 1} of {items.length} <ChevronDown size={12} strokeWidth={2} style={{ display: 'inline', verticalAlign: -1 }} /></small></button>
         <button className="wm-text" onClick={togglePause} aria-pressed={paused}>{paused ? <Play {...I} /> : <Pause {...I} />}{paused ? 'Resume' : 'Pause'}</button>
       </header>
-      <div className="wm-progress" aria-hidden="true">{items.map((it, i) => (
-        <i key={it.ex.id} className={s.skipped[it.ex.id] ? 'skip' : i < idx || (i === idx && s.between) ? 'done' : i === idx ? 'now' : ''} />
+      <div className="wm-progress">{items.map((it, i) => (
+        <button key={it.ex.id} aria-label={`Go to ${s.swaps[it.ex.id] ?? it.ex.name}`} onClick={() => go(i)}
+          className={s.skipped[it.ex.id] ? 'skip' : (s.logs[it.ex.id] ?? []).length && (s.logs[it.ex.id] ?? []).every(x => x.done) ? 'done' : i === idx ? 'now' : ''} />
       ))}</div>
 
       {s.between === ex.id ? (
@@ -127,7 +148,7 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
         <main className="wm-main" key={ex.id}>
           <div className="wm-ex">
             <h1>{name}</h1>
-            <p className="wm-meta num">{cur == null ? (dist ? 'All rounds done' : 'All sets done') : `${dist ? 'Round' : 'Set'} ${cur + 1} of ${n}`} · {repRange(ex)} {unit} · rest {fmtSecs(ex.rest)}</p>
+            <p className="wm-meta num">{cur == null ? (dist ? 'All rounds done' : 'All sets done') : <>{`${dist ? 'Round' : 'Set'} ${cur + 1} of ${n}`}{ps && ps.kind !== 'working' ? <b style={{ color: ps.kind === 'warmup' ? 'var(--amber)' : 'var(--violet)' }}> · {KIND_LABEL[ps.kind]}</b> : ''} · {ps ? target(ps, unit) : `${repRange(ex)} ${unit}`}</>} · rest {fmtSecs(ex.rest)}</p>
             {note && <p className="wm-meta">Kyle: {note}</p>}
           </div>
 
@@ -138,15 +159,18 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
                   <Value label="km" value={sets[cur].load} kind="km" onChange={v => change(cur, { load: v })} onStep={d => change(cur, { load: stepKm(sets[cur].load, d * 0.1) })} />
                   <Value label="min" value={sets[cur].reps} kind="mins" onChange={v => change(cur, { reps: v })} onStep={d => change(cur, { reps: stepMins(sets[cur].reps, d) })} />
                 </>) : (<>
-                {!bw && <Value label="kg" value={sets[cur].load} kind="load" onChange={v => change(cur, { load: v })} onStep={d => change(cur, { load: stepLoad(sets[cur].load, d * (ex.inc || 2.5)) })} />}
+                {!bw && <Value label="kg" value={sets[cur].load} kind="load" onChange={v => change(cur, { load: v })} onStep={d => change(cur, { load: sets[cur].load === '' && d > 0 ? String(firstStep(ex.kit, ex.inc)) : stepLoad(sets[cur].load, d * (ex.inc || 2.5)) })} />}
                 <Value label="reps" value={sets[cur].reps} kind="reps" onChange={v => change(cur, { reps: v })} onStep={d => change(cur, { reps: stepReps(sets[cur].reps, d) })} />
                 </>)}
               </div>
               <p className="wm-target">
                 {dist ? <>Aim for {repRange(ex)} minutes · log the distance from the machine or your watch</>
                   : bw ? <>Bodyweight · aim for {repRange(ex)} reps</> : s.swaps[ex.id] ? <>Swapped exercise · pick a weight you can do {repRange(ex)} reps with</>
-                  : first ? <>First time · pick a weight you could do <b>{ex.reps[1] + 2}</b> reps with, then do {repRange(ex)}</>
-                  : <>Target <b className="num">{sug.load} kg × {repRange(ex)}</b>{sug.increased ? ` · up ${ex.inc} kg` : ''}</>}
+                  : ps?.kind === 'warmup' ? <>Warm-up · a light weight, smooth reps. It doesn&apos;t count towards your progress.</>
+                  : ps?.kind === 'drop' ? <>Drop set · take some weight off and go again straight away</>
+                  : ps?.kind === 'amrap' ? <>As many good reps as you can, at least {ps.reps[0]}</>
+                  : first ? <>First time · {ex.start ? <>Kyle suggests starting at <b className="num">{ex.start} kg</b>. </> : null}Pick a weight you could do <b>{(ps?.reps[1] ?? ex.reps[1]) + 2}</b> reps with</>
+                  : <>Target <b className="num">{sug.load} kg × {ps ? target(ps, '').trim() : repRange(ex)}</b>{sug.increased ? ` · up ${ex.inc} kg` : ''}</>}
                 {ex.last.reps.length > 0 && <><br /><span className="num">Last time {bw ? 'BW' : `${ex.last.load} kg`} × {ex.last.reps.join(', ')}</span></>}
               </p>
               <button className="wm-primary" onClick={complete}><Check {...I} size={24} />{`${editing != null ? 'Save' : 'Complete'} ${dist ? 'round' : 'set'} ${cur + 1}`}</button>
@@ -155,12 +179,14 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
           )}
           {cur == null && <button className="wm-primary" onClick={() => setState({ between: ex.id })}>Continue</button>}
 
-          {doneSets > 0 && (
-            <ol className="wm-done">{sets.map((x, i) => x.done && (
-              <li key={i}><button onClick={() => setEditing(i)} aria-label={`Edit set ${i + 1}`}>
-                <span className="n">{i + 1}</span><span className="num">{dist ? `${x.load} km · ${x.reps} min` : <>{bw ? 'BW' : `${x.load} kg`} × {x.reps}</>}</span><Check {...I} size={18} className="ok" /><span className="edit">Edit</span></button></li>
-            ))}</ol>
-          )}
+          {/* Every set of this exercise: done, now, and still to come. Tap any to change it. */}
+          <ol className="wm-sets" aria-label="Sets">{sets.map((x, i) => { const p = plan[i]; const isNow = i === cur; return (
+            <li key={i} className={isNow ? 'now' : x.done ? 'done' : ''}><button onClick={() => setEditing(x.done || !isNow ? i : null)} aria-label={`${x.done ? 'Edit' : 'Go to'} set ${i + 1}`}>
+              <span className="n">{p?.kind && p.kind !== 'working' ? <em className={p.kind}>{KIND_SHORT[p.kind]}</em> : i + 1}</span>
+              <span className="num tgt">{p ? target(p, unit) : `${repRange(ex)} ${unit}`}</span>
+              <span className="num val">{x.done ? (dist ? `${x.load} km · ${x.reps} min` : <>{bw ? 'BW' : `${x.load} kg`} × {x.reps}</>) : dist ? '' : bw ? '' : x.load ? `${x.load} kg` : '–'}</span>
+              {x.done ? <Check {...I} size={18} className="ok" /> : isNow ? <span className="nowtag">Now</span> : <span />}</button></li>
+          ); })}</ol>
 
           <nav className="wm-actions" aria-label="More for this exercise">
             <button onClick={() => setSheet('howto')}><CirclePlay {...I} />How to</button>
@@ -197,7 +223,15 @@ function WorkoutMode({ w }: { w: CurrentWorkout }) {
       {sheet && (
         <div className="wm-scrim" onClick={e => { if (e.target === e.currentTarget) setSheet(null); }}>
           <div className="wm-sheet" role="dialog" aria-modal="true">
-            {sheet === 'exit' ? (<>
+            {sheet === 'list' ? (<>
+              <h2>{w.name}</h2>
+              <ol className="wm-list-ex">{items.map((it, i) => { const lg = s.logs[it.ex.id] ?? [], d = lg.filter(x => x.done).length; return (
+                <li key={it.ex.id}><button onClick={() => go(i)} aria-current={i === idx ? 'step' : undefined}>
+                  <span className="n num">{i + 1}</span><span><b>{s.swaps[it.ex.id] ?? it.ex.name}</b><small className="num">{s.skipped[it.ex.id] ? 'Skipped' : `${d} of ${it.sets} ${it.ex.measure === 'distance' ? 'rounds' : 'sets'} done`}</small></span>
+                  {d === it.sets ? <Check {...I} size={18} style={{ color: 'var(--mint)' }} /> : i === idx ? <span className="nowtag">Now</span> : null}</button></li>
+              ); })}</ol>
+              <button className="wm-secondary" onClick={() => setSheet(null)}>Close</button>
+            </>) : sheet === 'exit' ? (<>
               <h2>Leave the workout?</h2>
               <p>Everything you&apos;ve logged is saved. You can carry on from Home whenever you&apos;re ready.</p>
               <button className="wm-primary" onClick={() => { if (!paused) togglePause(); router.push('/home'); }}>Save and leave</button>

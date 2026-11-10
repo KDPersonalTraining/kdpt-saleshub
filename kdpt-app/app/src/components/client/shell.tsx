@@ -23,7 +23,7 @@ export const useUI = () => useContext(Ctx)!;
 
 const TABS = [['home', 'Home', House], ['train', 'Train', Dumbbell], ['fuel', 'Fuel', Utensils], ['progress', 'Progress', ChartNoAxesColumn], ['community', 'Community', Users]] as const;
 // Full-screen flows hide the tab bar.
-const NO_TABS = ['/workout', '/chat', '/kai', '/checkin', '/profile', '/welcome', '/tour'];
+const NO_TABS = ['/workout', '/chat', '/kai', '/checkin', '/welcome', '/tour'];
 
 export function ClientShell({ me, remote, children }: { me: { id: string; name: string; isNew?: boolean; demo?: boolean }; remote?: { orgId: string; state: Partial<ClientState> | null }; children: React.ReactNode }) {
   const path = usePathname();

@@ -34,11 +34,12 @@ export function sessionJob(s: ClientState, w: CurrentWorkout, who: { clientId: s
           completed_at: finished, device_updated_at: finished });
         continue;
       }
+      const kind = ex.plan?.[(s.logs[ex.id] ?? []).indexOf(x)]?.kind ?? 'working';
       const reps = parseReps(x.reps), load = ex.inc === 0 ? 0 : parseLoad(x.load);
       if (reps === null || load === null) continue;
       n += 1;
       sets.push({ id: uuid(), org_id: who.orgId, client_id: who.clientId, session_id: sid, workout_exercise_id: ex.id, exercise_id: did,
-        set_number: n, kind: 'working', load_kg: ex.inc === 0 ? null : load, reps, suggested_load_kg: ex.inc === 0 || !ex.last.reps.length ? null : suggestionFor(ex).load,
+        set_number: n, kind, load_kg: ex.inc === 0 ? null : load, reps, suggested_load_kg: ex.inc === 0 || !ex.last.reps.length ? null : suggestionFor(ex).load,
         completed_at: finished, device_updated_at: finished });
     }
     const m = s.exNotes[ex.id];

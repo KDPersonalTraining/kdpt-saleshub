@@ -74,7 +74,7 @@ export const EXERCISES: StarterExercise[] = [
 export const exerciseBySlug = (slug: string) => EXERCISES.find(e => e.slug === slug);
 
 export type Priority = 'must_keep' | 'keep_if_time' | 'first_to_cut';
-export type StarterItem = { slug: string; sets: number; reps: [number, number]; rest: number; priority: Priority; note?: string };
+export type StarterItem = { slug: string; sets: number; reps: [number, number]; rest: number; priority: Priority; note?: string; plan?: import('./sets').PlannedSet[] };
 export type StarterWorkout = { name: string; focus: string; weeks?: [number, number]; phase?: string; items: StarterItem[] };
 export type Starter = { key: string; name: string; summary: string; level: 'Beginner' | 'Intermediate'; weeks: number; daysPerWeek: string; workouts: StarterWorkout[] };
 
@@ -161,6 +161,20 @@ export const STARTERS: Starter[] = [
     ],
   },
 ];
+// A few set-by-set plans on the main lifts: a warm-up before heavy work,
+// a pyramid, and a drop set to finish.
+const W = (reps: number, ...work: [number, number][]) => [{ kind: 'warmup' as const, reps: [reps, reps] as [number, number] }, ...work.map(r => ({ kind: 'working' as const, reps: r }))];
+const PLANS: Record<string, Record<string, import('./sets').PlannedSet[]>> = {
+  'upper-lower': { 'bench-press': W(10, [6, 8], [6, 8], [6, 8]), 'back-squat': W(8, [6, 8], [6, 8], [6, 8]), 'trap-bar-deadlift': W(6, [5, 6], [5, 6], [5, 6]) },
+  'push-pull-legs': {
+    'bench-press': [{ kind: 'warmup', reps: [10, 10] }, { kind: 'working', reps: [10, 12] }, { kind: 'working', reps: [8, 10] }, { kind: 'working', reps: [6, 8] }],
+    'lat-pulldown': [{ kind: 'working', reps: [8, 10] }, { kind: 'working', reps: [8, 10] }, { kind: 'working', reps: [8, 10] }, { kind: 'drop', reps: [10, 15] }],
+    'back-squat': W(8, [6, 8], [6, 8], [6, 8], [6, 8]),
+    'triceps-pushdown': [{ kind: 'working', reps: [10, 12] }, { kind: 'working', reps: [10, 12] }, { kind: 'amrap', reps: [12, 30] }],
+  },
+};
+for (const s of STARTERS) for (const w of s.workouts) for (const it of w.items) { const p = PLANS[s.key]?.[it.slug]; if (p) { it.plan = p; it.sets = p.length; } }
+
 export const starterByKey = (key: string) => STARTERS.find(s => s.key === key);
 
 // The phases of a starter, in order: [label, first week, last week].

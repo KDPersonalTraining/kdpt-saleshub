@@ -43,7 +43,7 @@ export async function assignStarter(v: { clientId: string; key: string; startsOn
   const woId = Object.fromEntries(wos.map(w => [w.day_order, w.id]));
   const items = starter.workouts.flatMap((w, i) => w.items.map((it, p) => ({
     org_id: org, workout_id: woId[i + 1], exercise_id: idOf[it.slug], position: p + 1, working_sets: it.sets,
-    rep_min: it.reps[0], rep_max: it.reps[1], rest_seconds: it.rest, priority: it.priority, coach_note: it.note ?? null,
+    rep_min: it.reps[0], rep_max: it.reps[1], rest_seconds: it.rest, priority: it.priority, coach_note: it.note ?? null, set_plan: it.plan ?? null,
   })));
   const { error: e3 } = await sb.from('workout_exercises').insert(items);
   if (e3) return undo('Couldn’t save the exercises. Nothing was changed.');
@@ -69,7 +69,7 @@ async function coachOnly() {
 // Copies a programme in the database (workouts and exercises) as a new one:
 // for a client (active, replacing theirs) or as one of Kyle's own (no client).
 async function copyProgramme(sb: Sb, me: { id: string; orgId?: string }, srcId: string, to: { clientId: string | null; startsOn: string | null; name?: string }): Promise<{ id: string } | { error: string }> {
-  const { data: src } = await sb.from('programmes').select('name, description, weeks, starts_on, template_key, workouts(name, day_order, focus, phase, week_from, week_to, workout_exercises(exercise_id, position, working_sets, rep_min, rep_max, rest_seconds, priority, coach_note))')
+  const { data: src } = await sb.from('programmes').select('name, description, weeks, starts_on, template_key, workouts(name, day_order, focus, phase, week_from, week_to, workout_exercises(exercise_id, position, working_sets, rep_min, rep_max, rest_seconds, priority, coach_note, set_plan, start_load_kg))')
     .eq('id', srcId).maybeSingle();
   if (!src) return { error: 'Programme not found.' };
   type W = { name: string; day_order: number; focus: string | null; phase: string | null; week_from: number | null; week_to: number | null; workout_exercises: Record<string, unknown>[] };
@@ -123,7 +123,7 @@ export async function newTemplate(v: { name: string; fromStarter: string | null 
   for (const [i, w] of workouts.entries()) {
     const { data: nw } = await c.sb.from('workouts').insert({ org_id: c.me.orgId, programme_id: prog.id, name: w.name, day_order: i + 1, focus: w.focus || null, phase: w.phase ?? null, week_from: w.weeks?.[0] ?? null, week_to: w.weeks?.[1] ?? null }).select('id').single();
     if (nw && w.items.length) await c.sb.from('workout_exercises').insert(w.items.map((it, j) => ({ org_id: c.me.orgId, workout_id: nw.id, exercise_id: lib.find(e => e.slug === it.slug)!.id, position: j + 1,
-      working_sets: it.sets, rep_min: it.reps[0], rep_max: it.reps[1], rest_seconds: it.rest, priority: it.priority, coach_note: it.note ?? null })));
+      working_sets: it.sets, rep_min: it.reps[0], rep_max: it.reps[1], rest_seconds: it.rest, priority: it.priority, coach_note: it.note ?? null, set_plan: it.plan ?? null })));
   }
   revalidatePath('/coach/programmes');
   return { error: null, id: prog.id };
