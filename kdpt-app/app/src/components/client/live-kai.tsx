@@ -42,7 +42,7 @@ export function LiveKai() {
         <div className="ai-thread">{log.map((m, i) => (
           <div key={i}><div className="q">{m.q}</div>
             <div className="a" style={m.to === 'urgent' ? { borderColor: 'rgba(255,107,94,.5)' } : undefined}><span className="who"><span className="orb sm"><Icon name="spark" /></span>KAI</span>
-              <p style={{ whiteSpace: 'pre-line' }}>{m.a || 'Thinking…'}</p>
+              <KaiText text={m.a || 'Thinking…'} />
               {(m.to === 'coach' || m.to === 'urgent') && <Link className="handoff" href="/chat"><span className="kd-av"><img src="/kd-mark.png" alt="" /></span><span className="t"><b>Passed to Kyle</b><small>He’ll reply in your messages</small></span><Chev /></Link>}</div></div>
         ))}<div ref={end} /></div>
         {!busy && log.length < 2 && <div><div className="eyebrow" style={{ marginBottom: 10 }}>Try asking</div>
@@ -57,4 +57,19 @@ export function LiveKai() {
       </div>
     </>
   );
+}
+
+// Short answers: plain lines, with "- " lines shown as a tidy list.
+function KaiText({ text }: { text: string }) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const out: React.ReactNode[] = [];
+  let list: string[] = [];
+  const flush = () => { if (list.length) { out.push(<ul key={out.length} style={{ margin: '4px 0', paddingLeft: 18, display: 'grid', gap: 4 }}>{list.map((l, i) => <li key={i}>{l}</li>)}</ul>); list = []; } };
+  for (const l of lines) {
+    const m = l.match(/^[-•*]\s+(.*)$/);
+    if (m) list.push(m[1].replace(/\*\*/g, ''));
+    else { flush(); out.push(<p key={out.length} style={{ margin: 0 }}>{l.replace(/\*\*/g, '')}</p>); }
+  }
+  flush();
+  return <div style={{ display: 'grid', gap: 6 }}>{out}</div>;
 }

@@ -184,3 +184,7 @@
   .ds-actions.four a { padding: 12px 14px; }
   .page { gap: 18px; }
 }
+/* The Home top bar (logo, KAI, notifications, you) stays put while scrolling. */
+@media (max-width: 699px) {
+  .ds-top { position: sticky; top: 0; z-index: 12; background: #000; margin: 0 calc(-1 * var(--gut-r)) 0 calc(-1 * var(--gut)); padding: 0 var(--gut-r) 0 var(--gut); }
+}

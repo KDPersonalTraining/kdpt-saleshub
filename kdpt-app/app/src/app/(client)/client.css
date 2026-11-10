@@ -1084,3 +1084,26 @@ button.food { width: 100%; text-align: left; }
   .wm-main { gap: 18px; }
   .wm-progress { margin-bottom: 18px; }
 }
+
+/* Phones: leave room for the phone's own clock and battery bar (the app runs
+   edge to edge when added to the home screen), and keep pop-ups below it. */
+@media (max-width: 699px) {
+  .screen { padding-top: env(safe-area-inset-top, 0px); }
+  .device::before { content: ""; position: absolute; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: #000; z-index: 40; pointer-events: none; }
+  .push { top: calc(10px + env(safe-area-inset-top, 0px)); }
+  .toast { top: calc(60px + env(safe-area-inset-top, 0px)); }
+  .scrim .sheet, .wm-sheet { max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 12px); }
+}
+
+/* The fun comparison: pictures, then the words. */
+.wm-fun { display: grid; gap: 10px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.wm-fun p { margin: 0; color: var(--fg2); font-size: 16px; }
+.wm-fun b { display: block; color: var(--fg); font: 800 24px var(--display); letter-spacing: -.01em; margin-top: 2px; }
+.wm-fun small { display: block; color: var(--fg3); font-size: 14px; margin-top: 2px; }
+.fun-pics { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 40px; line-height: 1.1; }
+.fun-pics > span { display: inline-block; animation: funPop .35s ease-out both; }
+.fun-pics .half { clip-path: inset(0 50% 0 0); margin-right: -20px; }
+.fun-pics .big { font-size: 64px; }
+.fun-pics b { font: 800 32px var(--display); color: var(--fg); margin-left: 8px; }
+@keyframes funPop { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .fun-pics > span { animation: none; } }

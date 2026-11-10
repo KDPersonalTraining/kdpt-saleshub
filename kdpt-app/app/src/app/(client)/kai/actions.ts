@@ -49,7 +49,7 @@ export async function askKai(question: string, history: { q: string; a: string }
     const client = new Anthropic();
     const res = await client.messages.create({
       model: MODEL,
-      max_tokens: 4000,
+      max_tokens: 2000,
       output_config: { effort: 'low' },
       system: [
         { type: 'text', text: KAI_SYSTEM, cache_control: { type: 'ephemeral' } },

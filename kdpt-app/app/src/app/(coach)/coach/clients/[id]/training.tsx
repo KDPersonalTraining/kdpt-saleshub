@@ -14,8 +14,8 @@ export type CoachSession = { id: string; workout: string; date: string; minutes:
 
 // "4,620 kg (3 hippos) · 2.4 km (7 times the height of the Eiffel Tower)"
 const fun = (x: CoachSession) => [
-  x.volume ? `${x.volume.toLocaleString('en-GB')} kg${liftedLike(x.volume, x.id) ? ` (${liftedLike(x.volume, x.id)!.words})` : ''}` : '',
-  x.distance ? `${Math.round(x.distance / 100) / 10} km${coveredLike(x.distance, x.id) ? ` (${coveredLike(x.distance, x.id)!.words})` : ''}` : '',
+  x.volume ? `${x.volume.toLocaleString('en-GB')} kg${liftedLike(x.volume, x.id) ? ` (${liftedLike(x.volume, x.id)!.thing.e} ${liftedLike(x.volume, x.id)!.words})` : ''}` : '',
+  x.distance ? `${Math.round(x.distance / 100) / 10} km${coveredLike(x.distance, x.id) ? ` (${coveredLike(x.distance, x.id)!.place.e} ${coveredLike(x.distance, x.id)!.words})` : ''}` : '',
 ].filter(Boolean).join(' · ');
 
 // A client's programme and their logged workouts, on their record.

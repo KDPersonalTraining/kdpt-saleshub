@@ -25,6 +25,13 @@ describe('lifted like', () => {
   });
 });
 
+describe('pictures', () => {
+  it('every comparison has one', () => {
+    for (const t of WEIGHTS) expect(t.e, t.one).toBeTruthy();
+    for (const p of DISTANCES) expect(p.e, p.name).toBeTruthy();
+  });
+});
+
 describe('covered like', () => {
   it('compares a distance with a place 1 to 20 times its size', () => {
     for (const m of [400, 2400, 5000, 10000, 42195]) for (const seed of ['a', 'b', 'c']) {
