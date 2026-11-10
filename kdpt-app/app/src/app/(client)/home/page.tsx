@@ -49,7 +49,7 @@ export default function Home() {
       <Hello initials={me.initials} eyebrow="Wednesday 21 October" title={`Morning, ${me.first}`} />
 
       <Link className="ds-hero" href="/workout" aria-label={`${inProgress ? 'Carry on' : 'Start'} ${WORKOUT.name}`}>
-        <span className={`tag ${inProgress ? 'amber' : ''}`}>{inProgress ? 'In progress' : 'Today'}</span>
+        {inProgress && <span className="tag amber">In progress</span>}
         <h2>{WORKOUT.name}</h2>
         <p className="num">{p.items.length} exercises · about {p.minutes} min</p>
         <span className="go"><Play size={18} strokeWidth={2} fill="currentColor" />{inProgress ? 'Carry on' : 'Start workout'}</span>
@@ -141,7 +141,7 @@ function NewClientHome() {
 
       {plan && w && f ? (
         <Link className="ds-hero" href="/workout" aria-label={`${inProgress ? 'Carry on' : 'Start'} ${w.name}`}>
-          <span className={`tag ${inProgress ? 'amber' : ''}`}>{inProgress ? 'In progress' : 'Up next'}</span>
+          {inProgress && <span className="tag amber">In progress</span>}
           <h2>{w.name}</h2>
           <p className="num">{f.items.length} exercises · about {f.minutes} min</p>
           <span className="go"><Play size={18} strokeWidth={2} fill="currentColor" />{inProgress ? 'Carry on' : 'Start workout'}</span>

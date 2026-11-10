@@ -24,7 +24,7 @@ export default function Fuel() {
   const days: [string, number][] = [['M', 19], ['T', 20], ['W', 21], ['T', 22], ['F', 23], ['S', 24], ['S', 25]];
   return (
     <div className="page fade">
-      <div className="greet" style={{ paddingTop: 6 }}><div className="eyebrow">Nutrition</div><h1>Fuel</h1></div>
+      <div className="greet" style={{ paddingTop: 6 }}><h1>Fuel</h1></div>
       {live ? (n?.notes ? <p style={{ margin: 0, color: 'var(--fg2)', fontSize: 14 }}>Kyle: {n.notes}</p> : null) : <div className="days7">{days.map(([d, n], i) => <button key={i} className={day === i ? 'on' : ''} onClick={() => setDay(i)} aria-label={`${d} ${n}`}>{d}<b className="num">{n}</b><i className={i < 3 ? '' : 'none'} /></button>)}</div>}
       {mode === 'full' && (
         <div className="card fsum">

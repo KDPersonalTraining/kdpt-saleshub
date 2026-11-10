@@ -270,3 +270,68 @@
   .ds-days .done i { animation: dsPop .4s var(--ease) both; }
   @keyframes dsPop { from { transform: scale(.5); opacity: 0; } to { transform: none; opacity: 1; } }
 }
+
+/* Round 3: the "unslop" pass.
+   Type: small labels read as plain words, not shouted capitals; headings
+   wrap evenly; numbers keep their width; quiet text is easier to read. */
+.ds, .page { --fg3: #9ba29e; }
+.ds-eyebrow, .eyebrow, .ds .eyebrow, .page .eyebrow { color: var(--fg2); font: 500 14px var(--body, inherit); letter-spacing: 0; text-transform: none; }
+.screen :is(h1, h2, h3) { text-wrap: balance; }
+.screen p { text-wrap: pretty; }
+.screen { font-variant-numeric: tabular-nums; }
+/* No extra gloss on cards. */
+.card, .group, .stat, .ds-list.card, .ds-card, .ds-wcard, .ds-note { box-shadow: none; }
+
+/* The menu: one lit pill that slides to the section you pick. */
+.tabbar.ds-tabbar :is(a, button).on { background: none; }
+.tabbar.ds-tabbar :is(a, button) { position: relative; z-index: 1; }
+.tab-pill { position: absolute; z-index: 0; top: 6px; bottom: 6px; left: 6px; width: calc((100% - 12px) / 5); border-radius: 20px; background: rgba(126,213,151,.12);
+  transform: translateX(calc(var(--i, 0) * 100%)); transition: transform .32s cubic-bezier(.65,0,.35,1); }
+
+/* Toggles: the knob stretches while pressed, then settles. */
+.sw::after { transition: transform .2s cubic-bezier(.65,0,.35,1), width .14s ease-out; }
+.sw:active::after { width: 27px; }
+.sw[aria-checked="true"]:active::after { transform: translateX(17px); }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Entrances ease out; rows follow each other 30ms apart. */
+  .ds-page > *, .page > * { animation: dsIn .36s cubic-bezier(.16,1,.3,1) both; }
+  .ds-page > :nth-child(1), .page > :nth-child(1) { animation-delay: 0ms; }
+  .ds-page > :nth-child(2), .page > :nth-child(2) { animation-delay: 30ms; }
+  .ds-page > :nth-child(3), .page > :nth-child(3) { animation-delay: 60ms; }
+  .ds-page > :nth-child(4), .page > :nth-child(4) { animation-delay: 90ms; }
+  .ds-page > :nth-child(5), .page > :nth-child(5) { animation-delay: 120ms; }
+  .ds-page > :nth-child(6), .page > :nth-child(6) { animation-delay: 150ms; }
+  .ds-page > :nth-child(n+7), .page > :nth-child(n+7) { animation-delay: 180ms; }
+  .ds-wcards > *, .ds-list > * { animation: dsIn .32s cubic-bezier(.16,1,.3,1) both; }
+  .ds-wcards > :nth-child(2), .ds-list > :nth-child(2) { animation-delay: 30ms; }
+  .ds-wcards > :nth-child(3), .ds-list > :nth-child(3) { animation-delay: 60ms; }
+  .ds-wcards > :nth-child(4), .ds-list > :nth-child(4) { animation-delay: 90ms; }
+  .ds-wcards > :nth-child(n+5), .ds-list > :nth-child(n+5) { animation-delay: 120ms; }
+  /* Everything you tap presses to 0.97, with no lag while held. */
+  .optrow:active, .li:active, .pill-btn:active, .opt:active, .hrow:active, .prompt:active, .food:active, .addbtn:active, .cat:active { transform: scale(.97); transition-duration: 0s; }
+  .ds-row:active, .ds-btn:active, .ds-hero .go:active, .ds-wcard:active, .ds-quick a:active, .ds-actions a:active, .ds-note:active, .ds-kai:active { transition-duration: 0s; }
+  /* Sheets: quick and calm (240ms in, no overshoot). */
+  .sheet { animation: up .24s cubic-bezier(.16,1,.3,1); }
+  .wm-sheet { animation-duration: .24s; }
+  /* A finished set pulses once; the tick fades in sharp from a soft blur. */
+  .wm-sets li.done .k, .setrow.done .tick { animation: okPulse .32s ease-out; }
+  .tick svg, .ds-days .done i, .wm-sets li.done svg { animation: iconIn .22s ease-out both; }
+  @keyframes okPulse { 0% { box-shadow: 0 0 0 0 rgba(126,213,151,.45); } 100% { box-shadow: 0 0 0 10px rgba(126,213,151,0); } }
+  @keyframes iconIn { from { opacity: 0; filter: blur(4px); transform: scale(.6); } to { opacity: 1; filter: none; transform: none; } }
+  /* Exits are shorter than entrances. */
+  .splash { animation: appear .5s both, fadeout .4s 1.7s both; }
+}
+.skel > i { display: block; border-radius: 16px; background: #141615; animation: none !important; }
+@media (prefers-reduced-motion: no-preference) { .skel > i { background: linear-gradient(90deg, #141615 0%, #1c1f1d 50%, #141615 100%) 0 0 / 200% 100%; animation: skel 1.2s linear infinite !important; } @keyframes skel { to { background-position: -200% 0; } } }
+.tabbar.ds-tabbar { background: #121413; }
+.ds-hello small { color: var(--fg2); font: 500 14px var(--body); letter-spacing: 0; text-transform: none; }
+.ds-wcard .day { border-radius: 50%; }
+
+/* No shouted capitals anywhere: labels, buttons and headings read in
+   sentence case, as written. */
+.label-dot, .hero .tag, .hero h2, .ex-title h1, .finish h1, .pill-btn, .cta, .switchto, .a .who, .a .go, .optrow .add, .ci-done h1, .mindword,
+.comp .postbtn, .coachtag, .exfacts small, .sethead, .entrance .e-kicker, .splash .s-kicker, .wm-cap, .wm-value label span, .ds-hero .tag {
+  text-transform: none; letter-spacing: 0; }
+.label-dot, .a .who, .exfacts small, .sethead, .wm-cap, .wm-value label span, .splash .s-kicker, .entrance .e-kicker, .ds-hero .tag { font-size: 13px; }
+.pill-btn, .cta, .switchto, .a .go, .optrow .add, .comp .postbtn { font-size: 15px; }

@@ -18,7 +18,7 @@ export function LiveProgress() {
   const [lift, setLift] = useState(0);
   if (!p.totals.sessions) return (
     <div className="ds ds-page fade">
-      <div><div className="ds-eyebrow">Your progress</div><h1 className="ds-title">Progress</h1></div>
+      <div><h1 className="ds-title">Progress</h1></div>
       <Empty icon="progress" color="var(--mint)" title="Your progress starts here">Your lifts, bests and weekly totals appear after your first workout.</Empty>
       <Weight />
     </div>
@@ -29,7 +29,7 @@ export function LiveProgress() {
   const maxS = Math.max(1, ...p.weeks.map(w => w.sessions));
   return (
     <div className="ds ds-page fade">
-      <div><div className="ds-eyebrow">Your progress</div><h1 className="ds-title">Progress</h1></div>
+      <div><h1 className="ds-title">Progress</h1></div>
 
       <dl className="ds-totals">
         <div><dt>Workouts</dt><dd className="num">{p.totals.sessions}</dd></div>

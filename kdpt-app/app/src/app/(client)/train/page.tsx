@@ -19,7 +19,7 @@ export default function Train() {
   if (live?.plan) return <LiveTrain plan={live.plan} />;
   if (s.preview.fresh) return (
     <div className="ds ds-page">
-      <div><div className="ds-eyebrow">Your programme</div><h1 className="ds-title">Train</h1></div>
+      <div><h1 className="ds-title">Train</h1></div>
       <Empty icon="programmes" color="var(--mint)" title="Your programme is on its way" cta={<Link className="ds-btn secondary" href="/library">Browse exercises</Link>}>Kyle builds it after reading your health answers. It&apos;ll appear here.</Empty>
     </div>
   );
@@ -29,7 +29,7 @@ export default function Train() {
     <div className="ds ds-page">
       <Header name={PROGRAMME.name} week={PROGRAMME.week} weeks={PROGRAMME.weeks} pct={pct} phase="On track" />
       <Link className="ds-hero" href="/workout">
-        <span className={`tag ${inProgress ? 'amber' : ''}`}>{inProgress ? 'In progress' : 'Today'}</span>
+        {inProgress && <span className="tag amber">In progress</span>}
         <h2>{WORKOUT.name}</h2>
         <p className="num">{p.items.length} exercises · about {p.minutes} min</p>
         <span className="go"><Play size={18} strokeWidth={2} fill="currentColor" />{inProgress ? 'Carry on' : 'Start workout'}</span>
@@ -52,7 +52,7 @@ export default function Train() {
 function Header({ name, week, weeks, pct, phase }: { name: string; week: number; weeks: number | null; pct: number; phase?: string | null }) {
   return (
     <div style={{ display: 'grid', gap: 14 }}>
-      <div><div className="ds-eyebrow">Your programme</div><h1 className="ds-title">{name}</h1></div>
+      <div><h1 className="ds-title">{name}</h1></div>
       {weeks ? <div style={{ display: 'grid', gap: 8 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}><span className="num"><b>Week {week}</b> <span style={{ color: 'var(--fg3)' }}>of {weeks}</span></span>{phase && <span style={{ color: 'var(--fg2)' }}>{phase}</span>}</div>
         <div className="ds-bar"><i style={{ width: `${pct}%` }} /></div>
@@ -91,7 +91,7 @@ function LiveTrain({ plan }: { plan: LivePlan }) {
       <Header name={plan.name} week={plan.week} weeks={plan.weeks} pct={pct} phase={phase} />
       {heroW && hf && (
         <button className="ds-hero" onClick={() => open(heroW.id)} style={{ textAlign: 'left' }}>
-          <span className={`tag ${inProgress ? 'amber' : ''}`}>{inProgress ? 'In progress' : 'Up next'}</span>
+          {inProgress && <span className="tag amber">In progress</span>}
           <h2>{heroW.name}</h2>
           <p className="num">{hf.items.length} exercises · about {hf.minutes} min{heroW.focus ? ` · ${heroW.focus}` : ''}</p>
           <span className="go"><Play size={18} strokeWidth={2} fill="currentColor" />{inProgress ? 'Carry on' : 'Start workout'}</span>
