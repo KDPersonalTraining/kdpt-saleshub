@@ -66,7 +66,10 @@ Numbers use tabular figures, so they don't jump as they change.
   - 12 for controls and inputs
   - 20 for sheets and the occasional card
   - fully round only for small toggles and progress dots
-- **No shadows or gradients** on surfaces. Separation comes from space and hairlines.
+- **Depth, kept quiet (round 2).** Groups of content sit on lit cards: a subtle top-to-bottom dark gradient, a 1px edge at 7% white, radius 20. No coloured glows.
+- **One photo hero per screen** at most (Home, Train): the next workout on a real gym photo with a dark fade, so text always reads. Swap in Kyle's own photos when he has them.
+- **Motion:** sections rise in with a short stagger on open; anything tappable presses in slightly. Both switch off when the phone asks for reduced motion.
+- **Floating tab bar,** inset 12px from the edges, so content scrolls behind it.
 
 ## Icons
 

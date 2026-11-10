@@ -1107,3 +1107,17 @@ button.food { width: 100%; text-align: left; }
 .fun-pics b { font: 800 32px var(--display); color: var(--fg); margin-left: 8px; }
 @keyframes funPop { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .fun-pics > span { animation: none; } }
+
+/* Round 2 surfaces on the older screens too: softly lit cards with an edge,
+   the same as Home and Train, and the same entrance and press motion. */
+.card, .group, .stat, .fsum, .mrow-card { background: linear-gradient(180deg, #171a18 0%, #101211 100%); border: 1px solid rgba(255,255,255,.07); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+.card, .group { border-radius: 20px; }
+.stat { border-radius: 18px; }
+@media (prefers-reduced-motion: no-preference) {
+  .page > * { animation: dsIn .42s cubic-bezier(.2,.8,.2,1) both; }
+  .page > :nth-child(2) { animation-delay: .04s; } .page > :nth-child(3) { animation-delay: .08s; } .page > :nth-child(n+4) { animation-delay: .12s; }
+  .optrow, .li, .pill-btn, .opt, .card button, .hrow, .prompt { transition: transform .14s cubic-bezier(.2,.8,.2,1); }
+  .optrow:active, .li:active, .pill-btn:active, .opt:active, .hrow:active, .prompt:active { transform: scale(.98); }
+}
+.page .group, .ds .group { background: linear-gradient(180deg, #171a18 0%, #101211 100%); border: 1px solid rgba(255,255,255,.07); border-radius: 20px; padding: 0 16px; }
+.page .group > :last-child, .ds .group > :last-child { border-bottom: 0 !important; }
