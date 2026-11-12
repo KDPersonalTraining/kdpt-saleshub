@@ -1,21 +1,22 @@
 'use client';
 
-import { Bell, CalendarClock, ChevronRight, ClipboardCheck, CreditCard, Dumbbell, MessageCircle, Sparkles, Utensils } from 'lucide-react';
+import { Bell, CalendarClock, ChevronRight, ClipboardCheck, CreditCard, MessageCircle, Play, Sparkles, Utensils } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useUI } from '@/components/client/shell';
 import { MomentumRings } from '@/components/client/ui';
 import { MOMENTUM, WORKOUT } from '@/lib/client/sample-data';
+import { useClient } from '@/lib/client/store';
+import { planFor } from '@/lib/client/workout';
 import { useCurrentWorkout, useLive } from '@/lib/client/live';
 import { prettyDate } from '@/lib/programmes/plan';
 import { CLIENT_LABEL, isUpcoming, shownState } from '@/lib/bookings/states';
 import { ukWhen } from '@/lib/time';
-import { useClient } from '@/lib/client/store';
-import { planFor } from '@/lib/client/workout';
+import { trainedDays, ukToday, weekDays, type Day } from '@/lib/client/week';
 
-// Home: the next thing to do comes first (today's workout), then the next
-// session with Kyle, anything waiting on the client, and quick ways to log.
+// Home: who you are and what's next. The next workout is the big photo card;
+// this week's days, quick actions, what's coming up and a note from Kyle follow.
 const I = { size: 20, strokeWidth: 1.75 } as const;
 let pushedOnce = false;
 
@@ -39,22 +40,27 @@ export default function Home() {
   if (s.preview.payFail && !s.paid) todo.push({ icon: <CreditCard {...I} />, title: 'November payment didn’t go through', sub: 'Update your card or try again', tag: ['bad', 'Action needed'], onClick: () => openSheet('pay') });
   if (!s.book.done) todo.push({ icon: <CalendarClock {...I} />, title: 'November sessions to review', sub: '8 proposed by Kyle', tag: ['wait', 'Waiting for you'], onClick: () => openSheet('book') });
   if (!s.checkinsSent) todo.push({ icon: <ClipboardCheck {...I} />, title: 'Weekly check-in', sub: 'Due Sunday · 2 minutes', onClick: () => router.push('/checkin') });
+  // Sample week: trained Monday and Tuesday; today is Wednesday.
+  const days = weekDays('2026-10-21', ['2026-10-19', '2026-10-20']);
 
   return (
-    <div className="ds ds-page fade">
+    <div className="ds ds-page">
       <Top me={me.initials} unread={!s.read} />
-      <div><div className="ds-eyebrow">Wednesday 21 October</div><h1 className="ds-title">Morning, {me.first}</h1></div>
+      <Hello initials={me.initials} eyebrow="Wednesday 21 October" title={`Morning, ${me.first}`} />
 
-      <section className="ds-card" aria-label="Today's workout">
-        <div><div className="ds-eyebrow" style={{ color: inProgress ? 'var(--amber)' : 'var(--mint)' }}>{inProgress ? 'In progress' : 'Today'}</div>
-          <h2 className="ds-h2" style={{ marginTop: 6, fontSize: 24 }}>{WORKOUT.name}</h2>
-          <p style={{ margin: '4px 0 0', color: 'var(--fg2)', fontSize: 14 }} className="num">{p.items.length} exercises · about {p.minutes} min</p></div>
-        <Link className="ds-btn primary" href="/workout"><Dumbbell {...I} />{inProgress ? 'Carry on' : 'Start workout'}</Link>
-      </section>
+      <Link className="ds-hero" href="/workout" aria-label={`${inProgress ? 'Carry on' : 'Start'} ${WORKOUT.name}`}>
+        {inProgress && <span className="tag amber">In progress</span>}
+        <h2>{WORKOUT.name}</h2>
+        <p className="num">{p.items.length} exercises · about {p.minutes} min</p>
+        <span className="go"><Play size={18} strokeWidth={2} fill="currentColor" />{inProgress ? 'Carry on' : 'Start workout'}</span>
+      </Link>
+
+      <Week days={days} onOpen={() => openSheet('momentum')} />
+      <Quick />
 
       <section className="ds-section">
         <header><h2 className="ds-h2">Coming up</h2></header>
-        <div className="ds-list">
+        <div className="ds-list card">
           <button className="ds-row" onClick={() => openSheet('session')}><CalendarClock {...I} />
             <span className="t"><b>PT with Kyle</b><small className="num">Thursday 22 October · 7:00 · Studio</small></span>
             <span className="end">{s.sessionCancelled ? <span className="ds-tag bad">Cancelled</span> : <span className="ds-tag ok">Confirmed</span>}<ChevronRight {...I} /></span></button>
@@ -66,21 +72,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="ds-section">
-        <header><h2 className="ds-h2">This week</h2><button onClick={() => openSheet('momentum')}>Momentum</button></header>
-        <button className="ds-week" onClick={() => openSheet('momentum')} aria-label="Momentum this week. See the breakdown">
-          <MomentumRings size={64} stroke={6} />
-          <div className="ds-stat3">{MOMENTUM.map((m, i) => <div key={m.k}><small>{m.k}</small><b className="num">{['2 of 3', '5 of 7 days', 'Good'][i]}</b></div>)}</div>
-        </button>
-      </section>
+      <button className="ds-card ds-week" onClick={() => openSheet('momentum')} aria-label="Momentum this week. See the breakdown">
+        <MomentumRings size={64} stroke={6} />
+        <div className="ds-stat3">{MOMENTUM.map((m, i) => <div key={m.k}><small>{m.k}</small><b className="num">{['2 of 3', '5 of 7 days', 'Good'][i]}</b></div>)}</div>
+      </button>
 
-      <div className="ds-actions">
-        <Link href="/fuel"><Utensils {...I} />Log food</Link>
-        <Link href="/chat"><MessageCircle {...I} />Message Kyle</Link>
-        <Link href="/kai"><Sparkles {...I} style={{ color: 'var(--violet)' }} />Ask KAI</Link>
-      </div>
-
-      <Link className="ds-quote" href="/chat"><img src="/kd-mark.png" alt="" /><span><small>Kyle · yesterday</small><p>Leg press goes up today. Take the first set steady.</p></span></Link>
+      <Link className="ds-note" href="/chat"><img src="/kd-mark.png" alt="" /><span><small>Kyle · yesterday</small><p>Leg press goes up today. Take the first set steady.</p></span></Link>
     </div>
   );
 }
@@ -96,35 +93,74 @@ function Top({ me, unread }: { me: string; unread: boolean }) {
   );
 }
 
-// A brand-new client has no programme, sessions or history yet. Show what
-// happens next instead of empty versions of an established client's screen.
+function Hello({ initials, eyebrow, title }: { initials: string; eyebrow: string; title: string }) {
+  return <div className="ds-hello"><span className="av" aria-hidden="true">{initials}</span><span><small>{eyebrow}</small><h1>{title}</h1></span></div>;
+}
+
+function Week({ days, onOpen }: { days: Day[]; onOpen?: () => void }) {
+  const n = days.filter(d => d.done).length;
+  return (
+    <section className="ds-section">
+      <header><h2 className="ds-h2">This week</h2>{onOpen ? <button onClick={onOpen}>{n} workout{n === 1 ? '' : 's'}</button> : <span style={{ color: 'var(--fg3)', fontSize: 14 }}>{n} workout{n === 1 ? '' : 's'}</span>}</header>
+      <div className="ds-days" aria-label={`Trained on ${n} day${n === 1 ? '' : 's'} this week`}>{days.map((d, i) => (
+        <div key={d.date} className={`${d.done ? 'done' : ''} ${d.today ? 'today' : ''}`}><i style={{ animationDelay: `${i * 40}ms` }}>{d.done ? '✓' : Number(d.date.slice(8))}</i><small>{d.label}</small></div>
+      ))}</div>
+    </section>
+  );
+}
+
+function Quick({ last }: { last?: React.ReactNode }) {
+  return (
+    <nav className="ds-quick" aria-label="Quick actions">
+      <Link href="/fuel"><span className="ic"><Utensils {...I} /></span>Log food</Link>
+      <Link href="/chat"><span className="ic"><MessageCircle {...I} /></span>Message</Link>
+      <Link href="/kai"><span className="ic kai"><Sparkles {...I} /></span>Ask KAI</Link>
+      {last ?? <Link href="/checkin"><span className="ic"><ClipboardCheck {...I} /></span>Check-in</Link>}
+    </nav>
+  );
+}
+
+// A new client, or a real client in live mode: their own programme, sessions
+// and check-in; a "getting started" list until Kyle gives them a programme.
 function NewClientHome() {
   const s = useClient(), { me } = useUI(), live = useLive(), w = useCurrentWorkout(s);
   const plan = live?.plan, ci = live?.checkin;
   const coming = (live?.bookings ?? []).filter(b => isUpcoming(shownState(b, b.pending)) && Date.parse(b.end) >= Date.now());
   const next = coming[0], toConfirm = coming.filter(b => shownState(b, b.pending) === 'awaiting_client').length;
+  const inProgress = s.startedAt != null;
   const steps: [string, string, 'done' | 'now' | 'next'][] = [
     ['Health questions', 'Done. Kyle reads them before you start', 'done'],
-    plan ? ['Your programme', `${plan.name} is ready`, 'done'] : ['Your programme', 'Kyle builds it around your goal', 'now'],
+    ['Your programme', 'Kyle builds it around your goal', 'now'],
     ['First session', 'Kyle will send you a time to accept', 'next'],
   ];
-  const inProgress = s.startedAt != null;
+  const f = plan && w ? planFor(s.duration, w) : null;
   return (
-    <div className="ds ds-page fade">
+    <div className="ds ds-page">
       <Top me={me.initials} unread={!s.read} />
-      <div><div className="ds-eyebrow">{plan ? `Week ${plan.week}${plan.weeks ? ` of ${plan.weeks}` : ''}` : 'Getting started'}</div><h1 className="ds-title">Hi, {me.first}</h1></div>
-      {plan && w && (
-        <section className="ds-card" aria-label="Your next workout">
-          <div><div className="ds-eyebrow" style={{ color: inProgress ? 'var(--amber)' : 'var(--mint)' }}>{inProgress ? 'In progress' : 'Up next'}</div>
-            <h2 className="ds-h2" style={{ marginTop: 6, fontSize: 24 }}>{w.name}</h2>
-            <p style={{ margin: '4px 0 0', color: 'var(--fg2)', fontSize: 14 }} className="num">{planFor(s.duration, w).items.length} exercises · about {planFor(s.duration, w).minutes} min</p></div>
-          <Link className="ds-btn primary" href="/workout"><Dumbbell {...I} />{inProgress ? 'Carry on' : 'Start workout'}</Link>
+      <Hello initials={me.initials} eyebrow={plan ? `Week ${plan.week}${plan.weeks ? ` of ${plan.weeks}` : ''} · ${plan.name}` : 'Getting started'} title={`Hi, ${me.first}`} />
+
+      {plan && w && f ? (
+        <Link className="ds-hero" href="/workout" aria-label={`${inProgress ? 'Carry on' : 'Start'} ${w.name}`}>
+          {inProgress && <span className="tag amber">In progress</span>}
+          <h2>{w.name}</h2>
+          <p className="num">{f.items.length} exercises · about {f.minutes} min</p>
+          <span className="go"><Play size={18} strokeWidth={2} fill="currentColor" />{inProgress ? 'Carry on' : 'Start workout'}</span>
+        </Link>
+      ) : (
+        <section className="ds-hero slim" style={{ '--photo': 'url(/assets/gym.jpg)' } as React.CSSProperties}>
+          <span className="tag">Welcome to KDPT</span>
+          <h2>Your programme is on its way</h2>
+          <p>Kyle builds it around your goal. It’ll appear here.</p>
         </section>
       )}
+
+      {live && <Week days={weekDays(ukToday(), trainedDays(live.sessions))} />}
+      <Quick last={live ? <Link href="/sessions"><span className="ic"><CalendarClock {...I} /></span>Sessions</Link> : <Link href="/tour"><span className="ic"><Sparkles {...I} /></span>App tour</Link>} />
+
       {(ci || next) && (
         <section className="ds-section">
           <header><h2 className="ds-h2">Coming up</h2></header>
-          <div className="ds-list">
+          <div className="ds-list card">
             {next && <Link className="ds-row" href="/sessions"><CalendarClock {...I} /><span className="t"><b>Session with Kyle</b><small>{ukWhen(next.start)}{next.location ? ` · ${next.location}` : ''}</small></span>
               <span className="end">{toConfirm ? <span className="ds-tag wait">{toConfirm > 1 ? `${toConfirm} to confirm` : 'Please confirm'}</span> : <span className="ds-tag ok">{CLIENT_LABEL[shownState(next, next.pending)][0]}</span>}<ChevronRight {...I} /></span></Link>}
             {ci && (ci.submittedAt
@@ -133,20 +169,20 @@ function NewClientHome() {
           </div>
         </section>
       )}
-      <section className="ds-section">
-        <header><h2 className="ds-h2">{plan ? 'Getting started' : 'What happens next'}</h2></header>
-        <ol className="ds-list ds-steps">{steps.map(([t, d, st], i) => (
-          <li key={t} className={`ds-row noicon ${st}`}><span className="t"><b><span className="n num">{st === 'done' ? '✓' : i + 1}</span>{t}</b><small>{d}</small></span>
-            {st === 'now' && <span className="end"><span className="ds-tag wait">In progress</span></span>}</li>
-        ))}</ol>
-      </section>
-      <div className="ds-actions four">
-        <Link href="/fuel"><Utensils {...I} />Log food</Link>
-        <Link href="/chat"><MessageCircle {...I} />Message Kyle</Link>
-        <Link href="/kai"><Sparkles {...I} style={{ color: 'var(--violet)' }} />Ask KAI</Link>
-        {live ? <Link href="/sessions"><CalendarClock {...I} />Sessions</Link> : <Link href="/tour"><Sparkles {...I} />App tour</Link>}
-      </div>
-      {!live && <Link className="ds-quote" href="/chat"><img src="/kd-mark.png" alt="" /><span><small>Kyle · just now</small><p>Welcome {me.first}! I&apos;ll have your programme ready before our first session.</p></span></Link>}
+
+      {!plan && (
+        <section className="ds-section">
+          <header><h2 className="ds-h2">What happens next</h2></header>
+          <ol className="ds-list card ds-steps">{steps.map(([t, d, st], i) => (
+            <li key={t} className={`ds-row noicon ${st}`}><span className="t"><b><span className="n num">{st === 'done' ? '✓' : i + 1}</span>{t}</b><small>{d}</small></span>
+              {st === 'now' && <span className="end"><span className="ds-tag wait">In progress</span></span>}</li>
+          ))}</ol>
+        </section>
+      )}
+
+      {!live && <Link className="ds-note" href="/chat"><img src="/kd-mark.png" alt="" /><span><small>Kyle · just now</small><p>Welcome {me.first}! I&apos;ll have your programme ready before our first session.</p></span></Link>}
+      {live && <Link className="ds-note" href="/chat"><img src="/kd-mark.png" alt="" /><span><small>Kyle</small><p>Any questions, message me here. I reply within a few hours.</p></span></Link>}
     </div>
   );
 }
+

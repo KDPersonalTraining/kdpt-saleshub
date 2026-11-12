@@ -76,7 +76,8 @@ export function LiveToday({ name, data }: { name: string; data: TodayData }) {
         <Sec title="Recent workouts" />
         <div className="card">
           {data.recent.map(r => {
-            const fun = [liftedLike(r.volume, r.id)?.words, coveredLike(r.distance, r.id)?.words].filter(Boolean).join(' and ');
+            const l = liftedLike(r.volume, r.id), c = coveredLike(r.distance, r.id);
+            const fun = [l && `${l.thing.e} ${l.words}`, c && `${c.place.e} ${c.words}`].filter(Boolean).join(' and ');
             return (
               <Link key={r.id} style={row} href={`/coach/clients/${r.clientId}`}>
                 <span><b>{r.name} · {r.workout}</b><small style={{ display: 'block', color: 'var(--fg3)', fontSize: 12 }}>{shortDate(r.at)} · {r.sets} sets{r.volume ? ` · ${r.volume.toLocaleString('en-GB')} kg` : ''}{r.distance ? ` · ${Math.round(r.distance / 100) / 10} km` : ''}{fun ? ` · ${fun}` : ''}</small></span>

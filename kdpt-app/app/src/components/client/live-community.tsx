@@ -21,7 +21,7 @@ export function LiveCommunity() {
   const send = async (p: CPost) => { if (await addComment(p.id, me.id, live.orgId, text)) { setText(''); void load(); } else toast('Couldn’t post it. Try again.'); };
   return (
     <div className="ds ds-page fade">
-      <div><div className="ds-eyebrow">KDPT</div><h1 className="ds-title">Community</h1></div>
+      <div><h1 className="ds-title">Community</h1></div>
       {posts === null ? <p style={{ color: 'var(--fg3)' }}>Loading…</p> : !posts.length ? <Empty icon="community" color="var(--mint)" title="Nothing here yet">Kyle’s tips, meals and news will show up here.</Empty> : (
         <div style={{ display: 'grid', gap: 24 }}>{posts.map(p => (
           <article key={p.id} style={{ display: 'grid', gap: 10, borderBottom: '1px solid rgba(255,255,255,.09)', paddingBottom: 20 }}>

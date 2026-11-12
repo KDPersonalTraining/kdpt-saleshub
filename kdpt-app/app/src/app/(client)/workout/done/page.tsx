@@ -1,6 +1,7 @@
 'use client';
 
-import { Check, Footprints, PawPrint, Trophy } from 'lucide-react';
+import { Check, Trophy } from 'lucide-react';
+import { FunPictures } from '@/components/client/fun-pictures';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -38,12 +39,12 @@ export default function WorkoutDone() {
       </dl>
       {/* The fun bit: random, but the same for this workout everywhere it's shown. */}
       {(() => { const like = liftedLike(sum.volumeKg, seed); return like && (
-        <p className="wm-like"><PawPrint size={22} strokeWidth={1.75} aria-hidden="true" />
-          <span>You lifted about <b>{like.words}</b><small className="num">{sum.volumeKg.toLocaleString('en-GB')} kg · {like.count === 1 ? 'a' : 'each'} {like.thing.one} weighs around {like.thing.kg.toLocaleString('en-GB')} kg</small></span></p>
+        <div className="wm-fun"><FunPictures e={like.thing.e} count={like.count} />
+          <p>You lifted about <b>{like.words}</b><small className="num">{sum.volumeKg.toLocaleString('en-GB')} kg · {like.count === 1 ? 'a' : 'each'} {like.thing.one} weighs around {like.thing.kg.toLocaleString('en-GB')} kg</small></p></div>
       ); })()}
       {(() => { const far = coveredLike(sum.distanceM, seed); return far && (
-        <p className="wm-like"><Footprints size={22} strokeWidth={1.75} aria-hidden="true" />
-          <span>You covered <b>{far.words}</b><small className="num">{Math.round(sum.distanceM / 100) / 10} km · {far.place.kind === 'count' ? `a ${far.place.name} is` : `${far.place.name.replace(/^the /, 'The ').replace(/^a /, 'A ')} is`} about {far.place.m.toLocaleString('en-GB')} m{far.place.kind === 'height' ? ' tall' : ' long'}</small></span></p>
+        <div className="wm-fun"><FunPictures e={far.place.e} count={far.count} />
+          <p>You covered <b>{far.words}</b><small className="num">{Math.round(sum.distanceM / 100) / 10} km · {far.place.kind === 'count' ? `a ${far.place.name} is` : `${far.place.name.replace(/^the /, 'The ').replace(/^a /, 'A ')} is`} about {far.place.m.toLocaleString('en-GB')} m{far.place.kind === 'height' ? ' tall' : ' long'}</small></p></div>
       ); })()}
       {sum.records.length > 0 && (
         <section><span className="wm-cap">New personal bests</span>

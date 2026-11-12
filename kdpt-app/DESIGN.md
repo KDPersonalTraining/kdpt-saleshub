@@ -66,7 +66,10 @@ Numbers use tabular figures, so they don't jump as they change.
   - 12 for controls and inputs
   - 20 for sheets and the occasional card
   - fully round only for small toggles and progress dots
-- **No shadows or gradients** on surfaces. Separation comes from space and hairlines.
+- **Depth, kept quiet (round 2).** Groups of content sit on lit cards: a subtle top-to-bottom dark gradient, a 1px edge at 7% white, radius 20. No coloured glows.
+- **One photo hero per screen** at most (Home, Train): the next workout on a real gym photo with a dark fade, so text always reads. Swap in Kyle's own photos when he has them.
+- **Motion:** sections rise in with a short stagger on open; anything tappable presses in slightly. Both switch off when the phone asks for reduced motion.
+- **Floating tab bar,** inset 12px from the edges, so content scrolls behind it.
 
 ## Icons
 
@@ -118,3 +121,24 @@ The workout is the most-used screen and gets its own environment:
 - **The summary** shows time, sets and kg lifted as big plain figures, new records, and a short recap per exercise.
 
 The workout logic, saved progress, rules and tests stay as they are. Only how it looks and how you move through it changes.
+
+## Round 3: keeping it from looking machine-made
+
+Checked against two lists Kyle shared ("20 ways to unslop AI designs" and "20 ways to make beautiful animations").
+
+- **Labels are plain words.** Small labels above headings are sentence case at 14px, not spaced-out capitals. A label that only repeats the heading is removed (no "Nutrition" above Fuel).
+- **No filler badges.** A tag appears only when it tells you something the screen doesn't already, such as "In progress". There's no "Coach" badge next to Kyle, and no category tag that repeats the post title.
+- **Readable quiet text:** secondary grey is #9ba29e.
+- **Headings wrap evenly** (`text-wrap: balance`), and numbers keep their width (tabular figures).
+- **Nested shapes match.** A badge inside a card is either a circle or follows the card's radius minus its padding.
+- **Loading screens show the outline** of the page in grey blocks, not a blank page.
+- **Motion:**
+  - Entrances ease out.
+  - Rows follow each other 30ms apart.
+  - Taps press to 0.97 straight away.
+  - Sheets open in 240ms.
+  - Exits are shorter than entrances.
+  - The menu has one lit pill that slides between tabs (ease-in-out).
+  - Toggle knobs stretch about 12% while pressed.
+  - A finished set pulses once, and ticks fade in from a soft blur.
+  - Nothing bounces.

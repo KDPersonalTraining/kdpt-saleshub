@@ -50,8 +50,8 @@ function PostCard({ p }: { p: Post }) {
   const send = () => { const v = reply.trim(); if (!v) return; setState({ comments: { ...s.comments, [p.id]: [...mine, v] } }); setReply(''); };
   return (
     <article className={`post ${p.pinned ? 'pinned' : ''}`}>
-      <div className="by"><Avatar id={p.by} /><span className="t"><b>{PEOPLE[p.by][0]}</b>{p.by === 'kyle' && <span className="coachtag">Coach</span>}<small>{p.when}{p.pinned ? ' · Pinned' : ''}</small></span>
-        {cat && <span className="label-dot" style={{ color: cat[3] }}>{cat[1]}</span>}</div>
+      <div className="by"><Avatar id={p.by} /><span className="t"><b>{PEOPLE[p.by][0]}</b><small>{p.when}{p.pinned ? ' · Pinned' : ''}</small></span>
+        {cat && cat[1] !== p.title && <span className="label-dot" style={{ color: cat[3] }}>{cat[1]}</span>}</div>
       {p.title && <h3>{p.title}</h3>}<p>{p.body}</p>
       {p.imgs && <div className="strip3">{p.imgs.map(i => <img key={i} src={`/assets/${i}.jpg`} alt="" />)}</div>}
       {p.board && <><div className="board">{p.board.map(([n, v], i) => <div key={n}><span>{i + 1}. {n}</span><b className="num">{v} avg</b></div>)}</div>

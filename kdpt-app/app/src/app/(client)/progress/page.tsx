@@ -36,7 +36,7 @@ function Progress() {
   const s = useClient();
   if (s.preview.fresh) return (
     <div className="page fade">
-      <div className="greet" style={{ paddingTop: 6 }}><div className="eyebrow">Your progress</div><h1>Progress</h1></div>
+      <div className="greet" style={{ paddingTop: 6 }}><h1>Progress</h1></div>
       <Empty icon="progress" color="var(--mint)" title="Your progress starts here">Your lifts, records and streaks appear after your first workouts.</Empty>
     </div>
   );

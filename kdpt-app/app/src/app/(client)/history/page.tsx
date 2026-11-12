@@ -24,8 +24,8 @@ export default function History() {
             <Chev open={open === i} />
           </button>
           {open === i && <div className="hsets">{r.sets.map(([n, sets]) => <div key={n}><b>{n}</b><span className="num">{sets.join(' · ')}</span></div>)}
-            {liftedLike(r.volume, r.id) && <div><b>Lifted about</b><span>{liftedLike(r.volume, r.id)!.words}</span></div>}
-            {coveredLike(r.distance, r.id) && <div><b>Covered</b><span>{coveredLike(r.distance, r.id)!.words}</span></div>}</div>}
+            {liftedLike(r.volume, r.id) && <div><b>Lifted about</b><span>{liftedLike(r.volume, r.id)!.thing.e} {liftedLike(r.volume, r.id)!.words}</span></div>}
+            {coveredLike(r.distance, r.id) && <div><b>Covered</b><span>{coveredLike(r.distance, r.id)!.place.e} {coveredLike(r.distance, r.id)!.words}</span></div>}</div>}
         </div>
       ))}</div>
     </div>

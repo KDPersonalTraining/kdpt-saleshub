@@ -94,6 +94,7 @@ export function ClientShell({ me, remote, children }: { me: { id: string; name: 
         </div>
         {showTabs && (
           <nav className="tabbar ds-tabbar" aria-label="App sections">
+            {TABS.some(t => t[0] === active) && <i className="tab-pill" aria-hidden style={{ '--i': TABS.findIndex(t => t[0] === active) } as React.CSSProperties} />}
             {TABS.map(([k, l, TabIcon]) => (
               <Link key={k} href={`/${k}`} className={k === active ? 'on' : ''} aria-current={k === active ? 'page' : undefined}>
                 <TabIcon size={24} strokeWidth={1.75} /><span>{l}</span>
