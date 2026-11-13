@@ -107,6 +107,70 @@ h1 em { font-style: normal; color: var(--mint); }
 .opt input:checked + .box .tick { background: var(--mint); border-color: var(--mint); }
 .opt input:checked + .box .tick svg { opacity: 1; }
 .opt input:focus-visible + .box { outline: 2px solid var(--mint); outline-offset: 2px; }
+/* ---------- goal step: scale + body focus picker ---------- */
+.sr { position: absolute; left: -9999px; }
+.scale { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); border: 0; padding: 0; margin: 0 0 18px; min-width: 0; }
+.scale::before { content: ""; position: absolute; top: 10px; left: 16.66%; right: 16.66%; height: 2px; background: var(--line-strong); }
+.scale label { position: relative; display: grid; justify-items: center; gap: 9px; cursor: pointer; padding-bottom: 4px; }
+.scale input { position: absolute; opacity: 0; pointer-events: none; }
+.scale .dot { width: 22px; height: 22px; border-radius: 50%; background: var(--panel-2); border: 2px solid var(--line-strong); transition: background .18s, border-color .18s, transform .18s, box-shadow .18s; }
+.scale .txt { font-size: 13px; font-weight: 500; color: var(--muted); text-align: center; line-height: 1.25; transition: color .18s; }
+.scale label:hover .dot { border-color: rgba(126,213,151,0.6); }
+.scale input:checked ~ .dot { background: var(--mint); border-color: var(--mint); transform: scale(1.12); box-shadow: 0 0 0 5px var(--mint-soft); }
+.scale input:checked ~ .txt { color: var(--cream); }
+.scale input:focus-visible ~ .dot { outline: 2px solid var(--mint); outline-offset: 3px; }
+.body-hint { margin: 0 0 12px; }
+.body-wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); gap: 12px; align-items: stretch; }
+.figure { position: relative; background: rgba(11,15,13,0.6); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 8px 54px; perspective: 800px; overflow: hidden; }
+.turn { position: relative; aspect-ratio: 200 / 440; max-height: 330px; margin: 0 auto; transform-style: preserve-3d; transition: transform .65s cubic-bezier(.2,.7,.2,1); }
+.turn svg { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: visible; }
+.turn .back { transform: rotateY(180deg); }
+.figure[data-side="back"] .turn { transform: rotateY(180deg); }
+.figure[data-side="front"] .back, .figure[data-side="back"] .front { pointer-events: none; }
+.area { color: #415249; cursor: pointer; transition: color .18s, filter .18s; }
+.area:hover { color: #52685C; }
+.figure.all .area { color: #4F8566; }
+.area.on, .figure.all .area.on { color: var(--mint); filter: drop-shadow(0 0 6px rgba(126,213,151,0.4)); }
+.fig-line { stroke: #111714; stroke-width: 1.5; stroke-linecap: round; fill: none; pointer-events: none; }
+.flip { position: absolute; left: 8px; right: 8px; bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 7px; font: inherit; font-size: 12.5px; font-weight: 500; color: var(--cream); background: rgba(242,244,239,0.05); border: 1px solid var(--line-strong); border-radius: 999px; padding: 6px 10px; min-height: 32px; cursor: pointer; transition: border-color .18s; }
+.flip:hover { border-color: var(--mint); }
+.flip svg { flex: none; }
+.chips { display: grid; gap: 5px; align-content: start; }
+.chip { font: inherit; font-size: 13.5px; font-weight: 500; text-align: left; color: var(--cream); background: rgba(242,244,239,0.02); border: 1px solid var(--line-strong); border-radius: 10px; padding: 0 12px; min-height: 38px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; transition: border-color .18s, background .18s; }
+.chip:hover { border-color: rgba(126,213,151,0.5); }
+.chip[aria-pressed="true"] { border-color: var(--mint); background: var(--mint-soft); }
+.chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); flex: none; transition: background .18s; }
+.chip[aria-pressed="true"] i { background: var(--mint); }
+/* 3D figure */
+.body3d { display: grid; gap: 12px; }
+.stage3d { position: relative; height: 320px; margin-top: 46px; border: 1px solid var(--line); border-radius: var(--r);
+           background: radial-gradient(90% 70% at 50% 95%, rgba(126,213,151,0.12), rgba(126,213,151,0) 70%), rgba(11,15,13,0.6); }
+.stage3d canvas { position: absolute; left: 0; top: -56px; width: 100%; height: calc(100% + 56px); display: block;
+                  touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none; opacity: 0; transition: opacity .6s ease; }
+.stage3d.ready canvas { opacity: 1; }
+@media (min-width: 560px) { .stage3d { height: 360px; } }
+.stage3d canvas.drag { cursor: grabbing; }
+.stage3d:not(.ready)::before { content: ""; position: absolute; left: 50%; top: 50%; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%;
+                               border: 2px solid var(--line-strong); border-top-color: var(--mint); animation: kd-spin .8s linear infinite; }
+@keyframes kd-spin { to { transform: rotate(360deg); } }
+.spin { display: grid; gap: 4px; padding: 0 2px; }
+.spin input { -webkit-appearance: none; appearance: none; width: 100%; height: 30px; margin: 0; background: transparent; cursor: pointer; touch-action: none; }
+.spin input::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: linear-gradient(90deg, var(--line-strong), rgba(126,213,151,0.6) 50%, var(--line-strong)); }
+.spin input::-moz-range-track { height: 4px; border-radius: 4px; background: linear-gradient(90deg, var(--line-strong), rgba(126,213,151,0.6) 50%, var(--line-strong)); }
+.spin input::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -11px; border: 0; border-radius: 50%;
+  background: var(--mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230B0F0D' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 7 4 12l5 5M15 7l5 5-5 5'/%3E%3C/svg%3E") center / 15px no-repeat;
+  box-shadow: 0 0 0 6px var(--mint-soft), 0 4px 14px rgba(0,0,0,0.5); transition: transform .15s; }
+.spin input::-moz-range-thumb { width: 26px; height: 26px; border: 0; border-radius: 50%;
+  background: var(--mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230B0F0D' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 7 4 12l5 5M15 7l5 5-5 5'/%3E%3C/svg%3E") center / 15px no-repeat;
+  box-shadow: 0 0 0 6px var(--mint-soft), 0 4px 14px rgba(0,0,0,0.5); }
+.spin input:active::-webkit-slider-thumb { transform: scale(1.12); }
+.spin input:focus-visible { outline: none; }
+.spin input:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--cream); outline-offset: 3px; }
+.spin input:focus-visible::-moz-range-thumb { outline: 2px solid var(--cream); outline-offset: 3px; }
+.ticks { display: flex; justify-content: space-between; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.ticks span:nth-child(3) { color: var(--cream); }
+.chips.pills { display: flex; flex-wrap: wrap; gap: 7px; }
+.chips.pills .chip { min-height: 36px; border-radius: 999px; padding: 0 14px 0 12px; font-size: 13px; flex-direction: row-reverse; justify-content: flex-end; }
 .fields { display: grid; gap: 14px; }
 .field { display: grid; gap: 6px; min-width: 0; }
 .field label { font-size: 12.5px; font-weight: 500; }
@@ -281,9 +345,7 @@ const STEPS = [
     { v: "Online coaching", s: "Custom programme, app and weekly check-ins" },
     { v: "1-2-1 PT in Northampton", s: "In person at Trilogy Active" },
     { v: "Not sure yet", s: "Help me choose" } ] },
-  { key: "goal", q: "What's your main goal?", opts: [
-    { v: "Build muscle" }, { v: "Lose body fat" }, { v: "Get stronger" },
-    { v: "Feel confident in the gym" }, { v: "Improve fitness and health" } ] },
+  { key: "goal", q: "What's your main goal?", body: true },
   { key: "experience", q: "Where are you at with training?", opts: [
     { v: "New to the gym" },
     { v: "Training under a year" },
@@ -292,7 +354,60 @@ const STEPS = [
   { key: "contact", q: "Where should I reply?" }
 ];
 
-const state = { step: 0, answers: {}, contact: { name: "", reach: "", instagram: "" } };
+const state = { step: 0, answers: {}, focus: [], side: "front", angle: 0, contact: { name: "", reach: "", instagram: "" } };
+
+/* Goal step: a three-point scale plus a figure to tap for focus areas. No areas picked means "all over". */
+const GOALS = ["Lose weight", "Tone up", "Build size"];
+const AREAS = [
+  { v: "Shoulders" }, { v: "Chest", side: "front" }, { v: "Arms" }, { v: "Core", side: "front" },
+  { v: "Back", side: "back" }, { v: "Glutes", side: "back" }, { v: "Legs" }
+];
+function figure(side) {
+  // Drawn as the figure's right half and mirrored. viewBox 0 0 200 440, centre line x=100.
+  const both = d => `<path d="${d}"/><path d="${d}" transform="matrix(-1 0 0 1 200 0)"/>`;
+  const area = (name, ...ds) => `<g class="area" data-area="${name}">${ds.map(both).join("")}</g>`;
+  const outline = "M100 4 C113 4 119 16 118 30 C117.5 38 114 46 108 51 C108 55 109 58 112 60 C120 63 130 64 137 68 C146 72 150 80 150 92 C151 104 152 114 153 124 C154 134 156 142 157 150 C159 162 162 176 163 190 C164 196 166 202 166 210 C166 220 163 229 158 229 C154 229 153 220 153 212 C153 204 152 198 151 192 C149 178 146 164 144 152 C142 142 141 132 140 122 C140 114 139 107 137 101 C136 112 134 124 132 136 C130 148 130 158 131 166 C132 176 135 186 136 196 C140 212 140 232 137 252 C135 270 131 286 129 300 C128 308 131 318 133 332 C134 350 130 370 126 388 C125 398 125 406 127 414 C130 420 135 424 135 428 C135 432 126 433 116 433 C112 433 111 428 112 420 C113 408 113 398 112 388 C111 368 110 348 110 330 C109 318 110 308 109 300 C108 280 106 250 102 222 L100 220 Z";
+  const delt = "M137 70 C145 73 148.5 81 148.5 92 C148.5 98 148 103 146.5 108 C142 105 138 99 136 91 C134 83 134 75 137 70 Z";
+  const upperArm = "M139.5 106 C142 110 146 112 150 111 C151 119 152 128 152.5 136 C150 141 145 141 142.5 137 C141.5 127 140.5 116 139.5 106 Z";
+  const forearm = "M144.5 147 C148 151 153 151 156 147 C158 160 160.5 175 161.5 188 C159 192 154.5 192 152.5 189 C150.5 176 147.5 161 144.5 147 Z";
+  const lowerLeg = "M111.5 306 C116 311 124 311 129 306 C132.5 320 133 344 129.5 368 C128 378 126.5 385 125.5 392 L113.5 392 C112.5 372 109.5 340 111.5 306 Z";
+  const front = side === "front";
+  const muscles = front
+    ? area("Chest", "M102 71 L130 69.5 C133.5 76 135 84 134 92 C132 102 122 108 112 107 C106 106.5 102 104 102 101 Z")
+      + area("Core",
+          "M102 110 C108 112.5 116 112.5 122 109.5 L122 160 C122 176 114 190 102 199 Z",
+          "M125.5 109 C129 107 132 104 133.5 100 C133.5 114 132 128 130 142 C129 154 129.5 164 130.5 172 C129 180 127 186 125 191 C125.5 180 125.5 170 125.5 160 Z")
+      + area("Legs", "M104 227 C112 217 126 207 134 201 C137 216 137 234 135 252 C133 270 130 284 128 296 C122 300.5 114 300.5 110 296 C108 276 106 250 104 227 Z", lowerLeg)
+    : area("Back",
+          "M102 53 L107 54 C108 57 110 60 113 61 C120 63 128 65 134 68.5 C127 74 118 81 111 92 L102 110 Z",
+          "M104.5 113 L112.5 95 C118 87 126 80 133 77 C135 84 136 92 136 100 C135 112 133 126 131 138 C126 150 114 158 104.5 160 Z",
+          "M102 164 C112 162 124 155 130 147 C129 156 129.5 166 130.5 174 C128 184 118 192 102 196 Z")
+      + area("Glutes", "M102 200 C112 198 126 192 134 186 C137 198 138 212 137 226 C130 234.5 114 236.5 102 229 Z")
+      + area("Legs", "M104 237 C114 241 128 239 137 233 C137 250 134 270 130 284 C129 290 128 294 128 296 C122 300.5 114 300.5 110 296 C108 278 106 256 104 237 Z", lowerLeg);
+  const detail = front
+    ? `<path class="fig-line" d="M102 128 H122 M102 144 H122 M102 160 H121 M78 128 H98 M78 144 H98 M79 160 H98"/>`
+    : `<path class="fig-line" d="M112 314 C116 330 122 330 128 314 M88 314 C84 330 78 330 72 314"/>`;
+  return `<svg class="${side}" viewBox="0 0 200 440" aria-hidden="true">
+    <defs><linearGradient id="skin-${side}" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#27322C"/><stop offset="0.5" stop-color="#35433B"/><stop offset="1" stop-color="#27322C"/></linearGradient></defs>
+    <ellipse cx="100" cy="435" rx="52" ry="5" fill="rgba(0,0,0,0.5)"/>
+    <g fill="url(#skin-${side})">${both(outline)}</g>
+    <g fill="currentColor">
+      ${area("Shoulders", delt)}${area("Arms", upperArm, forearm)}${muscles}
+    </g>
+    ${detail}
+  </svg>`;
+}
+
+/* 3D figure, loaded in the background. Falls back to the flat figure without WebGL or if the script fails. */
+const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+let body3d = null, no3d = false;
+const body3dReady = (() => {
+  try { const c = document.createElement("canvas"); if (!(c.getContext("webgl2") || c.getContext("webgl"))) throw 0; }
+  catch (_) { no3d = true; return Promise.resolve(null); }
+  return import("/body3d.js").then(m => (body3d = m.createBody({ reduceMotion }))).catch(() => { no3d = true; return null; });
+})();
+
 const stage = document.getElementById("stage");
 const label = document.getElementById("stepLabel");
 const bars = [...document.querySelectorAll("#progress i")];
@@ -306,7 +421,88 @@ function render() {
   label.textContent = `Step ${i + 1} of ${STEPS.length}`;
   bars.forEach((b, n) => b.classList.toggle("on", n <= i));
   const back = i > 0 ? `<button type="button" class="btn btn-ghost" data-back>← Back</button>` : "";
-  if (s.opts) {
+  if (s.body) {
+    const goal = state.answers.goal, use3d = !no3d;
+    stage.innerHTML = `<div class="step">
+      <h2 class="q">${s.q}</h2>
+      <fieldset class="scale"><legend class="sr">${s.q}</legend>
+        ${GOALS.map(g => `<label><input type="radio" name="goal" value="${g}" ${goal === g ? "checked" : ""}><span class="dot"></span><span class="txt">${g}</span></label>`).join("")}
+      </fieldset>
+      ${use3d ? `<p class="hint body-hint">Tap a muscle to focus on it, or leave it as all over. Drag or slide to turn.</p>
+      <div class="body3d">
+        <div class="stage3d" data-stage3d></div>
+        <div class="spin">
+          <input type="range" min="-180" max="180" step="1" value="${Math.round(state.angle)}" aria-label="Turn the figure" data-spin>
+          <div class="ticks" aria-hidden="true"><span>Back</span><span>Side</span><span>Front</span><span>Side</span><span>Back</span></div>
+        </div>
+        <div class="chips pills" role="group" aria-label="Focus areas">
+          <button type="button" class="chip" data-chip="all">All over<i></i></button>
+          ${AREAS.map(a => `<button type="button" class="chip" data-chip="${a.v}">${a.v}<i></i></button>`).join("")}
+        </div>
+      </div>` : `      <p class="hint body-hint">Tap where you most want to see it, or leave it as all over.</p>
+      <div class="body-wrap">
+        <div class="figure" data-side="${state.side}">
+          <div class="turn">${figure("front")}${figure("back")}</div>
+          <button type="button" class="flip" data-flip aria-label="Turn the figure around">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+            <span data-side-label></span></button>
+        </div>
+        <div class="chips" role="group" aria-label="Focus areas">
+          <button type="button" class="chip" data-chip="all">All over<i></i></button>
+          ${AREAS.map(a => `<button type="button" class="chip" data-chip="${a.v}">${a.v}<i></i></button>`).join("")}
+        </div>
+      </div>`}
+      <div class="nav">${back}<button type="button" class="btn btn-primary" data-continue>Continue</button></div></div>`;
+    const fig = stage.querySelector(".figure"), cont = stage.querySelector("[data-continue]");
+    const paint = () => {
+      if (fig) {
+        fig.dataset.side = state.side;
+        fig.classList.toggle("all", state.focus.length === 0);
+        fig.querySelectorAll(".area").forEach(a => a.classList.toggle("on", state.focus.includes(a.dataset.area)));
+        stage.querySelector("[data-side-label]").textContent = state.side === "front" ? "Show back" : "Show front";
+      }
+      if (use3d && body3d) body3d.setFocus(state.focus);
+      stage.querySelectorAll("[data-chip]").forEach(c => {
+        const v = c.dataset.chip;
+        c.setAttribute("aria-pressed", v === "all" ? state.focus.length === 0 : state.focus.includes(v));
+      });
+      cont.disabled = !state.answers.goal;
+    };
+    const toggle = v => {
+      if (v === "all") state.focus = [];
+      else state.focus = state.focus.includes(v) ? state.focus.filter(x => x !== v) : [...state.focus, v];
+      if (state.focus.length === AREAS.length) state.focus = [];
+    };
+    stage.querySelectorAll("input[name=goal]").forEach(r => r.addEventListener("change", () => { state.answers.goal = r.value; paint(); }));
+    if (fig) {
+      fig.querySelectorAll(".area").forEach(a => a.addEventListener("click", () => { toggle(a.dataset.area); paint(); }));
+      stage.querySelector("[data-flip]").addEventListener("click", () => { state.side = state.side === "front" ? "back" : "front"; paint(); });
+    }
+    stage.querySelectorAll("[data-chip]").forEach(c => c.addEventListener("click", () => {
+      const v = c.dataset.chip, side = (AREAS.find(a => a.v === v) || {}).side;
+      toggle(v);
+      if (side && state.focus.includes(v)) { state.side = side; if (use3d && body3d) body3d.turnTo(side); }
+      paint();
+    }));
+    if (use3d) {
+      const host = stage.querySelector("[data-stage3d]"), spin = stage.querySelector("[data-spin]");
+      let held = false;
+      spin.addEventListener("input", () => { state.angle = +spin.value; if (body3d) body3d.setAngle(state.angle); });
+      spin.addEventListener("pointerdown", () => { held = true; });
+      ["pointerup", "pointercancel", "blur"].forEach(ev => spin.addEventListener(ev, () => { held = false; }));
+      body3dReady.then(b => {
+        if (!host.isConnected) return;
+        if (!b) { render(); return; }
+        b.onPick = v => { toggle(v); paint(); };
+        b.onAngle = a => { state.angle = b.angle; if (!held) spin.value = Math.round(a); };
+        b.mount(host, state.angle);
+        host.classList.add("ready");
+        paint();
+      });
+    }
+    cont.addEventListener("click", () => { if (state.answers.goal) next(); });
+    paint();
+  } else if (s.opts) {
     const cur = state.answers[s.key];
     stage.innerHTML = `<div class="step">
       <h2 class="q">${s.q}</h2>
@@ -366,9 +562,13 @@ async function submit() {
   const c = state.contact;
   let ig = c.instagram.replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/\/.*$/, "");
   if (ig && !ig.startsWith("@")) ig = "@" + ig;
+  const focus = AREAS.map(a => a.v).filter(v => state.focus.includes(v)).join(", ") || "All over";
   const lead = {
     submitted: new Date().toISOString(),
-    service: state.answers.service, goal: state.answers.goal, experience: state.answers.experience,
+    service: state.answers.service,
+    // Focus is included in the goal text as well, so it reaches the sheet even without its own column.
+    goal: `${state.answers.goal} (focus: ${focus.toLowerCase()})`, focus,
+    experience: state.answers.experience,
     name: c.name,
     email: isEmail(c.reach) ? c.reach : "",
     phone: isEmail(c.reach) ? "" : c.reach,
@@ -409,7 +609,7 @@ function done(l, demo) {
 
 document.getElementById("enquiry").addEventListener("submit", e => {
   e.preventDefault();
-  if (!STEPS[state.step].opts) submit();
+  if (STEPS[state.step].key === "contact") submit();
 });
 render();
 </script>

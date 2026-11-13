@@ -54,7 +54,7 @@ const GLOBAL_CSS = `
   /* Photo layouts */
   .kd-split { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 64px; align-items: center; }
   .kd-photo { position: relative; border-radius: 24px; overflow: hidden; aspect-ratio: 3 / 4; max-width: 100%; background: #0D0D0D; }
-  .kd-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .kd-photo img, .kd-photo video { width: 100%; height: 100%; object-fit: cover; display: block; }
   .kd-photo::after { content: ""; position: absolute; inset: 0; pointer-events: none;
                      background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.45) 100%); }
   .kd-cap { position: absolute; z-index: 1; left: 16px; bottom: 16px; font-family: 'Poppins', sans-serif;
@@ -64,6 +64,22 @@ const GLOBAL_CSS = `
     .kd-split { grid-template-columns: minmax(0, 1fr); gap: 40px; }
     .kd-photo { aspect-ratio: 4 / 5; max-height: 560px; }
   }
+
+  /* Coaching cards: depth on hover */
+  .kd-tilt { position: relative; overflow: hidden; cursor: pointer; height: 100%;
+             display: flex; flex-direction: column; justify-content: space-between;
+             background: #1E1E1E; border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 36px 32px;
+             transform-style: preserve-3d; will-change: transform;
+             transition: transform 0.25s ease-out, border-color 0.25s ease, box-shadow 0.25s ease; }
+  .kd-tilt::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+                     background: radial-gradient(420px circle at var(--gx, 50%) var(--gy, 0%), rgba(126,213,151,0.13), rgba(126,213,151,0) 60%);
+                     transition: opacity 0.25s ease; }
+  .kd-tilt > * { position: relative; }
+  .kd-tilt:hover, .kd-tilt:focus-visible { border-color: rgba(126,213,151,0.45); box-shadow: 0 24px 48px -24px rgba(0,0,0,0.9); }
+  .kd-tilt:hover::before { opacity: 1; }
+  .kd-tilt:focus-visible { outline: 2px solid #7ED597; outline-offset: 3px; }
+  .kd-tilt:active { transform: scale(0.985); }
+  @media (prefers-reduced-motion: reduce) { .kd-tilt { transition: border-color 0.25s ease; } }
 `;
 
 function useGlobalStyles() {
@@ -268,13 +284,64 @@ function FadeIn({ children, delay = 0, style = {} }) {
   );
 }
 
-// Photo with optional caption
-function Photo({ src, alt, caption, position = "center", eager = false, style = {} }) {
+// Photo with optional caption. Pass `video` to play a short muted loop in the same frame
+// (the photo stays as the poster, and is all that shows for reduced-motion or data-saver visitors).
+function Photo({ src, alt, caption, position = "center", eager = false, style = {}, video }) {
+  const ref = useRef(null);
+  const [canPlay] = useState(() => {
+    if (!video || typeof window === "undefined") return false;
+    const still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const saver = navigator.connection && navigator.connection.saveData;
+    return !still && !saver;
+  });
+  useEffect(() => {
+    const v = ref.current;
+    if (!v || !canPlay) return;
+    v.muted = true;
+    let visible = false;
+    const start = () => { if (visible && v.paused) v.play().catch(() => {}); };
+    const obs = new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (visible) start(); else v.pause();
+    }, { threshold: 0.25 });
+    obs.observe(v);
+    v.addEventListener("canplay", start);
+    return () => { obs.disconnect(); v.removeEventListener("canplay", start); };
+  }, [canPlay]);
   return (
     <div className="kd-photo" style={style}>
-      <img src={src} alt={alt} loading={eager ? "eager" : "lazy"} decoding="async"
-           style={{ objectPosition: position }} />
+      {canPlay ? (
+        <video ref={ref} src={video} poster={src} muted loop playsInline disablePictureInPicture
+               preload={eager ? "auto" : "none"} aria-label={alt} style={{ objectPosition: position }} />
+      ) : (
+        <img src={src} alt={alt} loading={eager ? "eager" : "lazy"} decoding="async"
+             style={{ objectPosition: position }} />
+      )}
       {caption && <span className="kd-cap">{caption}</span>}
+    </div>
+  );
+}
+
+// Coaching option card that tilts towards the cursor (mouse only; touch gets a press state)
+function TiltCard({ onActivate, children }) {
+  const ref = useRef(null);
+  const move = e => {
+    if (e.pointerType !== "mouse") return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const el = ref.current, r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    el.style.transition = "transform 0.08s linear, border-color 0.25s ease, box-shadow 0.25s ease";
+    el.style.transform = `perspective(900px) rotateX(${((0.5 - y) * 5).toFixed(2)}deg) rotateY(${((x - 0.5) * 5).toFixed(2)}deg) translateY(-4px)`;
+    el.style.setProperty("--gx", `${(x * 100).toFixed(1)}%`);
+    el.style.setProperty("--gy", `${(y * 100).toFixed(1)}%`);
+  };
+  const leave = () => { const el = ref.current; el.style.transition = ""; el.style.transform = ""; };
+  return (
+    <div ref={ref} className="kd-tilt" role="link" tabIndex={0}
+         onClick={onActivate}
+         onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onActivate(); } }}
+         onPointerMove={move} onPointerLeave={leave}>
+      {children}
     </div>
   );
 }
@@ -1274,7 +1341,7 @@ function PriceCard({ label, price, period, features, ctaLabel, href }) {
 }
 
 // ─── Sales page hero ──────────────────────────────────────────────────────────
-function SalesHero({ eyebrow, title, sub, ctaLabel, onCta, ghostLabel, onGhost, image, imageAlt = "", imagePos, caption }) {
+function SalesHero({ eyebrow, title, sub, ctaLabel, onCta, ghostLabel, onGhost, image, imageAlt = "", imagePos, caption, video }) {
   const copy = (
     <FadeIn>
       <Eyebrow>{eyebrow}</Eyebrow>
@@ -1295,7 +1362,7 @@ function SalesHero({ eyebrow, title, sub, ctaLabel, onCta, ghostLabel, onGhost, 
           <div className="kd-split">
             {copy}
             <FadeIn delay={150}>
-              <Photo src={image} alt={imageAlt} position={imagePos} caption={caption} eager />
+              <Photo src={image} alt={imageAlt} position={imagePos} caption={caption} video={video} eager />
             </FadeIn>
           </div>
         ) : copy}
@@ -1419,29 +1486,7 @@ function Home({ go, openQuiz }) {
               },
             ].map((c, i) => (
               <FadeIn key={c.page} delay={i * 100}>
-                <div
-                  onClick={() => go(c.page)}
-                  style={{
-                    background: C.card,
-                    border: `1px solid ${C.border}`,
-                    borderRadius: 24,
-                    padding: "36px 32px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    cursor: "pointer",
-                    transition: "border-color 0.25s ease, transform 0.25s ease",
-                    height: "100%",
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.borderColor = "rgba(126,213,151,0.45)";
-                    e.currentTarget.style.transform = "translateY(-3px)";
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.borderColor = C.border;
-                    e.currentTarget.style.transform = "translateY(0)";
-                  }}
-                >
+                <TiltCard onActivate={() => go(c.page)}>
                   <div>
                     {/* Icon bubble */}
                     <div style={{ width: 44, height: 44, borderRadius: 14,
@@ -1473,7 +1518,7 @@ function Home({ go, openQuiz }) {
                     </span>
                     <ArrowRight size={15} color={C.green} />
                   </div>
-                </div>
+                </TiltCard>
               </FadeIn>
             ))}
           </div>
@@ -1486,8 +1531,9 @@ function Home({ go, openQuiz }) {
           <div className="kd-split" style={{ gridTemplateColumns: undefined, alignItems: "start" }}>
             {/* Left, photo */}
             <FadeIn>
-              <Photo src="/images/site/pt-coaching.jpg" alt="Kyle coaching a client through kettlebell swings"
-                     position="45% 40%" caption="1-2-1 at Trilogy Active" style={{ aspectRatio: "4 / 5" }} />
+              <Photo src="/media/pt-deadlift-poster.jpg" video="/media/pt-deadlift.mp4"
+                     alt="Kyle coaching a client through his deadlift set-up"
+                     position="50% 45%" caption="1-2-1 at Trilogy Active" style={{ aspectRatio: "4 / 5" }} />
             </FadeIn>
             <div>
             {/* Kyle's copy */}
@@ -2083,7 +2129,7 @@ function PTPage({ openQuiz, go }) {
         sub="1:1 personal training sessions with technique-focused, fully tailored coaching. Starting with a free, no-pressure consultation."
         ctaLabel="Book Free Consultation" onCta={() => document.getElementById("pt-book")?.scrollIntoView({ behavior: "smooth" })}
         ghostLabel="Help me choose" onGhost={openQuiz}
-        image="/images/site/pt-coaching.jpg" imageAlt="Kyle coaching a client through kettlebell swings" imagePos="45% 40%" caption="1-2-1 at Trilogy Active" />
+        image="/media/pt-kettlebell-poster.jpg" video="/media/pt-kettlebell.mp4" imageAlt="Kyle coaching a client through kettlebell swings" imagePos="50% 40%" caption="1-2-1 at Trilogy Active" />
 
       {/* 2. What's included / how sessions work */}
       <Section style={{ padding: "0 0 72px" }}>
