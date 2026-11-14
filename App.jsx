@@ -2097,45 +2097,71 @@ const PT_PACKAGES = [
   { sessions: 8, price: 290 },
 ];
 
-// Short muted, looping coaching clip. Plays only while on screen,
-// and not at all for visitors who prefer reduced motion.
+// Short silent looping coaching clip.
+// iPhones only autoplay when the muted attribute is really on the element, so it is
+// set directly. If autoplay is blocked (Low Power Mode, reduced motion), a play
+// button shows and a tap plays it.
 function CoachingClip({ src, poster, label }) {
   const ref = useRef(null);
+  const [playing, setPlaying] = useState(false);
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
+    v.muted = true;
+    v.defaultMuted = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
+    v.setAttribute("webkit-playsinline", "");
+    const onPlay = () => setPlaying(true);
+    const onPause = () => setPlaying(false);
+    v.addEventListener("playing", onPlay);
+    v.addEventListener("pause", onPause);
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce || !("IntersectionObserver" in window)) return;
-    const io = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { v.play().catch(() => {}); } else { v.pause(); }
-    }, { threshold: 0.4 });
-    io.observe(v);
-    return () => io.disconnect();
+    let io;
+    if (!reduce && "IntersectionObserver" in window) {
+      io = new IntersectionObserver(([e]) => {
+        if (e.isIntersecting) { v.play().catch(() => {}); } else { v.pause(); }
+      }, { threshold: 0.35 });
+      io.observe(v);
+    }
+    return () => {
+      if (io) io.disconnect();
+      v.removeEventListener("playing", onPlay);
+      v.removeEventListener("pause", onPause);
+    };
   }, []);
+  const toggle = () => {
+    const v = ref.current;
+    if (!v) return;
+    if (v.paused) { v.play().catch(() => {}); } else { v.pause(); }
+  };
   return (
     <figure style={{ margin: 0 }}>
-      <div style={{ position: "relative", aspectRatio: "9 / 16", borderRadius: 20, overflow: "hidden",
-                    background: C.card, border: `1px solid ${C.border}` }}>
-        <video ref={ref} src={src} poster={poster} muted loop playsInline preload="metadata"
+      <div onClick={toggle}
+           style={{ position: "relative", aspectRatio: "4 / 5", borderRadius: 24, overflow: "hidden",
+                    background: C.card, border: `1px solid ${C.border}`, cursor: "pointer" }}>
+        <video ref={ref} src={src} poster={poster} muted loop playsInline autoPlay preload="metadata"
                aria-label={label}
                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        <div style={{ position: "absolute", inset: "auto 0 0 0", padding: "48px 20px 18px",
+                      background: "linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0))",
+                      pointerEvents: "none" }}>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", color: C.white, fontSize: 14,
+                       fontWeight: 600, letterSpacing: "0.01em" }}>{label}</p>
+        </div>
+        <button type="button" aria-label={playing ? `Pause ${label}` : `Play ${label}`}
+                onClick={e => { e.stopPropagation(); toggle(); }}
+                style={{ position: "absolute", top: 14, right: 14, width: 36, height: 36,
+                         borderRadius: 999, border: "1px solid rgba(255,255,255,0.18)",
+                         background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)",
+                         WebkitBackdropFilter: "blur(8px)", color: C.white, cursor: "pointer",
+                         display: "flex", alignItems: "center", justifyContent: "center",
+                         opacity: playing ? 0.55 : 1, transition: "opacity 0.2s", padding: 0 }}>
+          {playing
+            ? <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><rect x="2" y="1.5" width="2.6" height="9" rx="1" fill="currentColor"/><rect x="7.4" y="1.5" width="2.6" height="9" rx="1" fill="currentColor"/></svg>
+            : <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.6v8.8a.6.6 0 0 0 .9.5l7-4.4a.6.6 0 0 0 0-1L3.9 1.1a.6.6 0 0 0-.9.5z" fill="currentColor"/></svg>}
+        </button>
       </div>
-      <figcaption style={{ fontFamily: "'Poppins', sans-serif", color: C.muted, fontSize: 12,
-                           fontWeight: 300, marginTop: 10 }}>{label}</figcaption>
-    </figure>
-  );
-}
-
-function CoachingStill({ src, alt, label, position = "center" }) {
-  return (
-    <figure style={{ margin: 0 }}>
-      <div style={{ aspectRatio: "9 / 16", borderRadius: 20, overflow: "hidden",
-                    background: C.card, border: `1px solid ${C.border}` }}>
-        <img src={src} alt={alt} loading="lazy" decoding="async"
-             style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: position, display: "block" }} />
-      </div>
-      <figcaption style={{ fontFamily: "'Poppins', sans-serif", color: C.muted, fontSize: 12,
-                           fontWeight: 300, marginTop: 10 }}>{label}</figcaption>
     </figure>
   );
 }
@@ -2245,22 +2271,15 @@ function PTPage({ openQuiz, go }) {
               Real sessions with real clients at Trilogy Active. Setup, technique and cues, adjusted as you go.
             </Body>
           </FadeIn>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                        gap: 16, maxWidth: 880 }}>
             <FadeIn delay={0}>
-              <CoachingClip src="/media/pt/pt-rows.mp4" poster="/media/pt/pt-rows-poster.jpg"
-                            label="Barbell rows: setup and bracing" />
+              <CoachingClip src="/media/pt/pt-rows-v2.mp4" poster="/media/pt/pt-rows-v2.jpg"
+                            label="Barbell rows" />
             </FadeIn>
-            <FadeIn delay={70}>
-              <CoachingStill src="/media/pt/pt-coaching-1.jpg"
-                             alt="Kyle watching a client set up for a barbell row" label="Watching the detail" />
-            </FadeIn>
-            <FadeIn delay={140}>
-              <CoachingClip src="/media/pt/pt-kettlebell.mp4" poster="/media/pt/pt-kettlebell-poster.jpg"
-                            label="Kettlebell swings: owning the hinge" />
-            </FadeIn>
-            <FadeIn delay={210}>
-              <CoachingStill src="/media/pt/pt-coaching-2.jpg"
-                             alt="Kyle coaching a client through core work in the studio" label="Core work in the studio" position="35% center" />
+            <FadeIn delay={90}>
+              <CoachingClip src="/media/pt/pt-kettlebell-v2.mp4" poster="/media/pt/pt-kettlebell-v2.jpg"
+                            label="Kettlebell swings" />
             </FadeIn>
           </div>
         </Wrap>
