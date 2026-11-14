@@ -552,7 +552,7 @@ function Footer({ go }) {
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SOCIAL PROOF DATA
-// Replace placeholder reviews with genuine client testimonials.
+// Genuine client testimonials. Only add reviews from real clients.
 // Each review supports: name, stars (1-5), quote, goal (optional), duration (optional)
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1718,6 +1718,7 @@ function OnlinePage({ openQuiz, go }) {
     { q: "How does a weekly check-in work?", a: "Each week you submit progress photos, weight and training feedback through Everfit. I review everything and respond within 48 hours with any adjustments to your programme or nutrition." },
     { q: "Is nutrition guidance included?", a: "Yes. Nutrition guidance is included in every online coaching plan. It's tailored around your goals, preferences and lifestyle rather than a generic spreadsheet." },
     { q: "What app do I need?", a: "Everfit. It's free to download. Your programme, video demos, habit tracking and messaging are all in one place." },
+    { q: "I work shifts or nights. Will this work for me?", a: "Yes. Your programme is built around the days and times you can actually train, including nights, rotating shifts and weeks away. Nutrition guidance works around eating at odd hours, and check-ins happen in the app, so there's no call to fit in." },
     { q: "Is there a minimum commitment?", a: "No lock-in. Coaching runs month to month and you can cancel with notice before your next billing date." },
   ];
   return (
@@ -1762,6 +1763,26 @@ function OnlinePage({ openQuiz, go }) {
               </BtnPrimary>
             </div>
           </FadeIn>
+        </Wrap>
+      </Section>
+
+      {/* Shift work / irregular hours */}
+      <Section style={{ padding: "0 0 72px" }}>
+        <Wrap>
+          <FadeIn><Eyebrow>Built around your hours</Eyebrow>
+            <H2 style={{ fontSize: "clamp(22px, 3.5vw, 32px)", marginBottom: 12 }}>
+              Shifts, nights, travel. It still works.
+            </H2>
+            <Body muted style={{ maxWidth: 520, marginBottom: 36 }}>
+              No fixed session times and nothing to turn up to. Your plan fits your rota, not a 9–5.
+            </Body>
+          </FadeIn>
+          <FeatureGrid items={[
+            { t: "Train when you can", d: "Your programme is built around the days and times you actually have, whether that's 6am, midnight or a rotating rota." },
+            { t: "Any gym, anywhere", d: "Home, hotel or a different gym each week. Your plan adapts to the equipment you've got." },
+            { t: "Food that fits odd hours", d: "Nutrition guidance that works around shift patterns and eating at unusual times." },
+            { t: "No calls to fit in", d: "Weekly check-ins happen in the Everfit app, so there's no call to fit around your shifts." },
+          ]} />
         </Wrap>
       </Section>
 
