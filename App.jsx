@@ -2072,8 +2072,8 @@ function ProgrammesPage({ openQuiz, go }) {
 // In-person PT monthly packages. Change prices here and they update across the PT page.
 const PT_PACKAGES = [
   { sessions: 2, price: 90 },
-  { sessions: 4, price: 150 },
-  { sessions: 8, price: 260 },
+  { sessions: 4, price: 160 },
+  { sessions: 8, price: 290 },
 ];
 
 function PTPage({ openQuiz, go }) {
