@@ -1781,7 +1781,7 @@ function OnlinePage({ openQuiz, go }) {
             { t: "Train when you can", d: "Your programme is built around the days and times you actually have, whether that's 6am, midnight or a rotating rota." },
             { t: "Any gym, anywhere", d: "Home, hotel or a different gym each week. Your plan adapts to the equipment you've got." },
             { t: "Food that fits odd hours", d: "Nutrition guidance that works around shift patterns and eating at unusual times." },
-            { t: "No calls to fit in", d: "Check-ins happen in the Everfit app, so you can send yours whenever your week allows." },
+            { t: "No calls to fit in", d: "Weekly check-ins happen in the Everfit app, so there's no call to fit around your shifts." },
           ]} />
         </Wrap>
       </Section>
