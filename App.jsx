@@ -1399,7 +1399,7 @@ function Home({ go, openQuiz }) {
               {
                 Icon: Smartphone,
                 title: "Online Coaching",
-                tag: "Most popular",
+                tag: "Most popular · £120/month",
                 desc: "Ongoing remote coaching with weekly check-ins, nutrition support and a programme that evolves as you progress.",
                 page: "online",
               },
@@ -1413,7 +1413,7 @@ function Home({ go, openQuiz }) {
               {
                 Icon: Dumbbell,
                 title: "Personal Training",
-                tag: "In person",
+                tag: "In person · from £90/month",
                 desc: "1:1 in-person sessions in Northampton with hands-on coaching and a fully tailored approach.",
                 page: "pt",
               },
@@ -2069,11 +2069,19 @@ function ProgrammesPage({ openQuiz, go }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 // PERSONAL TRAINING PAGE
 // ═══════════════════════════════════════════════════════════════════════════════
+// In-person PT monthly packages. Change prices here and they update across the PT page.
+const PT_PACKAGES = [
+  { sessions: 2, price: 90 },
+  { sessions: 4, price: 160 },
+  { sessions: 8, price: 290 },
+];
+
 function PTPage({ openQuiz, go }) {
   const faqs = [
     { q: "Where do sessions take place?", a: "Sessions take place in Northampton. The exact address is confirmed once your consultation is booked." },
     { q: "How long is the consultation?", a: "Around 30 minutes. We cover your goals, training background and whether 1:1 sessions are the right fit for you." },
-    { q: "Is there a minimum commitment?", a: "No. Packages are discussed during your consultation based on your goals and schedule." },
+    { q: "How much are sessions?", a: `Monthly packages: ${PT_PACKAGES.map(pk => `${pk.sessions} sessions for £${pk.price}`).join(", ")}. The consultation is free, and you only pay once you decide to start.` },
+    { q: "Is there a minimum commitment?", a: "No. How often you train is agreed in your consultation, based on your goals, schedule and budget." },
     { q: "What should I bring to my first session?", a: "Just comfortable training kit and water. Everything else is taken care of." },
   ];
   return (
@@ -2205,7 +2213,7 @@ function PTPage({ openQuiz, go }) {
                 </p>
                 <p style={{ fontFamily: "'Poppins', sans-serif", color: C.sec,
                              fontSize: 14, fontWeight: 300 }}>
-                  Book a free consultation. No pressure, no commitment.
+                  Packages from £90 a month. Book a free consultation first. No pressure, no commitment.
                 </p>
               </div>
               <BtnPrimary href="https://calendly.com/kdpt/book-your-free-pt-consultation-here">
@@ -2233,6 +2241,20 @@ function PTPage({ openQuiz, go }) {
               <Body style={{ maxWidth: 420, marginBottom: 12, fontSize: 15 }}>
                 A free, no-pressure chat about your goals and what in-person coaching in Northampton would look like for you.
               </Body>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+                            gap: 12, width: "100%", maxWidth: 520, margin: "8px 0 20px" }}>
+                {PT_PACKAGES.map(pk => (
+                  <div key={pk.sessions} style={{ border: `1px solid ${C.border}`, borderRadius: 16,
+                                                   padding: "18px 12px", background: C.card }}>
+                    <p style={{ fontFamily: "'Poppins', sans-serif", color: C.sec, fontSize: 12,
+                                 fontWeight: 400, marginBottom: 6 }}>{pk.sessions} sessions / month</p>
+                    <p style={{ fontFamily: "'Montserrat', sans-serif", color: C.white,
+                                 fontSize: 24, fontWeight: 700, marginBottom: 2 }}>£{pk.price}</p>
+                    <p style={{ fontFamily: "'Poppins', sans-serif", color: C.muted, fontSize: 12,
+                                 fontWeight: 300 }}>£{(pk.price / pk.sessions).toFixed(2).replace(/\.00$/, "")} per session</p>
+                  </div>
+                ))}
+              </div>
               <Body muted style={{ maxWidth: 380, marginBottom: 32, fontSize: 13 }}>
                 No commitment required. If it feels right, we go from there.
               </Body>
