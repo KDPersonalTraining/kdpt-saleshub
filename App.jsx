@@ -2097,6 +2097,49 @@ const PT_PACKAGES = [
   { sessions: 8, price: 290 },
 ];
 
+// Short muted, looping coaching clip. Plays only while on screen,
+// and not at all for visitors who prefer reduced motion.
+function CoachingClip({ src, poster, label }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { v.play().catch(() => {}); } else { v.pause(); }
+    }, { threshold: 0.4 });
+    io.observe(v);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <figure style={{ margin: 0 }}>
+      <div style={{ position: "relative", aspectRatio: "9 / 16", borderRadius: 20, overflow: "hidden",
+                    background: C.card, border: `1px solid ${C.border}` }}>
+        <video ref={ref} src={src} poster={poster} muted loop playsInline preload="metadata"
+               aria-label={label}
+               style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+      </div>
+      <figcaption style={{ fontFamily: "'Poppins', sans-serif", color: C.muted, fontSize: 12,
+                           fontWeight: 300, marginTop: 10 }}>{label}</figcaption>
+    </figure>
+  );
+}
+
+function CoachingStill({ src, alt, label, position = "center" }) {
+  return (
+    <figure style={{ margin: 0 }}>
+      <div style={{ aspectRatio: "9 / 16", borderRadius: 20, overflow: "hidden",
+                    background: C.card, border: `1px solid ${C.border}` }}>
+        <img src={src} alt={alt} loading="lazy" decoding="async"
+             style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: position, display: "block" }} />
+      </div>
+      <figcaption style={{ fontFamily: "'Poppins', sans-serif", color: C.muted, fontSize: 12,
+                           fontWeight: 300, marginTop: 10 }}>{label}</figcaption>
+    </figure>
+  );
+}
+
 function PTPage({ openQuiz, go }) {
   const faqs = [
     { q: "Where do sessions take place?", a: "Sessions take place in Northampton. The exact address is confirmed once your consultation is booked." },
@@ -2188,6 +2231,38 @@ function PTPage({ openQuiz, go }) {
               </BtnPrimary>
             </div>
           </FadeIn>
+        </Wrap>
+      </Section>
+
+      {/* Inside a session: real coaching clips */}
+      <Section style={{ padding: "0 0 72px" }}>
+        <Wrap>
+          <FadeIn><Eyebrow>Inside a session</Eyebrow>
+            <H2 style={{ fontSize: "clamp(22px, 3.5vw, 32px)", marginBottom: 12 }}>
+              Coached on every rep.
+            </H2>
+            <Body muted style={{ maxWidth: 480, marginBottom: 36 }}>
+              Real sessions with real clients at Trilogy Active. Setup, technique and cues, adjusted as you go.
+            </Body>
+          </FadeIn>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 16 }}>
+            <FadeIn delay={0}>
+              <CoachingClip src="/media/pt/pt-rows.mp4" poster="/media/pt/pt-rows-poster.jpg"
+                            label="Barbell rows: setup and bracing" />
+            </FadeIn>
+            <FadeIn delay={70}>
+              <CoachingStill src="/media/pt/pt-coaching-1.jpg"
+                             alt="Kyle watching a client set up for a barbell row" label="Watching the detail" />
+            </FadeIn>
+            <FadeIn delay={140}>
+              <CoachingClip src="/media/pt/pt-kettlebell.mp4" poster="/media/pt/pt-kettlebell-poster.jpg"
+                            label="Kettlebell swings: owning the hinge" />
+            </FadeIn>
+            <FadeIn delay={210}>
+              <CoachingStill src="/media/pt/pt-coaching-2.jpg"
+                             alt="Kyle coaching a client through core work in the studio" label="Core work in the studio" position="35% center" />
+            </FadeIn>
+          </div>
         </Wrap>
       </Section>
 
