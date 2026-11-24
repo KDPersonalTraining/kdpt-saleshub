@@ -14,25 +14,36 @@
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Poppins,Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%}
 main{max-width:440px;margin:0 auto;padding:max(28px,env(safe-area-inset-top)) 20px max(32px,env(safe-area-inset-bottom))}
 .logo{display:block;width:52px;height:auto;margin:0 0 24px}
-.tag{display:inline-block;background:#1E3326;color:var(--mint);font:500 13px Poppins,Arial,sans-serif;padding:5px 12px;border-radius:99px;margin:0 0 14px}
+.tag{display:block;color:var(--mint);font:500 14px Poppins,Arial,sans-serif;margin:0 0 10px}
 h1{font:800 clamp(30px,8.5vw,38px)/1.08 Montserrat,Arial,sans-serif;margin:0 0 12px;letter-spacing:-.5px}
 h1 em{font-style:normal;color:var(--mint)}
 .sub{margin:0 0 22px;color:#C9CFCB;font-size:16px}
 form{display:grid;gap:10px}
 label{position:absolute;left:-9999px}
-input{width:100%;height:56px;border-radius:14px;border:1px solid var(--line);background:var(--deep);color:var(--ink);font:500 17px Poppins,Arial,sans-serif;padding:0 16px;-webkit-appearance:none}
+input{width:100%;height:56px;border-radius:14px;border:0;background:#1A201D;color:var(--ink);font:500 17px Poppins,Arial,sans-serif;padding:0 16px;-webkit-appearance:none}
 input::placeholder{color:#6F7672}
-input:focus{outline:2px solid var(--mint);outline-offset:1px;border-color:transparent}
+input:focus{outline:2px solid var(--mint);outline-offset:0}
 .hp{position:absolute;left:-9999px}
 button{height:58px;border:0;border-radius:999px;background:var(--mint);color:#0B0F0D;font:800 17px Montserrat,Arial,sans-serif;cursor:pointer;margin-top:4px;-webkit-tap-highlight-color:transparent}
-button[disabled]{opacity:.6}
+button{position:relative;overflow:hidden;transition:transform .15s ease}
+button::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg)}
+button:active{transform:scale(.97)}
+@media(prefers-reduced-motion:no-preference){button{animation:breathe 2.8s ease-in-out infinite}button::after{animation:sheen 2.8s ease-in-out infinite}}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(126,213,151,.45)}50%{box-shadow:0 0 0 10px rgba(126,213,151,0)}}
+@keyframes sheen{0%,55%{left:-60%}85%,100%{left:130%}}
+button[disabled]{opacity:.6;animation:none}
 .err{color:#FF8A7A;font-size:14px;min-height:0;margin:0}
 .small{font-size:12.5px;color:var(--mute);margin:12px 0 0;text-align:center}
 .ticks{list-style:none;padding:0;margin:26px 0 0;display:grid;gap:10px;font-size:15px;color:#C9CFCB}
 .ticks li{display:flex;gap:10px;align-items:center}
 .ticks li::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--mint)}
-.quote{margin:26px 0 0;padding:16px 18px;border-left:3px solid var(--mint);background:var(--card);border-radius:0 14px 14px 0;font-size:15px}
-.quote p{margin:0 0 6px}.quote cite{font-style:normal;font-size:13px;color:var(--mute)}
+.rv{margin:34px -20px 0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.rv .lbl{margin:0 20px 12px;font-size:13px;color:var(--mute)}
+.track{display:flex;gap:40px;width:max-content;padding-left:20px}
+.rq{width:280px;flex:none;margin:0;font-size:15px;line-height:1.5;color:#E3E7E4}
+.rq cite{display:block;margin-top:6px;font-style:normal;font-size:13px;color:var(--mint)}
+@media(prefers-reduced-motion:no-preference){.track{animation:marq 60s linear infinite}.rv:hover .track{animation-play-state:paused}}
+@keyframes marq{to{transform:translateX(-50%)}}
 .done{display:none;text-align:center;padding:24px 0 8px}
 .done .big{width:64px;height:64px;border-radius:50%;background:var(--mint);margin:0 auto 16px;display:grid;place-items:center}
 .done h2{font:800 24px Montserrat,Arial,sans-serif;margin:0 0 8px}.done p{margin:0;color:#C9CFCB}
@@ -54,7 +65,7 @@ button[disabled]{opacity:.6}
 </form>
 <p class="small">One email a day for 30 days. Unsubscribe any time.</p>
 <ul class="ticks"><li>12 gym sessions, 3 a week</li><li>Daily coaching and weekly check-ins</li><li>A tracker that proves your progress</li></ul>
-<div class="quote"><p>"I’ve made more progress in the last few months than I did in the previous two years."</p><cite>Richard E, client</cite></div>
+<div class="rv" aria-label="What clients say"><p class="lbl">What clients say</p><div class="track" id="track"></div></div>
 </div>
 <div class="done" id="done" role="status">
 <div class="big"><svg width="30" height="30" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 10.5l3 3 6-7" fill="none" stroke="#0B0F0D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -64,6 +75,10 @@ button[disabled]{opacity:.6}
 </main>
 <script>
 {
+const RV=[["Richard E", "I’ve made more progress in the last few months than I did in the previous two years."], ["Liam", "Kyle corrected my technique on almost everything in the first few sessions and the difference it made to my strength progression was immediate."], ["Holly", "Kyle spoke to me and helped me get past my nerves and tackle some machines I've never seen before!"], ["Marcus", "I've put on nearly 8kg of muscle over eight months and I've never felt stronger."], ["Ethan", "I tried two other PTs before Kyle and both felt like they were running through a script."], ["Jordan N", "He showed me how to trust and challenge my body again, how to enjoy the process, and how to be kinder to myself."], ["Hannah", "What I appreciate most is that Kyle treats you like an intelligent adult. He explains the why behind everything."]];
+const esc=v=>String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const one=RV.map(r=>`<figure class="rq">&ldquo;${esc(r[1])}&rdquo;<cite>${esc(r[0])}</cite></figure>`).join("");
+document.getElementById("track").innerHTML=one+one.replace(/<figure/g,'<figure aria-hidden="true"');
 const f=document.getElementById("f"),go=document.getElementById("go"),err=document.getElementById("err");
 f.addEventListener("submit",async e=>{
  e.preventDefault();err.textContent="";
