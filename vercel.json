@@ -9,6 +9,14 @@
       "destination": "/links.html"
     },
     {
+      "source": "/unstuck",
+      "destination": "/unstuck-join.html"
+    },
+    {
+      "source": "/unstuck/programme",
+      "destination": "/unstuck-programme.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
