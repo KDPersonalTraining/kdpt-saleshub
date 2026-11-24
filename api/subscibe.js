@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Email is required" });
   }
 
-  const BREVO_API_KEY = process.env.BREVO_API_KEY;
+  const BREVO_API_KEY = process.env.BREVO_API_KEY || process.env.brevo_api_key;
 
   if (!BREVO_API_KEY) {
     console.error("Missing BREVO_API_KEY environment variable");

@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ ok: false, error: "Please enter your first name." });
   }
 
-  const apiKey = process.env.BREVO_API_KEY;
+  const apiKey = process.env.BREVO_API_KEY || process.env.brevo_api_key;
   const listId = Number(process.env.BREVO_LIST_ID || 8);
   if (!apiKey) {
     console.error("BREVO_API_KEY is not set");
