@@ -111,7 +111,7 @@ footer a{color:var(--mute)}
 </div>
 <section class="card" id="bench">
 <h2>Your benchmarks</h2>
-<p>Week 1 vs Week 4, same weight, max good reps on the last set. This is your proof.</p>
+<p>Your Week 1 and Week 4 benchmark sets side by side, at the same weight. These numbers show how far you've come.</p>
 <table><thead><tr><th>Lift</th><th>Week 1</th><th>Week 4</th><th>Change</th></tr></thead><tbody id="bt"></tbody></table>
 </section>
 <section class="card">
@@ -128,13 +128,13 @@ footer a{color:var(--mute)}
 </section>
 <section class="card" id="reviews">
 <h2>What clients say</h2>
-<p>In their words.</p>
+
 <div class="rv" id="rv" tabindex="0" aria-label="Client reviews"></div>
 <div class="rvnav"><button type="button" id="rvPrev" aria-label="Previous review">&larr;</button><div class="dots" id="rvDots"></div><button type="button" id="rvNext" aria-label="Next review">&rarr;</button></div>
 </section>
 <section class="card" id="work">
 <h2>Three ways to work with me</h2>
-<p>Unstuck is the same plan for everyone. These are built around you. Options start from £49.</p>
+<p>Unstuck is the same plan for everyone. Each of these is built around you, and they start from £49.</p>
 <div class="opt"><h3>Online coaching</h3><p>Your programme, built around your gym and schedule. Weekly check-ins where I adjust everything, plus nutrition guidance and support in your messages.</p><a class="btn" href="https://calendly.com/kyle-kdpt/30min">Book a free call</a></div>
 <div class="opt"><h3>In-person PT</h3><p>1-2-1 sessions with me at Trilogy Active, Northampton.</p><a class="btn" href="https://calendly.com/kyle-kdpt/30min">Book a free call</a></div>
 <div class="opt"><h3>Personalised programme</h3><p>A plan built for you to follow on your own. No call needed and no monthly commitment.</p><a class="btn ghost" href="https://buy.stripe.com/3cI3cu9qRg9S7BngsN3oA01">Get my programme</a></div>
@@ -151,27 +151,27 @@ const WEEKS=[
  {n:"Overload",t:"Week 3: Overload",r:"Normal speed, still controlled. Add weight: 2.5 to 5 kg on lower body, 1 to 2.5 kg on upper body. Back to the bottom of the rep range, 1 to 2 reps left."},
  {n:"Prove it",t:"Week 4: Prove it",r:"An extra set on the first two exercises. Beat Week 3. In Session B, retest your benchmarks with your Week 1 weights."}];
 const S={
- A:{n:"Strength",job:"Session A builds strength on the big lifts, with heavy, lower-rep sets most people never train.",ex:[
+ A:{n:"Strength",job:"Session A builds strength on the big lifts with heavy, lower-rep sets, a range most people never train in.",ex:[
   {n:"Back squat",alt:"or hack squat / goblet squat",p:[[4,"5–6"],[4,"5–6"],[4,"5"],[5,"5–6"]],rest:"2–3 min",why:"Heavy, low-rep squats are where most gym-goers undertrain."},
   {n:"Dumbbell bench press",p:[[3,"6–8"],[3,"6–8"],[3,"6"],[4,"6–8"]],rest:"2 min",why:"Each side works alone, so a weaker side can't hide."},
   {n:"Seated cable row",p:[[3,"8–10"],[3,"8–10"],[3,"8"],[3,"8–10"]],rest:"90 s",why:"Balances the pressing and builds the upper back that keeps shoulders healthy."},
-  {n:"Romanian deadlift",p:[[3,"8"],[3,"8"],[3,"8"],[3,"8"]],rest:"2 min",why:"Hamstrings and glutes through a long range. Teaches the hinge."},
-  {n:"Pallof press",p:[[3,"10/side"],[3,"10/side"],[3,"12/side"],[3,"12/side"]],rest:"60 s",why:"Core that resists twisting. More useful for lifting than crunches."}]},
+  {n:"Romanian deadlift",p:[[3,"8"],[3,"8"],[3,"8"],[3,"8"]],rest:"2 min",why:"Works your hamstrings and glutes through a long range and teaches you to hinge at the hips."},
+  {n:"Pallof press",p:[[3,"10/side"],[3,"10/side"],[3,"12/side"],[3,"12/side"]],rest:"60 s",why:"Trains your core to resist twisting, which carries over to lifting better than crunches do."}]},
  B:{n:"Build",job:"Session B builds muscle on stable machines you can push hard safely. The first three lifts are your benchmarks.",ex:[
   {n:"Leg press",b:1,p:[[3,"10–12"],[3,"10–12"],[3,"10"],[4,"10–12"]],rest:"2 min",why:"Push legs close to failure safely, without your lower back as the limit."},
   {n:"Lat pulldown",b:1,p:[[3,"10–12"],[3,"10–12"],[3,"10"],[4,"10–12"]],rest:"90 s",why:"Builds back width, and shows clearly whether you're getting stronger."},
   {n:"Machine chest press",b:1,p:[[3,"10–12"],[3,"10–12"],[3,"10"],[3,"10–12"]],rest:"90 s",why:"A fixed path, so you can go hard without a spotter."},
-  {n:"Leg curl",p:[[3,"12"],[3,"12"],[3,"12"],[3,"12"]],rest:"60 s",why:"Hamstrings are one of the most undertrained muscles in the gym."},
-  {n:"Dumbbell lateral raise",p:[[3,"15"],[3,"15"],[3,"15"],[3,"15"]],rest:"60 s",why:"Side delts give the shoulder its shape. High reps, strict form."},
-  {n:"Cable biceps curl",alt:"superset with pushdown",p:[[2,"12–15"],[2,"12–15"],[2,"12–15"],[2,"12–15"]],rest:"60 s",why:"Arms finish the session. Quick, and people stick to plans they enjoy."},
+  {n:"Leg curl",p:[[3,"12"],[3,"12"],[3,"12"],[3,"12"]],rest:"60 s",why:"Hamstrings are one of the most undertrained muscles in most people's routines."},
+  {n:"Dumbbell lateral raise",p:[[3,"15"],[3,"15"],[3,"15"],[3,"15"]],rest:"60 s",why:"Your side delts give the shoulder its shape, and they respond best to high reps with strict form."},
+  {n:"Cable biceps curl",alt:"superset with pushdown",p:[[2,"12–15"],[2,"12–15"],[2,"12–15"],[2,"12–15"]],rest:"60 s",why:"A quick arm finisher, because people stick with plans they enjoy."},
   {n:"Triceps pushdown",alt:"superset with curl",p:[[2,"12–15"],[2,"12–15"],[2,"12–15"],[2,"12–15"]],rest:"60 s",why:"Pairs with the curl to save time."}]},
  C:{n:"Weak links",job:"Session C trains one side at a time to find and fix the gaps holding your big lifts back. Always start with your weaker side.",ex:[
-  {n:"Bulgarian split squat",p:[[3,"8/leg"],[3,"8/leg"],[3,"8/leg"],[4,"8/leg"]],rest:"90 s",why:"Shows and fixes left-right differences. Legs and balance at once."},
+  {n:"Bulgarian split squat",p:[[3,"8/leg"],[3,"8/leg"],[3,"8/leg"],[4,"8/leg"]],rest:"90 s",why:"Shows up differences between your left and right legs and trains your balance at the same time."},
   {n:"Single-arm dumbbell row",p:[[3,"10/arm"],[3,"10/arm"],[3,"10/arm"],[4,"10/arm"]],rest:"90 s",why:"Each side pulls on its own, so the weaker one catches up."},
   {n:"Hip thrust",alt:"barbell or machine",p:[[3,"10"],[3,"10"],[3,"10"],[3,"10"]],rest:"90 s",why:"Glutes are often the weak link behind stuck squats and deadlifts."},
-  {n:"Half-kneeling single-arm press",p:[[3,"10/arm"],[3,"10/arm"],[3,"10/arm"],[3,"10/arm"]],rest:"90 s",why:"Overhead press plus core control. Exposes a weaker side straight away."},
-  {n:"Cable face pull",p:[[3,"15"],[3,"15"],[3,"15"],[3,"15"]],rest:"60 s",why:"Rear shoulders and upper back. Balances pressing, helps posture."},
-  {n:"Farmer's carry",m:1,p:[[3,"40 m"],[3,"40 m"],[3,"40 m"],[3,"40 m"]],rest:"60 s",why:"Grip, core and whole-body tension. A simple test of real strength."}]}};
+  {n:"Half-kneeling single-arm press",p:[[3,"10/arm"],[3,"10/arm"],[3,"10/arm"],[3,"10/arm"]],rest:"90 s",why:"An overhead press that also needs core control, so a weaker side shows up straight away."},
+  {n:"Cable face pull",p:[[3,"15"],[3,"15"],[3,"15"],[3,"15"]],rest:"60 s",why:"Works your rear shoulders and upper back to balance out the pressing and help your posture."},
+  {n:"Farmer's carry",m:1,p:[[3,"40 m"],[3,"40 m"],[3,"40 m"],[3,"40 m"]],rest:"60 s",why:"Builds grip, core strength and whole-body tension."}]}};
 const KEY="kdpt-unstuck-v1";
 const CODES=["w1a-5fy9", "w1b-aby4", "w1c-ze7w", "w2a-rs9f", "w2b-3rq3", "w2c-5vhc", "w3a-42av", "w3b-u7b9", "w3c-exrk", "w4a-7a34", "w4b-zu8n", "w4c-vjcc"];
 const DAYS=[2,4,6,9,11,13,16,18,20,23,25,27];
