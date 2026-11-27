@@ -17,6 +17,18 @@
       "destination": "/unstuck-programme.html"
     },
     {
+      "source": "/online",
+      "destination": "/online.html"
+    },
+    {
+      "source": "/programmes",
+      "destination": "/programmes.html"
+    },
+    {
+      "source": "/pt",
+      "destination": "/pt.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

@@ -2,11 +2,11 @@
   "name": "kdpt-sales-hub",
   "private": true,
   "version": "1.0.0",
-  "description": "KD Personal Training – Sales Hub",
+  "description": "KD Personal Training \u2013 Sales Hub",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

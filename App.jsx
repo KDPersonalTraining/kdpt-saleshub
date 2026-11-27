@@ -2887,14 +2887,53 @@ function CookiesPage() {
 // ═══════════════════════════════════════════════════════════════════════════════
 // ROOT APP
 // ═══════════════════════════════════════════════════════════════════════════════
+// ── Per-page URLs and meta (so search engines see each page separately) ──
+const SITE = "https://start.kdpersonaltraining.com";
+const ROUTES = ["meals", "guide", "online", "programmes", "pt", "links", "terms", "privacy", "cookies"];
+const PAGE_META = {
+  home: ["KD Personal Training | Personal Trainer in Northampton & Online Coach", "Personal trainer in Northampton and online coach. 1:1 personal training at Trilogy Active, online coaching from £120 a month and personalised programmes for £49."],
+  online: ["Online Coaching | KD Personal Training", "Online coaching with Kyle Denny: a programme built around you, weekly check-ins, nutrition guidance and messaging in Everfit. £120 a month, no lock-in."],
+  programmes: ["Personalised Training Programmes | KD Personal Training", "A training programme built around your goals, schedule and equipment, delivered in Everfit within 3 to 5 working days. One payment of £49."],
+  pt: ["Personal Trainer in Northampton | 1:1 PT | KD Personal Training", "1:1 personal training in Northampton at Trilogy Active with Kyle Denny. Technique-focused sessions, packages from £90 a month, free consultation first."],
+  terms: ["Terms | KD Personal Training", "Terms and conditions for KD Personal Training."],
+  privacy: ["Privacy Policy | KD Personal Training", "How KD Personal Training handles your personal data."],
+  cookies: ["Cookie Policy | KD Personal Training", "How KD Personal Training uses cookies."],
+};
+function pageFromPath(pathname) {
+  const path = String(pathname || "").replace(/^\/|\/$/g, "");
+  return ROUTES.includes(path) ? path : "home";
+}
+function setMeta(selector, attr, value) {
+  let el = document.head.querySelector(selector);
+  if (!el) {
+    const m = selector.match(/^(\w+)\[(\w+)="([^"]+)"\]$/);
+    if (!m) return;
+    el = document.createElement(m[1]); el.setAttribute(m[2], m[3]); document.head.appendChild(el);
+  }
+  el.setAttribute(attr, value);
+}
+function applyMeta(page) {
+  const meta = PAGE_META[page];
+  if (!meta) return;
+  const url = SITE + (page === "home" ? "/" : "/" + page);
+  document.title = meta[0];
+  setMeta('meta[name="description"]', "content", meta[1]);
+  setMeta('link[rel="canonical"]', "href", url);
+  setMeta('meta[property="og:url"]', "content", url);
+  setMeta('meta[property="og:title"]', "content", meta[0]);
+  setMeta('meta[property="og:description"]', "content", meta[1]);
+}
+
 export default function App() {
   useGlobalStyles();
-const getInitialPage = () => {
-  const path = window.location.pathname.replace(/^\/|\/$/g, "");
-if (["meals", "guide", "online", "programmes", "pt", "links"].includes(path)) return path;
-  return "home";
-};
+const getInitialPage = () => pageFromPath(window.location.pathname);
 const [page, setPage] = useState(getInitialPage);
+  useEffect(() => { applyMeta(page); }, [page]);
+  useEffect(() => {
+    const onPop = () => setPage(pageFromPath(window.location.pathname));
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
   useEffect(() => {
     if (window.location.hash) {
       setTimeout(() => {
@@ -2906,6 +2945,8 @@ const [page, setPage] = useState(getInitialPage);
   const topRef = useRef(null);
 
   const go = p => {
+    const url = p === "home" ? "/" : "/" + p;
+    try { if (window.location.pathname !== url) window.history.pushState({}, "", url); } catch(e) {}
     setPage(p);
     // Belt-and-braces scroll reset — covers window, document and the container ref
     try { window.scrollTo(0, 0); } catch(e) {}
