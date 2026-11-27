@@ -48,6 +48,8 @@ button[disabled]{opacity:.6;animation:none}
 .done .big{width:64px;height:64px;border-radius:50%;background:var(--mint);margin:0 auto 16px;display:grid;place-items:center}
 .done h2{font:800 24px Montserrat,Arial,sans-serif;margin:0 0 8px}.done p{margin:0;color:#C9CFCB}
 </style>
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <main>
@@ -74,6 +76,7 @@ button[disabled]{opacity:.6;animation:none}
 </div>
 </main>
 <script>
+const SRC=(()=>{const q=new URLSearchParams(location.search);let v=[q.get("src")||q.get("utm_campaign"),q.get("utm_source"),q.get("utm_medium")].filter(Boolean).join("/");try{if(v)sessionStorage.setItem("kdpt-src",v);else v=sessionStorage.getItem("kdpt-src")||""}catch(e){}if(!v&&document.referrer){try{v="ref/"+new URL(document.referrer).hostname}catch(e){}}return(v||"direct").slice(0,80)})();
 {
 const RV=[["Richard E", "I’ve made more progress in the last few months than I did in the previous two years."], ["Liam", "Kyle corrected my technique on almost everything in the first few sessions and the difference it made to my strength progression was immediate."], ["Holly", "Kyle spoke to me and helped me get past my nerves and tackle some machines I've never seen before!"], ["Marcus", "I've put on nearly 8kg of muscle over eight months and I've never felt stronger."], ["Ethan", "I tried two other PTs before Kyle and both felt like they were running through a script."], ["Jordan N", "He showed me how to trust and challenge my body again, how to enjoy the process, and how to be kinder to myself."], ["Hannah", "What I appreciate most is that Kyle treats you like an intelligent adult. He explains the why behind everything."]];
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -87,10 +90,10 @@ f.addEventListener("submit",async e=>{
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){err.textContent="Please enter a valid email address.";f.email.focus();return}
  go.disabled=true;go.textContent="Sending...";
  try{
-  const r=await fetch("/api/unstuck-signup",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({firstName,email,company})});
+  const r=await fetch("/api/unstuck-signup",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({firstName,email,company,source:SRC})});
   const d=await r.json().catch(()=>({}));
   if(!r.ok||!d.ok)throw new Error(d.error||"Something went wrong. Please try again.");
-  document.getElementById("nm").textContent=firstName;document.getElementById("pre").style.display="none";document.getElementById("done").style.display="block";window.scrollTo(0,0);
+  try{va("event",{name:"Unstuck signup",data:{source:SRC}})}catch(e){}document.getElementById("nm").textContent=firstName;document.getElementById("pre").style.display="none";document.getElementById("done").style.display="block";window.scrollTo(0,0);
  }catch(x){err.textContent=x.message;go.disabled=false;go.textContent="Send me Day 1"}
 });
 }
